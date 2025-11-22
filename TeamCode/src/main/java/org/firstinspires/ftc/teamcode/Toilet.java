@@ -23,6 +23,12 @@ public class Toilet extends LinearOpMode {
     double time;
     double newTime;
     boolean xLast = false;
+    //x is 0.9
+    boolean yLast = false;
+//y is 1
+    boolean aLast =false;
+    //a is 0.6
+
     private Follower follower;
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, launcher, flicker, rotator;
@@ -85,33 +91,42 @@ public class Toilet extends LinearOpMode {
             rightFront.setPower(rightFrontPower);
             rightRear.setPower(rightRearPower);
 
+
+
+
             boolean xPressed = gamepad1.x && !xLast;
             xLast = gamepad1.x;
 
-            if (xPressed){
+            boolean yPressed = gamepad1.y && !yLast;
+            yLast = gamepad1.y;
+
+            boolean aPressed = gamepad1.a && !aLast;
+            aLast = gamepad1.a;
+
+            if (aPressed){
                 newTime = runtime.time();
-                launcher.setPower(1);
+                launcher.setPower(0.6);
+                while (newTime-time<1.5){
+                    newTime = runtime.time();
+                }
+                intake.setPower(-1);
+                flicker.setPower(1);
                 while (newTime-time<2){
                     newTime = runtime.time();
                 }
-                intake.setPower(-1);
-                flicker.setPower(1);
-                while (newTime-time<2.5){
-                    newTime = runtime.time();
-                }
                 intake.setPower(0);
                 flicker.setPower(0);
+                while (newTime-time<3){
+                    newTime = runtime.time();
+                }
+                intake.setPower(-1);
+                flicker.setPower(1);
                 while (newTime-time<4){
                     newTime = runtime.time();
                 }
-                intake.setPower(-1);
-                flicker.setPower(1);
-                while (newTime-time<4.5){
-                    newTime = runtime.time();
-                }
                 intake.setPower(0);
                 flicker.setPower(0);
-                while (newTime-time<6){
+                while (newTime-time<5){
                     newTime = runtime.time();
                 }
                 intake.setPower(-1);
@@ -119,6 +134,74 @@ public class Toilet extends LinearOpMode {
 
 
             }
+
+
+
+            if (xPressed){
+                newTime = runtime.time();
+                launcher.setPower(0.9);
+                while (newTime-time<1.5){
+                    newTime = runtime.time();
+                }
+                intake.setPower(-1);
+                flicker.setPower(1);
+                while (newTime-time<2){
+                    newTime = runtime.time();
+                }
+                intake.setPower(0);
+                flicker.setPower(0);
+                while (newTime-time<3){
+                    newTime = runtime.time();
+                }
+                intake.setPower(-1);
+                flicker.setPower(1);
+                while (newTime-time<4){
+                    newTime = runtime.time();
+                }
+                intake.setPower(0);
+                flicker.setPower(0);
+                while (newTime-time<5){
+                    newTime = runtime.time();
+                }
+                intake.setPower(-1);
+                flicker.setPower(1);
+
+
+            }
+
+            if (yPressed){
+                newTime = runtime.time();
+                launcher.setPower(1);
+                while (newTime-time<1.5){
+                    newTime = runtime.time();
+                }
+                intake.setPower(-1);
+                flicker.setPower(1);
+                while (newTime-time<2){
+                    newTime = runtime.time();
+                }
+                intake.setPower(0);
+                flicker.setPower(0);
+                while (newTime-time<3){
+                    newTime = runtime.time();
+                }
+                intake.setPower(-1);
+                flicker.setPower(1);
+                while (newTime-time<4){
+                    newTime = runtime.time();
+                }
+                intake.setPower(0);
+                flicker.setPower(0);
+                while (newTime-time<5){
+                    newTime = runtime.time();
+                }
+                intake.setPower(-1);
+                flicker.setPower(1);
+
+
+            }
+
+
 
             //intake movements
             if (gamepad1.left_bumper){
@@ -135,11 +218,11 @@ public class Toilet extends LinearOpMode {
             flicker.setPower(gamepad1.left_trigger);
 
 
-            if (gamepad1.dpad_left){
+            if (gamepad2.dpad_left){
                 rotator.setPower(-1);
             }
-            else if (gamepad1.dpad_right){
-                rotator.setPower(1);
+            else if (gamepad2.dpad_right){
+                rotator.setPower(0.5);
             }
             else {
                 rotator.setPower(0);
