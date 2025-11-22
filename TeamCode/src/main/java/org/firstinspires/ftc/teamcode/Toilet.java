@@ -105,7 +105,7 @@ public class Toilet extends LinearOpMode {
 
             if (aPressed){
                 newTime = runtime.time();
-                launcher.setPower(0.6);
+                launcher.setPower(0.7);
                 while (newTime-time<1.5){
                     newTime = runtime.time();
                 }
@@ -219,10 +219,10 @@ public class Toilet extends LinearOpMode {
 
 
             if (gamepad2.dpad_left){
-                rotator.setPower(-1);
+                rotator.setPower(-0.2);
             }
             else if (gamepad2.dpad_right){
-                rotator.setPower(0.5);
+                rotator.setPower(0.2);
             }
             else {
                 rotator.setPower(0);
