@@ -25,7 +25,7 @@ public class Toilet extends LinearOpMode {
     boolean xLast = false;
     //x is 0.9
     boolean yLast = false;
-//y is 1
+    //y is 1
     boolean aLast =false;
     //a is 0.6
 
@@ -139,7 +139,7 @@ public class Toilet extends LinearOpMode {
 
             if (xPressed){
                 newTime = runtime.time();
-                launcher.setPower(0.9);
+                launcher.setPower(0.93);
                 while (newTime-time<1.5){
                     newTime = runtime.time();
                 }
@@ -182,17 +182,17 @@ public class Toilet extends LinearOpMode {
                 }
                 intake.setPower(0);
                 flicker.setPower(0);
-                while (newTime-time<3){
+                while (newTime-time<2.5){
                     newTime = runtime.time();
                 }
                 intake.setPower(-1);
                 flicker.setPower(1);
-                while (newTime-time<4){
+                while (newTime-time<3){
                     newTime = runtime.time();
                 }
                 intake.setPower(0);
                 flicker.setPower(0);
-                while (newTime-time<5){
+                while (newTime-time<3.5){
                     newTime = runtime.time();
                 }
                 intake.setPower(-1);
@@ -234,5 +234,3 @@ public class Toilet extends LinearOpMode {
     //for organization. Sets both intakes' power in the same direction
 
 }
-
-
