@@ -13,27 +13,27 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
-    public static FollowerConstants followerConstants = new FollowerConstants();
+    public static FollowerConstants followerConstants = new FollowerConstants()
+            .mass(9.97);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
     public static MecanumConstants driveConstants = new MecanumConstants()
+
             .maxPower(1)
             .rightFrontMotorName("rightFront")
             .rightRearMotorName("rightRear")
             .leftRearMotorName("leftRear")
             .leftFrontMotorName("leftFront")
-            .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
+            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-5)
-            .strafePodX(0.5)
+            .forwardPodY(-3.8)
+            .strafePodX(-1.2)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
-            .forwardPodY(-4)
-            .strafePodX(4.5)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
