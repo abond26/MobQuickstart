@@ -15,7 +15,7 @@ public class ExampleAuto extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
-    private DcMotor intake, launcher, flicker, rotator;
+    private DcMotor intake, launcher, flicker, x;
 
 
     private int pathState;
