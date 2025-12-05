@@ -20,15 +20,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 //@Config
 @TeleOp
-public class ToiletBlue extends LinearOpMode {
+public class  BLUETEST extends LinearOpMode {
     //time
-    private static double reaccelerationTime = 0.6; //determines how long between shooting
+    private static double reaccelerationTime = 0.4; //determines how long between shooting
     public static double speedUpWait = 1.5; //how long we wait before the motor is up to speed
     public static double shootTime1 = 1.6; //how long we push the balls through the turret for
     public static double reaccelerateWait1 = shootTime1+reaccelerationTime; //how long we wait before the motor is up to speed again
-    public static double shootTime2 = 2.2; //how long we push the balls through the turret for
+    public static double shootTime2 = 2.1; //how long we push the balls through the turret for
     public static double reaccelerateWait2 = shootTime2+reaccelerationTime; //how long we wait before the motor is up to speed again
-    public static double shootTime3 = 2.8;
+    public static double shootTime3 = 2.6;
     public static double driveMultiplier = 0.7;
 
 
@@ -158,13 +158,13 @@ public class ToiletBlue extends LinearOpMode {
                 }
                 adjustRotator(txDeg);
                 if (yPressed) {
-                    launcher.setPower(launcher.getVelocity()+50);
+                    launcher.setVelocity(launcher.getVelocity()+50);
                 }
                 if (aPressed) {
-                    launcher.setPower(launcher.getVelocity()-50);
+                    launcher.setVelocity(launcher.getVelocity()-50);
                 }
                 if (gamepad1.b) {
-                    launcher.setPower(calcVelocity(getDist(tyDeg)));
+                    launcher.setVelocity(calcVelocity(getDist(tyDeg)));
                 }
 
                 telemetry.addData("dist", getDist(tyDeg));
@@ -176,41 +176,44 @@ public class ToiletBlue extends LinearOpMode {
                 if (gamepad1.dpad_right) {
                     rotator.setTargetPosition(rotator.getCurrentPosition() + rotatorSpeed);
                 }
+                if (gamepad1.right_trigger > 0.1){
+                    launcher.setPower(0);
+                }
 
 
                 if (xPressed){
                     newTime = runtime.time();
-                    launcher.setPower(calcVelocity(getDist(tyDeg)));
+                    launcher.setVelocity(calcVelocity(getDist(tyDeg)));
                     while (newTime-time<speedUpWait){
-                        launcher.setPower(calcVelocity(getDist(tyDeg)));
+                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
                     intake.setPower(-1);
                     flicker.setPower(1);
                     while (newTime-time<shootTime1){
-                        launcher.setPower(calcVelocity(getDist(tyDeg)));
+                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
                     intake.setPower(0);
                     flicker.setPower(0);
                     while (newTime-time<reaccelerateWait1){
-                        launcher.setPower(calcVelocity(getDist(tyDeg)));
+                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
                     intake.setPower(-1);
                     flicker.setPower(1);
                     while (newTime-time<shootTime2){
-                        launcher.setPower(calcVelocity(getDist(tyDeg)));
+                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
                     intake.setPower(0);
                     flicker.setPower(0);
                     while (newTime-time<reaccelerateWait2){
-                        launcher.setPower(calcVelocity(getDist(tyDeg)));
+                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
@@ -218,11 +221,9 @@ public class ToiletBlue extends LinearOpMode {
                     flicker.setPower(1);
                     while (newTime-time<shootTime3){
                         drive();
-                        launcher.setPower(calcVelocity(getDist(tyDeg)));
+                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
                         newTime = runtime.time();
                     }
-
-
 
 
                 }
@@ -243,15 +244,12 @@ public class ToiletBlue extends LinearOpMode {
                 telemetry.addData("Launcher velocity (ticks/sec)", launcher.getVelocity());
             }
 
-            if (gamepad1.right_trigger > 0.1){
-                launcher.setPower(0);
-            }
-
 
 
             // Removed - was conflicting with RUN_TO_POSITION mode by setting power to 0
             // Use gamepad1 dpad_left/right instead for rotator control
-
+            telemetry.addData("motorPos", rotator.getCurrentPosition());
+            telemetry.update();
         }
         telemetry.addData("motorPos", rotator.getCurrentPosition());
         telemetry.update();
@@ -271,12 +269,8 @@ public class ToiletBlue extends LinearOpMode {
 
     public double calcVelocity(double dist) {
         double rice = dist/840.06556;
-        double velocity = -0.01*Math.pow(dist, 2) + 6.4*dist + 1242;
-
-        double rpower = velocity/2460;
-        return rpower;
-
-        
+        double velocity = 1379.8998*Math.pow(2.72,rice)+ -2.29930929;
+        return velocity;
     }
 
     public void drive(){

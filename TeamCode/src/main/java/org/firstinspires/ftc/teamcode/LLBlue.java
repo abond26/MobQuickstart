@@ -123,7 +123,7 @@ public class LLBlue extends LinearOpMode {
                 }
                 adjustRotator(txDeg);
                 telemetry.addLine("Function: adjustRotator");
-                    telemetry.addData("dist", getDist(tyDeg, txDeg));
+                telemetry.addData("dist", getDist(tyDeg, txDeg));
             }
             if (gamepad1.dpad_left){
                 rotator.setTargetPosition(rotator.getCurrentPosition()-rotatorSpeed);
@@ -153,4 +153,3 @@ public class LLBlue extends LinearOpMode {
     }
 
 }
-
