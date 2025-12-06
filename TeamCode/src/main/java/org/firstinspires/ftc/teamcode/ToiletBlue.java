@@ -157,14 +157,82 @@ public class ToiletBlue extends LinearOpMode {
 
                 }
                 adjustRotator(txDeg);
+
+
                 if (yPressed) {
                     launcher.setPower(launcher.getVelocity()+50);
                 }
-                if (aPressed) {
-                    launcher.setPower(launcher.getVelocity()-50);
+                if (gamepad2.a) {
+                    launcher.setPower(calcVelocity(getDist(tyDeg))+0.5);
                 }
-                if (gamepad1.b) {
+                if (gamepad2.b) {
                     launcher.setPower(calcVelocity(getDist(tyDeg)));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 }
 
                 telemetry.addData("dist", getDist(tyDeg));
@@ -270,13 +338,12 @@ public class ToiletBlue extends LinearOpMode {
     }
 
     public double calcVelocity(double dist) {
-        double rice = dist/840.06556;
-        double velocity = -0.01*Math.pow(dist, 2) + 6.4*dist + 1242;
-
+        double rice = dist/759.11885;
+        double velocity = 1253.0478*Math.pow(2.72,rice)+ 62.005321;
         double rpower = velocity/2460;
         return rpower;
 
-        
+
     }
 
     public void drive(){

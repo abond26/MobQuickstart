@@ -92,124 +92,67 @@ public class ExampleAuto extends OpMode {
   public void autonomousPathUpdate() {
     switch (pathState) {
       case 0:
-        follower.followPath(StartShoot,true);
-        setPathState(1);
+          follower.followPath(StartShoot, true);
+          launcher.setPower(-0.82);
+          setPathState(1);
         break;
       case 1:
         telemetry.addLine("done first");
 
         /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
         if(!follower.isBusy()) {
-          double time = runtime.time();
-          double newTime = time;
 
-
-// spin-up 1.5s
-          while (newTime - time < 2) {
-            newTime = runtime.time();
-          }
-            launcher.setPower(-0.75);
-
-
-// shot 1
-
-          while (newTime - time < 3.0) {
-            newTime = runtime.time();
-          }
-
-          intake.setPower(0);
-          flicker.setPower(0.19);
-
-// wait
-          while (newTime - time < 4.0) {
-            newTime = runtime.time();
-          }
-
-// shot 2
-          flicker.setPower(0.19);
-
-          while (newTime - time < 5.0) {
-            newTime = runtime.time();
-          }
-
-          intake.setPower(0);
-          flicker.setPower(0);
-
-// wait
-          while (newTime - time < 6.0) {
-            newTime = runtime.time();
-          }
-
-// final shot
-          flicker.setPower(0.19);
-//          while (newTime - time < 5.5){
-//            newTime = runtime.time()
-//          }
-//          intake.setPower(0);
-//          flicker.setPower(0);
+        }
+            setPathState(2);
+            double time = runtime.time();
+            double newTime = time;
+            while (newTime - time < 4) {
+                launcher.setPower(-0.8);
+                intake.setPower(-0.57);
+                flicker.setPower(0.4);
 
 
 
-
-          /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-          follower.followPath(FirstIntake,true);
-          intake.setPower(1);
-
-          setPathState(2);
         }
         break;
 
+
       case 2:
         if(!follower.isBusy()) {
-          intake.setPower(0);
-        }
-        follower.followPath(FirstIntakeShot,true);
 
-        setPathState(3);
+
+            setPathState(3);
+        }
+
+            break;
+
 
       case 3:
         if(!follower.isBusy()) {
-          double time = runtime.time();
-          double newTime = time;
 
           launcher.setPower(0.7);
-
+            follower.followPath(GoingtoIntake);
+            setPathState(4);
 // spin-up 1.5s
-          while (newTime - time < 1.5) {
-            newTime = runtime.time();
-          }
+
 
 // shot 1
           intake.setPower(-1);
           flicker.setPower(1);
 
-          while (newTime - time < 2.0) {
-            newTime = runtime.time();
-          }
 
-          intake.setPower(0);
-          flicker.setPower(0);
-
-// wait
-          while (newTime - time < 3.0) {
-            newTime = runtime.time();
-          }
 
 // shot 2
           intake.setPower(-1);
           flicker.setPower(1);
 
-          while (newTime - time < 4.0) {
-            newTime = runtime.time();
-          }
+
 
           intake.setPower(0);
           flicker.setPower(0);
 
 // wait
-          while (newTime - time < 5.0) {
-            newTime = runtime.time();
-          }
+
 
 // final shot
           intake.setPower(-1);
@@ -221,15 +164,14 @@ public class ExampleAuto extends OpMode {
 //          flicker.setPower(0);
 
         }
-        follower.followPath(GoingtoIntake);
-        setPathState(4);
+        break;
       case 4:
         if(!follower.isBusy()) {
           intake.setPower(0);
+            follower.followPath(GoingtoIntake);
+            setPathState(5);
         }
-        follower.followPath(GoingtoIntake);
-        setPathState(5);
-
+        break;
       case 5:
         if(!follower.isBusy()) {
         }
