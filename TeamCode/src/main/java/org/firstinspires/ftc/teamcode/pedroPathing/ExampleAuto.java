@@ -34,223 +34,198 @@ import com.bylazar.telemetry.TelemetryManager;
 @Autonomous(name = "Example Auto", group = "Examples")
 public class ExampleAuto extends OpMode {
 
-  private Follower follower;
- private Timer pathTimer, actionTimer, opmodeTimer;
+    private Follower follower;
+    private Timer pathTimer, actionTimer, opmodeTimer;
+
+    private DcMotor intake, launcher, flicker, x;
+
+
+    private int pathState;
+    private final Pose startPose = new Pose(60.29648894668401, 6.903640923226263, Math.toRadians(90)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(60.29648894668401, 83.51625487646292, Math.toRadians(130)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose scorePoseSwitch = new Pose(60.29648894668401, 83.51625487646292, Math.toRadians(180)); // Start Pose of our robot.
+    private final Pose PickupIntake1 = new Pose(18.43462791763407, 83.51625487646292, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose BeforeIntake2 = new Pose(60.29648894668401, 59, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose PickupIntake2 = new Pose(18.43462791763407, 59, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose BeforeIntake3 = new Pose(60.29648894668401, 35, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose PickupIntake3  = new Pose(18.076673977485832, 35, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark.
+
+
+
+
+    private PathChain StartShoot, FirstIntake, FirstIntakeShot, GoingtoIntake, SecondIntake, SecondShot, AdjustTime, GoingtoIntake3, ThirdIntake,ThirdShot;
+    private ElapsedTime runtime = new ElapsedTime();
 
- private DcMotor intake, launcher, flicker, x;
 
+    public void buildPaths() {
+        /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
+        StartShoot = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, scorePose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
+                .build();
+        AdjustTime = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, scorePoseSwitch))
+                .setLinearHeadingInterpolation(Math.toRadians(130),Math.toRadians(180))
+                .build();
 
- private int pathState;
- private final Pose startPose = new Pose(60.29648894668401, 6.903640923226263, Math.toRadians(90)); // Start Pose of our robot.
-  private final Pose scorePose = new Pose(60.29648894668401, 83.51625487646292, Math.toRadians(138)); // Highest (First Set) of Artifacts from the Spike Mark.
-  private final Pose PickupIntake1 = new Pose(18.43462791763407  , 83.51625487646292, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
-  private final Pose BeforeIntake2 = new Pose(60.29648894668401  , 59, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
+        FirstIntake = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, PickupIntake1))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), PickupIntake1.getHeading())
+                .build();
 
- private final Pose BeforeIntake3 = new Pose(60.29648894668401  , 35  , Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
+        FirstIntakeShot = follower.pathBuilder()
+                .addPath(new BezierLine(PickupIntake1, scorePose))
+                .setLinearHeadingInterpolation(PickupIntake1.getHeading(), scorePose.getHeading())
+                .build();
+        GoingtoIntake = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, BeforeIntake2))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), BeforeIntake2.getHeading())
+                .build();
+        SecondIntake = follower.pathBuilder()
+                .addPath(new BezierLine(BeforeIntake2, PickupIntake2))
+                .setLinearHeadingInterpolation(BeforeIntake2.getHeading(), PickupIntake2.getHeading())
+                .build();
+        SecondShot = follower.pathBuilder()
+                .addPath(new BezierLine(PickupIntake2, scorePose))
+                .setLinearHeadingInterpolation(PickupIntake2.getHeading(), scorePose.getHeading())
+                .build();
+        GoingtoIntake3 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, BeforeIntake3))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), BeforeIntake3.getHeading())
+                .build();
+        ThirdIntake = follower.pathBuilder()
+                .addPath(new BezierLine(BeforeIntake3,PickupIntake3))
+                .setLinearHeadingInterpolation(BeforeIntake3.getHeading(), PickupIntake3.getHeading())
+                .build();
+        ThirdShot = follower.pathBuilder()
+                .addPath(new BezierLine(PickupIntake3, scorePose))
+                .setLinearHeadingInterpolation(PickupIntake3.getHeading(), scorePose.getHeading())
+                .build();
 
 
-  private final Pose PickupIntake2 = new Pose(18.076673977485832, 35, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark.
 
-  private PathChain StartShoot, FirstIntake, FirstIntakeShot, GoingtoIntake,SecondIntake;
-  private ElapsedTime runtime = new ElapsedTime();
+    }
 
+    public void autonomousPathUpdate() {
+        switch (pathState) {
+            case 0:
+                follower.followPath(StartShoot, true);
+                setPathState(1);
+                launcher.setPower(-0.6);
 
+                break;
 
-  public void buildPaths() {
-    /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-    StartShoot = follower.pathBuilder()
-        .addPath(new BezierLine(startPose, scorePose))
-        .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
-        .build();
+            case 1:
+                if (!follower.isBusy()) {
+                    setPathState(2);
+                }
+                break;
+            case 2:
 
-    FirstIntake = follower.pathBuilder()
-        .addPath(new BezierLine(scorePose, PickupIntake1))
-        .setLinearHeadingInterpolation(scorePose.getHeading(), PickupIntake1.getHeading() )
-        .build();
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if (!follower.isBusy()) {
+                    launcher.setPower(-0.2);
+                    intake.setPower(-0.57);
+                    setPathState(3);
+                }
+                break;
 
-    FirstIntakeShot = follower.pathBuilder()
-        .addPath(new BezierLine(PickupIntake1,scorePose))
-        .setLinearHeadingInterpolation(PickupIntake1.getHeading(), scorePose.getHeading() )
-        .build();
-    GoingtoIntake = follower.pathBuilder()
-        .addPath(new BezierLine(scorePose,BeforeIntake2))
-        .setLinearHeadingInterpolation(scorePose.getHeading(), BeforeIntake2.getHeading())
-        .build();
-    SecondIntake = follower.pathBuilder()
-        .addPath(new BezierLine(BeforeIntake2,PickupIntake2))
-        .setLinearHeadingInterpolation(BeforeIntake2.getHeading(), PickupIntake2.getHeading() )
-        .build();
-    
+            case 3:
+                if (!follower.isBusy()) {
+                    intake.setPower(0);
+                    launcher.setPower(0);
+                    setPathState(4);
+                }
+                break;
 
+            case 4:
+                if (!follower.isBusy()) {
+                   setPathState(5);
+                    follower.followPath(AdjustTime, true);
+                }
+                break;
 
 
 
 
 
-  }
 
-  public void autonomousPathUpdate() {
-    switch (pathState) {
-      case 0:
-          follower.followPath(StartShoot, true);
-          launcher.setPower(-0.82);
-          setPathState(1);
-        break;
-      case 1:
-        telemetry.addLine("done first");
 
-        /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-        if(!follower.isBusy()) {
 
-        }
-            setPathState(2);
-            double time = runtime.time();
-            double newTime = time;
-            while (newTime - time < 4) {
-                launcher.setPower(-0.8);
-                intake.setPower(-0.57);
-                flicker.setPower(0.4);
 
 
 
-        }
-        break;
 
 
-      case 2:
-        if(!follower.isBusy()) {
 
 
-            setPathState(3);
-        }
 
-            break;
 
 
-      case 3:
-        if(!follower.isBusy()) {
 
-          launcher.setPower(0.7);
-            follower.followPath(GoingtoIntake);
-            setPathState(4);
-// spin-up 1.5s
+                }
+    }
 
 
-// shot 1
-          intake.setPower(-1);
-          flicker.setPower(1);
+    /** These change the states of the paths and actions. It will also reset the timers of the individual switches **/
+    public void setPathState(int pState) {
+        pathState = pState;
+        pathTimer.resetTimer();
+    }
+    /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
+    @Override
+    public void loop() {
 
+        // These loop the movements of the robot, these must be called continuously in order to work
+        follower.update();
+        autonomousPathUpdate();
 
+        // Feedback to Driver Hub for debugging
+        telemetry.addData("path state", pathState);
+        telemetry.addData("x", follower.getPose().getX());
+        telemetry.addData("y", follower.getPose().getY());
+        telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.update();
+    }
 
-// shot 2
-          intake.setPower(-1);
-          flicker.setPower(1);
+    /** This method is called once at the init of the OpMode. **/
+    @Override
+    public void init() {
 
+        intake = hardwareMap.get(DcMotor.class, "intake");
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        launcher = hardwareMap.get(DcMotor.class, "launcher");
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-          intake.setPower(0);
-          flicker.setPower(0);
+        flicker = hardwareMap.get(DcMotor.class, "flicker");
+        flicker.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-// wait
 
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+        opmodeTimer.resetTimer();
 
-// final shot
-          intake.setPower(-1);
-          flicker.setPower(1);
-//          while (newTime - time < 5.5){
-//            newTime = runtime.time()
-//          }
-//          intake.setPower(0);
-//          flicker.setPower(0);
 
-        }
-        break;
-      case 4:
-        if(!follower.isBusy()) {
-          intake.setPower(0);
-            follower.followPath(GoingtoIntake);
-            setPathState(5);
-        }
-        break;
-      case 5:
-        if(!follower.isBusy()) {
-        }
+        follower = Constants.createFollower(hardwareMap);
+        buildPaths();
+        follower.setStartingPose(startPose);
 
-        setPathState(5);
+    }
 
+    /** This method is called continuously after Init while waiting for "play". **/
+    @Override
+    public void init_loop() {}
 
+    /** This method is called once at the start of the OpMode.
+     * It runs all the setup actions, including building paths and starting the path system **/
+    @Override
+    public void start() {
+        opmodeTimer.resetTimer();
+        setPathState(0);
+    }
 
-        
-
-
-
-
-
-
-        }
-  }
-
-  /** These change the states of the paths and actions. It will also reset the timers of the individual switches **/
-          public void setPathState(int pState) {
-    pathState = pState;
-    pathTimer.resetTimer();
-  }
-  /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
-          @Override
-  public void loop() {
-
-    // These loop the movements of the robot, these must be called continuously in order to work
-    follower.update();
-    autonomousPathUpdate();
-
-    // Feedback to Driver Hub for debugging
-    telemetry.addData("path state", pathState);
-    telemetry.addData("x", follower.getPose().getX());
-    telemetry.addData("y", follower.getPose().getY());
-    telemetry.addData("heading", follower.getPose().getHeading());
-    telemetry.update();
-  }
-
-  /** This method is called once at the init of the OpMode. **/
-          @Override
-  public void init() {
-
-    intake = hardwareMap.get(DcMotor.class, "intake");
-    intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-    launcher = hardwareMap.get(DcMotor.class, "launcher");
-    launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-    flicker = hardwareMap.get(DcMotor.class, "flicker");
-    flicker.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
-    pathTimer = new Timer();
-    opmodeTimer = new Timer();
-    opmodeTimer.resetTimer();
-
-
-    follower = Constants.createFollower(hardwareMap);
-    buildPaths();
-    follower.setStartingPose(startPose);
-
-  }
-
-  /** This method is called continuously after Init while waiting for "play". **/
-          @Override
-  public void init_loop() {}
-
-  /** This method is called once at the start of the OpMode.
-    * It runs all the setup actions, including building paths and starting the path system **/
-          @Override
-  public void start() {
-    opmodeTimer.resetTimer();
-    setPathState(0);
-  }
-
-  /** We do not use this because everything should automatically disable **/
-          @Override
-  public void stop() {}
+    /** We do not use this because everything should automatically disable **/
+    @Override
+    public void stop() {}
 }
-
-

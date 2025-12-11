@@ -57,6 +57,7 @@ public class ToiletRed extends LinearOpMode {
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
     public ElapsedTime runtime = new ElapsedTime();
 
+
     public void runOpMode() throws InterruptedException{
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -163,10 +164,10 @@ public class ToiletRed extends LinearOpMode {
                 if (aPressed) {
                     launcher.setVelocity(launcher.getVelocity()-50);
                 }
-                if (gamepad1.b) {
-                    launcher.setVelocity(calcVelocity(getDist(tyDeg)));
-                }
+                if (gamepad2.b) {
+                    launcher.setPower(calcVelocity(getDist(tyDeg))*(1.03));
 
+                }
                 telemetry.addData("dist", getDist(tyDeg));
                 telemetry.addData("CalcVelocity", calcVelocity(getDist(tyDeg)));
 
@@ -264,8 +265,10 @@ public class ToiletRed extends LinearOpMode {
     }
 
     public double calcVelocity(double dist) {
-        double velocity = -0.01*Math.pow(dist, 2) + 6.4*dist + 1242;
-        return velocity;
+        double rice = dist/759.11885;
+        double velocity = 1253.0478*Math.pow(2.72,rice)+ 62.005321;
+        double rpower = velocity/2460;
+        return rpower;
     }
 
     public void drive(){
