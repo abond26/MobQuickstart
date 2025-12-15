@@ -158,13 +158,13 @@ public class  BLUETEST extends LinearOpMode {
                 }
                 adjustRotator(txDeg);
                 if (yPressed) {
-                    launcher.setVelocity(launcher.getVelocity()+50);
+                    launcher.setVelocity(launcher.getVelocity()+30);
                 }
                 if (aPressed) {
-                    launcher.setVelocity(launcher.getVelocity()-50);
+                    launcher.setVelocity(launcher.getVelocity()-30);
                 }
                 if (gamepad1.b) {
-                    launcher.setVelocity(calcVelocity(getDist(tyDeg)));
+                    launcher.setPower(calcVelocity(getDist(tyDeg)));
                 }
 
                 telemetry.addData("dist", getDist(tyDeg));
@@ -268,9 +268,11 @@ public class  BLUETEST extends LinearOpMode {
     }
 
     public double calcVelocity(double dist) {
-        double rice = dist/840.06556;
-        double velocity = 1379.8998*Math.pow(2.72,rice)+ -2.29930929;
-        return velocity;
+        double rice = dist/654.83484;
+        double velocity = 1149.3757*Math.pow(2.72,rice)+ 83.439116;
+        double rpower = velocity/2580;
+        return rpower;
+
     }
 
     public void drive(){

@@ -29,7 +29,7 @@ public class ToiletBlue extends LinearOpMode {
     public static double shootTime2 = 2.2; //how long we push the balls through the turret for
     public static double reaccelerateWait2 = shootTime2+reaccelerationTime; //how long we wait before the motor is up to speed again
     public static double shootTime3 = 2.8;
-    public static double driveMultiplier = 0.7;
+    public static double driveMultiplier = 0.75;
 
 
     private int limeHeight = 33;
@@ -160,80 +160,15 @@ public class ToiletBlue extends LinearOpMode {
 
 
                 if (yPressed) {
-                    launcher.setPower(launcher.getVelocity()+50);
+                    launcher.setVelocity(launcher.getVelocity()+30);
                 }
-                if (gamepad2.a) {
-                    launcher.setPower(calcVelocity(getDist(tyDeg))+0.5);
+                if (aPressed) {
+                    launcher.setVelocity(launcher.getVelocity()-30);
                 }
-                if (gamepad2.b) {
-                    launcher.setPower(calcVelocity(getDist(tyDeg)));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                if (gamepad1.b) {
+                    launcher.setVelocity(calcVelocity(getDist(tyDeg))*1.01);
                 }
+
 
                 telemetry.addData("dist", getDist(tyDeg));
                 telemetry.addData("CalcVelocity", calcVelocity(getDist(tyDeg)));
@@ -306,14 +241,23 @@ public class ToiletBlue extends LinearOpMode {
                     intake.setPower(0);
                 }
                 //launcher movements
+                if (gamepad1.left_trigger > 0.1) {
+                    flicker.setPower(gamepad1.left_trigger);     // Forward
+                }
+                else if (gamepad1.right_trigger > 0.1) {
+                    flicker.setPower(-gamepad1.right_trigger);   // Reverse
+                }
+                else {
+                    flicker.setPower(0);                         // Stop
+                }
 
-                flicker.setPower(gamepad1.left_trigger);
                 telemetry.addData("Launcher velocity (ticks/sec)", launcher.getVelocity());
             }
 
-            if (gamepad1.right_trigger > 0.1){
+            if (gamepad2.right_trigger > 0.1){
                 launcher.setPower(0);
             }
+
 
 
 
@@ -338,9 +282,9 @@ public class ToiletBlue extends LinearOpMode {
     }
 
     public double calcVelocity(double dist) {
-        double rice = dist/759.11885;
-        double velocity = 1253.0478*Math.pow(2.72,rice)+ 62.005321;
-        double rpower = velocity/2460;
+        double rice = dist/654.83484;
+        double velocity = 1149.3757*Math.pow(2.72,rice)+ 83.439116;
+        double rpower = velocity/2580;
         return rpower;
 
 
