@@ -2,17 +2,30 @@ package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp
 
 public class Testerino extends LinearOpMode {
-    private double driveMultiplier = 0.7;
+
+    //282
+    //-301
+    int motor180Range = 630;
+    int limelightUpAngle = 25;
+    private int limeHeight = 25;
+    private int tagHeight = 75;
+    private int y = tagHeight - limeHeight;
+    public static double driveMultiplier = 0.7;
+    private Limelight3A limelight;
+    private Servo hood;
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -21,6 +34,9 @@ public class Testerino extends LinearOpMode {
     public void runOpMode() throws InterruptedException{
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
+
+        hood = hardwareMap.get(Servo.class, "hood");
+        hood.setPosition(0);
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -35,27 +51,57 @@ public class Testerino extends LinearOpMode {
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         jollyCrusader.setPower(0);
         jollyCrusader.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        rotator = hardwareMap.get(DcMotor.class, "rotator");
+        rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotator.setTargetPosition(0);
+        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rotator.setDirection(DcMotorSimple.Direction.REVERSE);
+        rotator.setPower(1);
+
+        intake = hardwareMap.get(DcMotor.class, "gerald");
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake.setPower(0);
 
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
         theWheelOfTheOx.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         theWheelOfTheOx.setPower(0);
+        theWheelOfTheOx.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        if (limelight != null) {
+            limelight.pipelineSwitch(0);
+            limelight.start();
+            telemetry.addData("LL", "initialized");
+        } else {
+            telemetry.addData("LL", "not found");
+        }
 
         //dradle
 
         waitForStart();
         follower.startTeleopDrive();
         while (opModeIsActive()){
+            if (gamepad1.x){
+                limelight.pipelineSwitch(1);
+            }
+            if (gamepad1.b){
+                limelight.pipelineSwitch(0);
+            }
+
             drive();
 
-            if (gamepad1.dpad_up){
+            //launcha
+            if (gamepad1.dpad_up&&jollyCrusader.getVelocity()>=0){
                 jollyCrusader.setVelocity(jollyCrusader.getVelocity()+50);
             }
             if (gamepad1.dpad_down){
                 jollyCrusader.setVelocity(jollyCrusader.getVelocity()-50);
             }
 
+
+            //feed the flame ._.
             if (gamepad1.right_bumper){
                 theWheelOfTheOx.setPower(1);
             }
@@ -66,7 +112,56 @@ public class Testerino extends LinearOpMode {
                 theWheelOfTheOx.setPower(0);
             }
 
+            //intake
+            intake.setPower(gamepad1.right_trigger-gamepad1.left_trigger);
+
+            //rotator
+            if (gamepad1.dpad_left){
+                rotator.setTargetPosition(rotator.getCurrentPosition()-30);
+            }
+            if (gamepad1.dpad_right){
+                rotator.setTargetPosition(rotator.getCurrentPosition()+30);
+            }
+
+            //Limelight calibration
+            if (limelight != null) {
+                LLResult ll = limelight.getLatestResult();
+                double txDeg = 0.0; //horizontal deg
+                double tyDeg = 0.0; //vertical deg
+                double ta = 0.0;
+                boolean llValid = false;
+                if (ll != null) {
+                    txDeg = ll.getTx();
+                    tyDeg = ll.getTy();
+                    ta = ll.getTa();
+                    llValid = ll.isValid();
+                }
+
+
+                if (llValid) {
+                    telemetry.addData("Ta", ta);
+                    telemetry.addData("tx", txDeg);
+                    telemetry.addData("ty", tyDeg);
+                    //adjustRotator(txDeg);
+
+                }
+                if (!gamepad1.dpad_right && !gamepad1.dpad_left){
+                    adjustRotator(txDeg);
+                }
+
+            }
+
+            if (gamepad1.a){
+                hood.setPosition(hood.getPosition()-0.0005);
+            }
+            if (gamepad1.y){
+                hood.setPosition(hood.getPosition()+0.0005);
+            }
+
+
             telemetry.addData("jolly crusader velocity", jollyCrusader.getVelocity());
+            telemetry.addData("rotator pos", rotator.getTargetPosition());
+            telemetry.addData("hood pos", hood.getPosition());
             telemetry.update();
 
 
@@ -76,9 +171,9 @@ public class Testerino extends LinearOpMode {
     }
 
     public void drive(){
-        double y = -gamepad2.left_stick_y; //forward/backward
-        double x = gamepad2.left_stick_x; //strafe (left/right)
-        double r = gamepad2.right_stick_x; //rotate
+        double y = -gamepad1.left_stick_y; //forward/backward
+        double x = gamepad1.left_stick_x; //strafe (left/right)
+        double r = gamepad1.right_stick_x; //rotate
 
         //bot movements
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(r), 1);
@@ -91,5 +186,17 @@ public class Testerino extends LinearOpMode {
         leftRear.setPower(leftRearPower*driveMultiplier);
         rightFront.setPower(rightFrontPower);
         rightRear.setPower(rightRearPower*driveMultiplier);
+    }
+    public void adjustRotator(double tx) {
+        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+        int newPosition = rotator.getCurrentPosition() + adjustment;
+        rotator.setTargetPosition(newPosition);
+    }
+
+    public double getDist(double tyDeg) {
+        double tyRad = Math.toRadians(tyDeg+limelightUpAngle);
+        double dist = y / Math.tan(tyRad);
+        return dist;
     }
 }
