@@ -23,10 +23,10 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .centripetalScaling(0.005)
-            .headingPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.02, 0.01))
+            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.02, 0.01))
             .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.018, 0.02))
-            .forwardZeroPowerAcceleration(-41.38384785246662)
-            .lateralZeroPowerAcceleration(-62.18539512812173)
+            .forwardZeroPowerAcceleration(-44.223)
+            .lateralZeroPowerAcceleration(-59.188)
             .mass(9.79);
 
 
@@ -36,8 +36,8 @@ public class Constants {
             1.1,
             1);
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .xVelocity(71.0702629990465)
-            .yVelocity(52.01033800981177)
+            .xVelocity(72.693)
+            .yVelocity(55.886)
 
 
 

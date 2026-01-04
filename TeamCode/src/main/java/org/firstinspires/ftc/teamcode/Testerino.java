@@ -18,10 +18,11 @@ public class Testerino extends LinearOpMode {
 
     //282
     //-301
+    double sumOfTrigs;
     boolean yLast = false;
     boolean aLast =false;
     int motor180Range = 630;
-    int limelightUpAngle = 17;
+    int limelightUpAngle = 25;
     private int limeHeight = 25;
     private int tagHeight = 75;
     private int y = tagHeight - limeHeight;
@@ -38,8 +39,6 @@ public class Testerino extends LinearOpMode {
         follower.setStartingPose(startPose);
 
         hood = hardwareMap.get(Servo.class, "hood");
-        hood.setPosition(0.35);
-
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -64,7 +63,7 @@ public class Testerino extends LinearOpMode {
         rotator.setDirection(DcMotorSimple.Direction.REVERSE);
         rotator.setPower(1);
 
-        intake = hardwareMap.get(DcMotor.class, "gerald");
+        intake = hardwareMap.get(DcMotor.class, "tree");
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setPower(0);
 
@@ -92,7 +91,6 @@ public class Testerino extends LinearOpMode {
 
             boolean aPressed = gamepad1.a && !aLast;
             aLast = gamepad1.a;
-
 //            if (gamepad1.x){
 //                limelight.pipelineSwitch(1);
 //            }
@@ -123,7 +121,11 @@ public class Testerino extends LinearOpMode {
             }
 
             //intake
-            intake.setPower(gamepad1.left_trigger-gamepad1.right_trigger);
+            sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
+            if (sumOfTrigs!=0){
+                intake(sumOfTrigs);
+            }
+
 
             //rotator
             if (gamepad1.dpad_left){
@@ -209,4 +211,11 @@ public class Testerino extends LinearOpMode {
         double dist = y / Math.tan(tyRad);
         return dist;
     }
+    public void intake(double intakePower){
+        intake.setPower(intakePower);
+        if (!gamepad1.right_bumper) {
+            theWheelOfTheOx.setPower(-0.3);
+        }
+    }
+
 }
