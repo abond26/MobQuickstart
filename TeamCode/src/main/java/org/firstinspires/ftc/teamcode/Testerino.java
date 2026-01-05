@@ -22,8 +22,8 @@ public class Testerino extends LinearOpMode {
     boolean yLast = false;
     boolean aLast =false;
     int motor180Range = 630;
-    int limelightUpAngle = 25;
-    private int limeHeight = 25;
+    int limelightUpAngle = 20;
+    private int limeHeight = 35;
     private int tagHeight = 75;
     private int y = tagHeight - limeHeight;
     public static double driveMultiplier = 0.7;
@@ -107,6 +107,7 @@ public class Testerino extends LinearOpMode {
             if (yPressed){
                 jollyCrusader.setVelocity(jollyCrusader.getVelocity()-50);
             }
+
 
 
             //feed the flame ._.
