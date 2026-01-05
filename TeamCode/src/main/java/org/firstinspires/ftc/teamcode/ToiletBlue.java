@@ -282,10 +282,10 @@ public class ToiletBlue extends LinearOpMode {
     }
 
     public double calcVelocity(double dist) {
-        double rice = dist/654.83484;
-        double velocity = 1149.3757*Math.pow(2.72,rice)+ 83.439116;
-        double rpower = velocity/2580;
-        return rpower;
+            double rice = dist/654.83484;
+            double velocity = 1149.3757*Math.pow(2.72,rice)+ 83.439116;
+            double rpower = velocity/2580;
+            return rpower;
 
 
     }

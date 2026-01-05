@@ -37,7 +37,7 @@ public class  BLUETEST extends LinearOpMode {
     private int y = tagHeight - limeHeight;
     //Rotator var
     int motor180Range = 910;
-    int limelightUpAngle = 25;
+    int limelightUpAngle = 15;
     private int vMultiplier = 9;
     private Limelight3A limelight;
     double time;
@@ -70,7 +70,7 @@ public class  BLUETEST extends LinearOpMode {
         rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        intake = hardwareMap.get(DcMotor.class, "intake");
+        intake = hardwareMap.get(DcMotor.class, "tree");
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setPower(0);
 
@@ -80,7 +80,7 @@ public class  BLUETEST extends LinearOpMode {
         launcher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         launcher.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        flicker = hardwareMap.get(DcMotor.class, "flicker");
+        flicker = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
         flicker.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flicker.setPower(0);
 
@@ -257,7 +257,7 @@ public class  BLUETEST extends LinearOpMode {
     public void adjustRotator(double tx) {
         double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment;
+        int newPosition = rotator.getCurrentPosition() + adjustment + 5;
         rotator.setTargetPosition(newPosition);
     }
 

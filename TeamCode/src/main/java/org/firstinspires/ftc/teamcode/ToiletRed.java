@@ -47,6 +47,8 @@ public class ToiletRed extends LinearOpMode {
     boolean yLast = false;
     //y is 1
     boolean aLast =false;
+
+
     //a is 0.6
     private int rotatorSpeed = 50;
 
