@@ -170,7 +170,7 @@ public class AutonBlueClose extends OpMode {
                 .setLinearHeadingInterpolation(collect3Start.getHeading(), collect3End.getHeading())
                 .build();
 
-
+        //
         shoot4 = follower.pathBuilder()
                 .addPath(new BezierLine(collect3End, shootBall4))
                 .setLinearHeadingInterpolation(collect3End.getHeading(), shootBall4.getHeading())
