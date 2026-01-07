@@ -15,17 +15,18 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name = "BetterThanLeftovers", group = "Examples")
-public class HelperAuton extends OpMode {
-    double txDeg = 0.0; //horizontal deg
-    double tyDeg = 0.0; //vertical deg
+@Autonomous(name = "notbetterthanleftovers", group = "Examples")
+public class BackAuton extends OpMode {
     private Follower follower;
 
     private Servo hood;
     private int limeHeight = 33;
     private int tagHeight = 75;
-    private static final double NORMAL_DRIVE_POWER = 1;
-    private static final double INTAKE_DRIVE_POWER = 0.5; // tune this
+    private static final double SHOOT_POWER = 1;
+
+
+    private static final double NORMAL_DRIVE_POWER = 0.93;
+    private static final double INTAKE_DRIVE_POWER = 0.4; // tune this
 
     private int y = tagHeight - limeHeight;
     //Rotator var
@@ -37,8 +38,9 @@ public class HelperAuton extends OpMode {
     private DcMotor leftFront, leftRear, rightFront, rightRear;
 
 
-    private DcMotorEx launcher;
-    private DcMotor tree, theWheelOfTheOx, rotator;
+
+    private DcMotor tree, theWheelOfTheOx,  rotator;
+    public DcMotorEx launcher;
     private Timer pathTimer, opModeTimer;
 
     public enum PathState {
@@ -81,12 +83,7 @@ public class HelperAuton extends OpMode {
     }
 
     PathState pathState;
-    private final Pose startPose = new Pose(57, 9, Math.toRadians(90));
-    private final Pose shootPose = new Pose(49.5, 85, Math.toRadians(135));
-
-
-    private final Pose shootPoseover = new Pose(49.5, 85, Math.toRadians(140));
-
+    private final Pose startPose = new Pose(56, 8, Math.toRadians(115));
 
     private final Pose Startofballs3 = new Pose(50, 35, Math.toRadians(180));
     private final Pose Midofballs3 = new Pose(42, 35, Math.toRadians(180));
@@ -101,14 +98,14 @@ public class HelperAuton extends OpMode {
 
 
 
-    private final Pose EndofBalls2 = new Pose(4.2, 59, Math.toRadians(180));
+    private final Pose EndofBalls2 = new Pose(5, 59, Math.toRadians(180));
 
 
-    private final Pose Startofballs1 = new Pose(42, 83, Math.toRadians(180));
+    private final Pose Startofballs1 = new Pose(42, 84, Math.toRadians(180));
 
     private final Pose Midofballs1 = new Pose(45, 84, Math.toRadians(180));
 
-    private final Pose EndofBalls1 = new Pose(11.5, 83, Math.toRadians(180));
+    private final Pose EndofBalls1 = new Pose(12.5, 84, Math.toRadians(180));
 
 
 
@@ -117,14 +114,14 @@ public class HelperAuton extends OpMode {
 
     public void buildPaths() {
         StartShoot = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, shootPoseover))
-                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(startPose, startPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), startPose.getHeading())
                 .build();
 
 
         GoingtoIntake3 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPoseover, Startofballs3))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs3.getHeading())
+                .addPath(new BezierLine(startPose, Startofballs3))
+                .setLinearHeadingInterpolation(startPose.getHeading(), Startofballs3.getHeading())
                 .build();
 
 
@@ -147,13 +144,13 @@ public class HelperAuton extends OpMode {
 
 
         bang3 = follower.pathBuilder()
-                .addPath(new BezierLine(Startofballs3, shootPose ))
-                .setLinearHeadingInterpolation(EndofBalls3.getHeading(), shootPoseover.getHeading())
+                .addPath(new BezierLine(Startofballs3, startPose ))
+                .setLinearHeadingInterpolation(EndofBalls3.getHeading(), startPose.getHeading())
                 .build();
 
         GoingtoIntake2 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPoseover, Startofballs2))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs2.getHeading())
+                .addPath(new BezierLine(startPose, Startofballs2))
+                .setLinearHeadingInterpolation(startPose.getHeading(), Startofballs2.getHeading())
                 .build();
 
 
@@ -174,13 +171,13 @@ public class HelperAuton extends OpMode {
 
 
         bang2 = follower.pathBuilder()
-                .addPath(new BezierLine(EndofBalls2, shootPoseover))
-                .setLinearHeadingInterpolation(EndofBalls2.getHeading(), shootPoseover.getHeading())
+                .addPath(new BezierLine(EndofBalls2, startPose))
+                .setLinearHeadingInterpolation(EndofBalls2.getHeading(), startPose.getHeading())
                 .build();
 
         GoingtoIntake = follower.pathBuilder()
-                .addPath(new BezierLine(shootPoseover, Startofballs1))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs1.getHeading())
+                .addPath(new BezierLine(startPose, Startofballs1))
+                .setLinearHeadingInterpolation(startPose.getHeading(), Startofballs1.getHeading())
                 .build();
         pizza3 = follower.pathBuilder()
                 .addPath(new BezierLine(Startofballs1, Midofballs1))
@@ -193,8 +190,8 @@ public class HelperAuton extends OpMode {
                 .build();
 
         bang1 = follower.pathBuilder()
-                .addPath(new BezierLine(EndofBalls1, shootPoseover))
-                .setLinearHeadingInterpolation(EndofBalls1.getHeading(), shootPoseover.getHeading())
+                .addPath(new BezierLine(EndofBalls1, startPose))
+                .setLinearHeadingInterpolation(EndofBalls1.getHeading(), startPose.getHeading())
                 .build();
 
 
@@ -203,20 +200,16 @@ public class HelperAuton extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case DRIVE_START_SHOOT:
-                hood.setPosition(0.8046);
-                follower.setMaxPower(NORMAL_DRIVE_POWER);
-                follower.followPath(StartShoot, true);
-                launcher.setVelocity(1620);
-                rotator.setPower(0);
+                launcher.setVelocity(2080);
                 setPathState(PathState.PRE_SHOOT);
                 break;
 
 
             case PRE_SHOOT:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4) {
-                    hood.setPosition(0.8046);
-                    follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1620);
+                    hood.setPosition(0.75862068965);
+                    follower.setMaxPower(SHOOT_POWER);
+                    launcher.setVelocity(2080);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
@@ -227,7 +220,7 @@ public class HelperAuton extends OpMode {
 
             case BEFORE_FIRST:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(GoingtoIntake3, true);
                     intake(0);
@@ -243,7 +236,7 @@ public class HelperAuton extends OpMode {
 
             case PAUSE:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(pizza);
                     setPathState(pathState.VERYYYY_FIRST_INTAKE);
@@ -252,7 +245,7 @@ public class HelperAuton extends OpMode {
 
             case VERYYYY_FIRST_INTAKE:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(treetres, true);
                     intake(1);
@@ -269,12 +262,12 @@ public class HelperAuton extends OpMode {
 
             case FIRST_SHOT_PREP:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang3, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(2080);
 
                     setPathState(PathState.SHOT_1);
                 }
@@ -283,9 +276,10 @@ public class HelperAuton extends OpMode {
 
             case SHOT_1:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(0.8046);
+                    follower.setMaxPower(SHOOT_POWER);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(2080);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
@@ -297,7 +291,7 @@ public class HelperAuton extends OpMode {
 
             case BEFORE_SECOND:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(GoingtoIntake2, true);
                     intake(0);
@@ -309,7 +303,7 @@ public class HelperAuton extends OpMode {
 
             case PAUSE2:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(pizza2);
                     setPathState(pathState.VERYYYY_SECOND_INTAKE);
@@ -320,7 +314,7 @@ public class HelperAuton extends OpMode {
 
             case VERYYYY_SECOND_INTAKE:
                 if (!follower.isBusy()){
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(treedos, true);
                     intake(1);
@@ -335,8 +329,8 @@ public class HelperAuton extends OpMode {
                 if (!follower.isBusy()) {
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    hood.setPosition(0.8046);
-                    launcher.setVelocity(1620);
+                    hood.setPosition(0.75862068965);
+                    launcher.setVelocity(2080);
 
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang3prep, true);
@@ -347,13 +341,13 @@ public class HelperAuton extends OpMode {
 
             case SECOND_SHOT_PREP:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8046);
-                    launcher.setVelocity(1620);
+                    hood.setPosition(0.75862068965);
+                    launcher.setVelocity(0.8);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang2, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(2080);
 
                     setPathState(PathState.SHOT_2);
                 }
@@ -362,9 +356,10 @@ public class HelperAuton extends OpMode {
 
             case SHOT_2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(0.8046);
+                    follower.setMaxPower(SHOOT_POWER);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(2080);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
@@ -375,7 +370,7 @@ public class HelperAuton extends OpMode {
 
             case BEFORE_THIRD:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(GoingtoIntake, true);
                     intake(0);
@@ -388,7 +383,7 @@ public class HelperAuton extends OpMode {
 
             case PAUSE3:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(pizza3);
                     setPathState(pathState.VERYYYY_THIRD_INTAKE);
@@ -401,10 +396,10 @@ public class HelperAuton extends OpMode {
 
             case VERYYYY_THIRD_INTAKE:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(treeuno, true);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(2080);
                     intake(1);
                     theWheelOfTheOx.setPower(0.1);
 
@@ -415,12 +410,12 @@ public class HelperAuton extends OpMode {
 
             case THIRD_SHOT_PREP:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8046);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang1, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(2080);
 
                     setPathState(PathState.SHOT_3);
                 }
@@ -429,9 +424,10 @@ public class HelperAuton extends OpMode {
 
             case SHOT_3:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(0.8046);
+                    follower.setMaxPower(SHOOT_POWER);
+                    hood.setPosition(0.75862068965);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(2080);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
@@ -443,7 +439,7 @@ public class HelperAuton extends OpMode {
             case JACK_OFF:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
                     hood.setPosition(0);
-                    launcher.setPower(0);
+                    launcher.setVelocity(0);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
 
@@ -478,8 +474,8 @@ public class HelperAuton extends OpMode {
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         hood = hardwareMap.get(Servo.class, "hood");
-        hood.scaleRange(0, 0.029);
-        hood.setPosition(0.8046);
+        hood.scaleRange(0, 0.758620689659);
+        hood.setPosition(0.75862068965);
 
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
@@ -501,70 +497,53 @@ public class HelperAuton extends OpMode {
         } else {
             telemetry.addData("LL", "not found");
         }
+        if (limelight != null) {
+            LLResult ll = limelight.getLatestResult();
+            double txDeg = 0.0; //horizontal deg
+            double tyDeg = 0.0; //vertical deg
+            double ta = 0.0;
+            boolean llValid = false;
+            if (ll != null) {
+                txDeg = ll.getTx();
+                tyDeg = ll.getTy();
+                ta = ll.getTa();
+                llValid = ll.isValid();
+            }
+
+
+            if (llValid) {
+                telemetry.addData("Ta", ta);
+                telemetry.addData("tx", txDeg);
+                telemetry.addData("ty", tyDeg);
+                adjustRotator(txDeg);
+
+            }
+            adjustRotator(txDeg);
+
+        }
+
+
     }
 
     @Override
     public void loop() {
-        adjustRotator();
         follower.update();
         statePathUpdate();
-        adjustRotator();
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
-        telemetry.addData("jolly crusader velocity", launcher.getVelocity());
+
     }
 
-    public void adjustRotator() {
-        if (limelight != null) {
-            LLResult ll = limelight.getLatestResult();
-            txDeg = 0.0; //horizontal deg
-            tyDeg = 0.0; //vertical deg
-            double ta = 0.0;
-            boolean llValid = false;
-            if (ll != null) {
-                txDeg = ll.getTx();
-                tyDeg = ll.getTy();
-                ta = ll.getTa();
-                llValid = ll.isValid();
-            }
-
-
-            if (llValid) {
-                telemetry.addData("Ta", ta);
-                telemetry.addData("tx", txDeg);
-                telemetry.addData("ty", tyDeg);
-            }
-        }
-        double fracOfSemiCircum = Math.toRadians(txDeg) / Math.PI;
+    public void adjustRotator(double tx) {
+        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
         int newPosition = rotator.getCurrentPosition() + adjustment;
         rotator.setTargetPosition(newPosition);
     }
-
     public double getDist(double tyDeg) {
-        if (limelight != null) {
-            LLResult ll = limelight.getLatestResult();
-            txDeg = 0.0; //horizontal deg
-            tyDeg = 0.0; //vertical deg
-            double ta = 0.0;
-            boolean llValid = false;
-            if (ll != null) {
-                txDeg = ll.getTx();
-                tyDeg = ll.getTy();
-                ta = ll.getTa();
-                llValid = ll.isValid();
-            }
-
-
-            if (llValid) {
-                telemetry.addData("Ta", ta);
-                telemetry.addData("tx", txDeg);
-                telemetry.addData("ty", tyDeg);
-            }
-        }
         double tyRad = Math.toRadians(tyDeg+limelightUpAngle);
         double dist = y / Math.tan(tyRad);
         return dist;
