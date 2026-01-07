@@ -24,6 +24,7 @@ public class AutonBlueClose extends OpMode {
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
+    private int offset = 28;
 
     private Servo hood;
     private int limeHeight = 33;
@@ -207,6 +208,7 @@ public class AutonBlueClose extends OpMode {
                 break;
             case actuallyshoot1:
                 if (!follower.isBusy()){
+                    adjustRotator(37);
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(-1);
                     setPathState(AutonBlueClose.PathState.collection);
@@ -446,5 +448,11 @@ public class AutonBlueClose extends OpMode {
             theWheelOfTheOx.setPower(-0.3);
         }
     }
+    public void adjustRotator(double tx) {
+        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
+        rotator.setTargetPosition(newPosition);
 
+    }
 }
