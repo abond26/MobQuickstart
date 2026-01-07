@@ -21,6 +21,7 @@ public class Testerino extends LinearOpMode {
     double sumOfTrigs;
     boolean yLast = false;
     boolean aLast =false;
+    boolean xLast = false;
     int motor180Range = 630;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
@@ -39,6 +40,8 @@ public class Testerino extends LinearOpMode {
         follower.setStartingPose(startPose);
 
         hood = hardwareMap.get(Servo.class, "hood");
+        hood.scaleRange(0, 0.029);
+
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -91,6 +94,8 @@ public class Testerino extends LinearOpMode {
 
             boolean aPressed = gamepad1.a && !aLast;
             aLast = gamepad1.a;
+            boolean xPressed = gamepad2.x && !xLast;
+            xLast = gamepad2.x;
 //            if (gamepad1.x){
 //                limelight.pipelineSwitch(1);
 //            }
@@ -100,6 +105,8 @@ public class Testerino extends LinearOpMode {
 
             drive();
 
+
+
             //launcha
             if (aPressed){
                 jollyCrusader.setVelocity(jollyCrusader.getVelocity()+50);
@@ -107,6 +114,7 @@ public class Testerino extends LinearOpMode {
             if (yPressed){
                 jollyCrusader.setVelocity(jollyCrusader.getVelocity()-50);
             }
+
 
 
 
@@ -162,19 +170,30 @@ public class Testerino extends LinearOpMode {
                     adjustRotator(txDeg);
                 }
                 telemetry.addData("Distance", getDist(tyDeg));
+
+                if (gamepad1.right_stick_button){
+                    jollyCrusader.setVelocity(calcVelocity(getDist(tyDeg)));
+                    hood.setPosition(calcHood(getDist(tyDeg)));
+                }
+            }
+            if (gamepad1.left_stick_button){
+                jollyCrusader.setVelocity(0);
+                hood.setPosition(0);
             }
 
             if (gamepad1.x){
-                hood.setPosition(hood.getPosition()-0.0005);
+                hood.setPosition(hood.getPosition()-0.005);
             }
             if (gamepad1.b){
-                hood.setPosition(hood.getPosition()+0.0005);
+                hood.setPosition(hood.getPosition()+0.005);
             }
 
 
             telemetry.addData("jolly crusader velocity", jollyCrusader.getVelocity());
             telemetry.addData("rotator pos", rotator.getTargetPosition());
             telemetry.addData("hood pos", hood.getPosition());
+            telemetry.addData("x", follower.getPose().getX());
+            telemetry.addData("y", follower.getPose().getY());
             telemetry.update();
 
 
@@ -208,9 +227,21 @@ public class Testerino extends LinearOpMode {
     }
 
     public double getDist(double tyDeg) {
-        double tyRad = Math.toRadians(tyDeg+limelightUpAngle);
+        double tyRad = Math.abs(Math.toRadians(tyDeg+limelightUpAngle));
         double dist = y / Math.tan(tyRad);
-        return dist;
+        double realDist = 0.55*dist+40.3;
+        telemetry.addData("angle", Math.toDegrees(tyRad));
+        telemetry.addData("fakeDist", dist);
+        telemetry.addData("realDist", realDist);
+        return realDist;
+    }
+    public double calcVelocity(double dist) {
+        double velocity = 1359.5131 * Math.pow(1.00194, dist);
+        return velocity;
+    }
+    public double calcHood(double dist) {
+        double hoodAngle =0.00015651 * dist - 0.0154938;
+        return hoodAngle;
     }
     public void intake(double intakePower){
         intake.setPower(intakePower);
