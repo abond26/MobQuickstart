@@ -316,6 +316,10 @@ public class AutonBlueClose extends OpMode {
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotator.setTargetPosition(0);
+        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rotator.setPower(1.0);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         if (limelight != null) {
             limelight.pipelineSwitch(1);
@@ -331,7 +335,6 @@ public class AutonBlueClose extends OpMode {
         adjustRotator();
         follower.update();
         statePathUpdate();
-        adjustRotator();
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
@@ -341,7 +344,7 @@ public class AutonBlueClose extends OpMode {
     }
 
     public void adjustRotator() {
-        if (limelight != null) {
+        if (limelight != null && rotator != null) {
             LLResult ll = limelight.getLatestResult();
             txDeg = 0.0; //horizontal deg
             tyDeg = 0.0; //vertical deg
@@ -360,11 +363,12 @@ public class AutonBlueClose extends OpMode {
                 telemetry.addData("tx", txDeg);
                 telemetry.addData("ty", tyDeg);
             }
+            
+            double fracOfSemiCircum = Math.toRadians(txDeg) / Math.PI;
+            int adjustment = (int) (fracOfSemiCircum * motor180Range);
+            int newPosition = rotator.getCurrentPosition() + adjustment;
+            rotator.setTargetPosition(newPosition);
         }
-        double fracOfSemiCircum = Math.toRadians(txDeg) / Math.PI;
-        int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment;
-        rotator.setTargetPosition(newPosition);
     }
 
     public double getDist(double tyDeg) {
