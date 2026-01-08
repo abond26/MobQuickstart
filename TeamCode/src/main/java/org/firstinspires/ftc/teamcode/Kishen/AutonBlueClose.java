@@ -24,12 +24,13 @@ public class AutonBlueClose extends OpMode {
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
+    private int offset = 28;
 
     private Servo hood;
     private int limeHeight = 33;
     private int tagHeight = 75;
-    private static final double NORMAL_DRIVE_POWER = 0.93;
-    private static final double INTAKE_DRIVE_POWER = 0.4; // tune this
+    private static final double NORMAL_DRIVE_POWER = 1;
+    private static final double INTAKE_DRIVE_POWER = 0.6; // tune this
 
     private int y = tagHeight - limeHeight;
     //Rotator var
@@ -47,6 +48,7 @@ public class AutonBlueClose extends OpMode {
 
     public enum PathState {
         start,
+        actuallyshoot1,
         collection,
         shoot,
         collectAgain,
@@ -70,7 +72,7 @@ public class AutonBlueClose extends OpMode {
         parklol,
 
 
-        BEFORE_THIRD,
+        done,
 
         VERYYYY_THIRD_INTAKE,
 
@@ -86,34 +88,34 @@ public class AutonBlueClose extends OpMode {
 
     PathState pathState;
     private final Pose startPose = new Pose(24.4, 126.7, Math.toRadians(143));
-    private final Pose shootPose1 = new Pose(52, 84, Math.toRadians(180));
+    private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(180));
 
 
-    private final Pose collect1thing = new Pose(18.5, 84, Math.toRadians(180));
+    private final Pose collect1thing = new Pose(15, 82, Math.toRadians(180));
     private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(180));
 
 
-    private final Pose collect2Start = new Pose(52, 60, Math.toRadians(180));
-    private final Pose collect2End = new Pose(22, 60, Math.toRadians(180));
+    private final Pose collect2Start = new Pose(52, 56, Math.toRadians(180));
+    private final Pose collect2End = new Pose(7, 56, Math.toRadians(180));
     private final Pose shootBall3ControlPoint = new Pose(70, 43, Math.toRadians(180));
-    private final Pose shootBall3 = new Pose(60, 22, Math.toRadians(180));
+    private final Pose shootBall3 = new Pose(50, 22, Math.toRadians(180));
 
 
-    private final Pose collect3Start = new Pose(46, 36, Math.toRadians(180));
+    private final Pose collect3Start = new Pose(46, 33, Math.toRadians(180));
 
-    private final Pose collect3End = new Pose(46, 36, Math.toRadians(180));
+    private final Pose collect3End = new Pose(6, 33, Math.toRadians(180)); // FIXED: Changed from same position to actual collection end
 
 
-    private final Pose shootBall4 = new Pose(60, 22, Math.toRadians(180));
+    private final Pose shootBall4 = new Pose(55, 22, Math.toRadians(180));
 
 
 
     private final Pose collect4start = new Pose(16, 11, Math.toRadians(180));
 
 
-    private final Pose collect4end = new Pose(10, 11, Math.toRadians(180));
+    private final Pose collect4end = new Pose(3, 11, Math.toRadians(180));
 
-    private final Pose shootBall5 = new Pose(60, 22, Math.toRadians(180));
+    private final Pose shootBall5 = new Pose(50, 22, Math.toRadians(180));
 
     private final Pose park = new Pose(16, 11, Math.toRadians(180));
 
@@ -169,7 +171,7 @@ public class AutonBlueClose extends OpMode {
                 .setLinearHeadingInterpolation(collect3Start.getHeading(), collect3End.getHeading())
                 .build();
 
-
+        //
         shoot4 = follower.pathBuilder()
                 .addPath(new BezierLine(collect3End, shootBall4))
                 .setLinearHeadingInterpolation(collect3End.getHeading(), shootBall4.getHeading())
@@ -199,84 +201,125 @@ public class AutonBlueClose extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
+                launcher.setVelocity(1620);
+                follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
-                setPathState(AutonBlueClose.PathState.collection);
+                setPathState(PathState.actuallyshoot1);
                 break;
+            case actuallyshoot1:
+                if (!follower.isBusy()){
+                    adjustRotator(37);
+                    tree.setPower(1);
+                    theWheelOfTheOx.setPower(-1);
+                    setPathState(AutonBlueClose.PathState.collection);
+                }
+                break;
+
             case collection:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4) {
+
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.25) {
+                    follower.setMaxPower(INTAKE_DRIVE_POWER);
+                    theWheelOfTheOx.setPower(1);
+                    tree.setPower(1);
                     follower.followPath(collect1);
                     setPathState((AutonBlueClose.PathState.shoot));
                 }
                 break;
             case shoot:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.75) {
                     follower.followPath(shoot2);
-                    setPathState((AutonBlueClose.PathState.collectAgain));
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    tree.setPower(1);
+                    if(pathTimer.getElapsedTimeSeconds()>2) {
+                        theWheelOfTheOx.setPower(-1);
+                        setPathState((PathState.collectAgain));
+                    }
                 }
                 break;
             case collectAgain:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(goToCollect2);
-                    setPathState((AutonBlueClose.PathState.collectAgainEnd));
+                    setPathState((PathState.collectAgainEnd));
                 }
                 break;
             case collectAgainEnd:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(collect2);
+                    tree.setPower(1);
+                    theWheelOfTheOx.setPower(1);
                     setPathState((AutonBlueClose.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.75) {
                     follower.followPath(shoot3);
-                    setPathState((AutonBlueClose.PathState.collectAgainAgain));
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    tree.setPower(1);
+                    if(pathTimer.getElapsedTimeSeconds()>2) {
+                        theWheelOfTheOx.setPower(-1);
+                        setPathState((PathState.collectAgainAgain));
+                    }
                 }
                 break;
             case collectAgainAgain:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1){
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(goToCollect3);
                     setPathState((AutonBlueClose.PathState.collectAgainAgainEnd));
                 }
                 break;
             case collectAgainAgainEnd:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(collect3);
                     setPathState((AutonBlueClose.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.75) {
                     follower.followPath(shoot4);
-                    setPathState((AutonBlueClose.PathState.collectAgainAgainAgain));
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    tree.setPower(1);
+                    if(pathTimer.getElapsedTimeSeconds()>4.5) {
+                        theWheelOfTheOx.setPower(-1);
+                        setPathState((PathState.collectAgainAgainAgain));
+                    }
                 }
                 break;
             case collectAgainAgainAgain:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(goToCollect4);
                     setPathState((AutonBlueClose.PathState.collectAgainAgainAgainEnd));
                 }
                 break;
             case collectAgainAgainAgainEnd:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(collect4);
                     setPathState((AutonBlueClose.PathState.shootAgainAgainAgain));
                 }
                 break;
             case shootAgainAgainAgain:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.75) {
                     follower.followPath(shoot5);
-                    setPathState((AutonBlueClose.PathState.parklol));
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    tree.setPower(1);
+                    if(pathTimer.getElapsedTimeSeconds()>4.5) {
+                        theWheelOfTheOx.setPower(-1);
+                        setPathState((PathState.parklol));
+                    }
                 }
                 break;
             case parklol:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(parking);
+                    setPathState((AutonBlueClose.PathState.done));
+                    // Path complete - autonomous ends here
                 }
                 break;
+
+            case done:
+                break;
+
         }
-
     }
-
     public void setPathState(PathState newState) {
         pathState = newState;
         pathTimer.resetTimer();
@@ -316,10 +359,6 @@ public class AutonBlueClose extends OpMode {
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotator.setTargetPosition(0);
-        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setPower(1.0);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         if (limelight != null) {
             limelight.pipelineSwitch(1);
@@ -335,6 +374,7 @@ public class AutonBlueClose extends OpMode {
         adjustRotator();
         follower.update();
         statePathUpdate();
+        adjustRotator();
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
@@ -344,7 +384,7 @@ public class AutonBlueClose extends OpMode {
     }
 
     public void adjustRotator() {
-        if (limelight != null && rotator != null) {
+        if (limelight != null) {
             LLResult ll = limelight.getLatestResult();
             txDeg = 0.0; //horizontal deg
             tyDeg = 0.0; //vertical deg
@@ -363,12 +403,11 @@ public class AutonBlueClose extends OpMode {
                 telemetry.addData("tx", txDeg);
                 telemetry.addData("ty", tyDeg);
             }
-            
-            double fracOfSemiCircum = Math.toRadians(txDeg) / Math.PI;
-            int adjustment = (int) (fracOfSemiCircum * motor180Range);
-            int newPosition = rotator.getCurrentPosition() + adjustment;
-            rotator.setTargetPosition(newPosition);
         }
+        double fracOfSemiCircum = Math.toRadians(txDeg) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+        int newPosition = rotator.getCurrentPosition() + adjustment;
+        rotator.setTargetPosition(newPosition);
     }
 
     public double getDist(double tyDeg) {
@@ -409,5 +448,11 @@ public class AutonBlueClose extends OpMode {
             theWheelOfTheOx.setPower(-0.3);
         }
     }
+    public void adjustRotator(double tx) {
+        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
+        rotator.setTargetPosition(newPosition);
 
+    }
 }

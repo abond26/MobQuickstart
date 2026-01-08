@@ -40,9 +40,7 @@ public class Testerino extends LinearOpMode {
         follower.setStartingPose(startPose);
 
         hood = hardwareMap.get(Servo.class, "hood");
-        hood.scaleRange(0, 0.029);
-
-
+        hood.scaleRange(0,0.0328);
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
@@ -140,8 +138,11 @@ public class Testerino extends LinearOpMode {
             if (gamepad1.dpad_left){
                 rotator.setTargetPosition(rotator.getCurrentPosition()-30);
             }
-            if (gamepad1.dpad_right){
+            else if (gamepad1.dpad_right){
                 rotator.setTargetPosition(rotator.getCurrentPosition()+30);
+            }
+            else{
+                rotator.setTargetPosition(rotator.getCurrentPosition());
             }
 
             //Limelight calibration
@@ -163,12 +164,12 @@ public class Testerino extends LinearOpMode {
                     telemetry.addData("Ta", ta);
                     telemetry.addData("tx", txDeg);
                     telemetry.addData("ty", tyDeg);
-                    //adjustRotator(txDeg);
+                    if (!gamepad1.dpad_right && !gamepad1.dpad_left){
+                        adjustRotator(txDeg);
+                    }
 
                 }
-                if (!gamepad1.dpad_right && !gamepad1.dpad_left){
-                    adjustRotator(txDeg);
-                }
+
                 telemetry.addData("Distance", getDist(tyDeg));
 
                 if (gamepad1.right_stick_button){
@@ -222,7 +223,7 @@ public class Testerino extends LinearOpMode {
     public void adjustRotator(double tx) {
         double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment;
+        int newPosition = rotator.getCurrentPosition() + adjustment - 28;
         rotator.setTargetPosition(newPosition);
     }
 
@@ -236,11 +237,11 @@ public class Testerino extends LinearOpMode {
         return realDist;
     }
     public double calcVelocity(double dist) {
-        double velocity = 1359.5131 * Math.pow(1.00194, dist);
+        double velocity = 0.077 * Math.pow(dist, 2) - 21.02 * dist + 3081;
         return velocity;
     }
     public double calcHood(double dist) {
-        double hoodAngle =0.00015651 * dist - 0.0154938;
+        double hoodAngle = 8.48347 * Math.pow(dist, 2) - 0.02334 * dist + 2.0402;
         return hoodAngle;
     }
     public void intake(double intakePower){
