@@ -537,7 +537,7 @@ class LateralVelocityTuner extends OpMode {
  */
 class ForwardZeroPowerAccelerationTuner extends OpMode {
     private final ArrayList<Double> accelerations = new ArrayList<>();
-    public static double VELOCITY = 30;
+    public static double VELOCITY = 65;
 
     private double previousVelocity;
     private long previousTimeNano;
@@ -643,7 +643,7 @@ class ForwardZeroPowerAccelerationTuner extends OpMode {
  */
 class LateralZeroPowerAccelerationTuner extends OpMode {
     private final ArrayList<Double> accelerations = new ArrayList<>();
-    public static double VELOCITY = 30;
+    public static double VELOCITY = 50;
     private double previousVelocity;
     private long previousTimeNano;
     private boolean stopping;
@@ -790,8 +790,35 @@ class TranslationalTuner extends OpMode {
             }
         }
 
+        // Calculate and send PIDF tuning telemetry for graphing
+        double lateralError = 0.0;
+        double transOutput = 0.0;
+        
+        if (follower.getCurrentPath() != null) {
+            Pose currentPose = follower.getPose();
+            Pose targetPose = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
+            double pathHeading = follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue());
+            
+            // Calculate lateral error (perpendicular distance from path)
+            double errorX = targetPose.getX() - currentPose.getX();
+            double errorY = targetPose.getY() - currentPose.getY();
+            double errorAngle = Math.atan2(errorY, errorX);
+            lateralError = Math.sqrt(errorX * errorX + errorY * errorY) * Math.sin(errorAngle - pathHeading);
+            
+            // Calculate translational output (velocity component perpendicular to path)
+            Vector velocity = follower.getVelocity();
+            double perpHeading = pathHeading + Math.PI / 2;
+            transOutput = velocity.dot(new Vector(1.0, perpHeading));
+        }
+        
+        // Always send graph-able telemetry (even if path is null, send 0)
+        telemetry.addData("Trans Error", lateralError);
+        telemetry.addData("Trans Output", transOutput);
+        telemetry.addData("Test Value", 1.0); // Test to verify telemetry is working
+        
         telemetryM.debug("Push the robot laterally to test the Translational PIDF(s).");
         telemetryM.update(telemetry);
+        telemetry.update();
     }
 }
 
@@ -809,6 +836,7 @@ class TranslationalTuner extends OpMode {
 class HeadingTuner extends OpMode {
     public static double DISTANCE = 48;
     private boolean forward = true;
+    private double previousHeading = Double.NaN;
 
     private Path forwards;
     private Path backwards;
@@ -862,8 +890,39 @@ class HeadingTuner extends OpMode {
             }
         }
 
+        // Calculate and send heading PIDF tuning telemetry for graphing
+        double headingError = 0.0;
+        double headingOutput = 0.0;
+        
+        if (follower.getCurrentPath() != null) {
+            double currentHeading = follower.getPose().getHeading();
+            double targetHeading = follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue());
+            
+            // Calculate heading error (wrapped to -π to π)
+            headingError = targetHeading - currentHeading;
+            // Normalize to [-π, π]
+            while (headingError > Math.PI) headingError -= 2 * Math.PI;
+            while (headingError < -Math.PI) headingError += 2 * Math.PI;
+            
+            // Calculate heading output (angular velocity approximation from heading change)
+            // Store previous heading to calculate angular velocity
+            if (!Double.isNaN(previousHeading)) {
+                double headingChange = currentHeading - previousHeading;
+                // Normalize heading change to [-π, π]
+                while (headingChange > Math.PI) headingChange -= 2 * Math.PI;
+                while (headingChange < -Math.PI) headingChange += 2 * Math.PI;
+                headingOutput = headingChange / 0.02; // Approximate angular velocity (assuming ~20ms loop time)
+            }
+            previousHeading = currentHeading;
+        }
+        
+        // Always send graph-able telemetry
+        telemetry.addData("Heading Error", headingError);
+        telemetry.addData("Heading Output", headingOutput);
+        
         telemetryM.debug("Turn the robot manually to test the Heading PIDF(s).");
         telemetryM.update(telemetry);
+        telemetry.update();
     }
 }
 
@@ -941,8 +1000,37 @@ class DriveTuner extends OpMode {
             }
         }
 
+        // Calculate and send drive PIDF tuning telemetry for graphing
+        double driveError = 0.0;
+        double driveOutput = 0.0;
+        
+        if (follower.getCurrentPath() != null) {
+            Pose currentPose = follower.getPose();
+            Pose targetPose = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
+            double pathHeading = follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue());
+            
+            // Calculate drive error (distance along the path - forward/backward error)
+            double errorX = targetPose.getX() - currentPose.getX();
+            double errorY = targetPose.getY() - currentPose.getY();
+            // Project error onto path direction (forward/backward along path)
+            double errorAngle = Math.atan2(errorY, errorX);
+            double driveErrorDistance = Math.sqrt(errorX * errorX + errorY * errorY);
+            // Error along path direction (positive = ahead, negative = behind)
+            driveError = driveErrorDistance * Math.cos(errorAngle - pathHeading);
+            
+            // Calculate drive output (velocity component along path direction)
+            Vector velocity = follower.getVelocity();
+            double driveOutputVelocity = velocity.dot(new Vector(1.0, pathHeading));
+            driveOutput = driveOutputVelocity;
+        }
+        
+        // Always send graph-able telemetry
+        telemetry.addData("Drive Error", driveError);
+        telemetry.addData("Drive Output", driveOutput);
+        
         telemetryM.debug("Driving forward?: " + forward);
         telemetryM.update(telemetry);
+        telemetry.update();
     }
 }
 
@@ -1079,8 +1167,47 @@ class CentripetalTuner extends OpMode {
             }
         }
 
+        // Calculate and send centripetal tuning telemetry for graphing
+        double totalPathError = 0.0;
+        double lateralError = 0.0;
+        double driveError = 0.0;
+        double headingError = 0.0;
+        
+        if (follower.getCurrentPath() != null) {
+            Pose currentPose = follower.getPose();
+            Pose targetPose = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
+            double pathHeading = follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue());
+            
+            // Calculate total path error (straight-line distance from target)
+            double errorX = targetPose.getX() - currentPose.getX();
+            double errorY = targetPose.getY() - currentPose.getY();
+            totalPathError = Math.sqrt(errorX * errorX + errorY * errorY);
+            
+            // Calculate lateral error (perpendicular to path)
+            double errorAngle = Math.atan2(errorY, errorX);
+            lateralError = totalPathError * Math.sin(errorAngle - pathHeading);
+            
+            // Calculate drive error (along path direction)
+            driveError = totalPathError * Math.cos(errorAngle - pathHeading);
+            
+            // Calculate heading error
+            double currentHeading = currentPose.getHeading();
+            double targetHeading = pathHeading;
+            headingError = targetHeading - currentHeading;
+            // Normalize to [-π, π]
+            while (headingError > Math.PI) headingError -= 2 * Math.PI;
+            while (headingError < -Math.PI) headingError += 2 * Math.PI;
+        }
+        
+        // Always send graph-able telemetry
+        telemetry.addData("Total Path Error", totalPathError);
+        telemetry.addData("Lateral Error", lateralError);
+        telemetry.addData("Drive Error", driveError);
+        telemetry.addData("Heading Error", headingError);
+        
         telemetryM.debug("Driving away from the origin along the curve?: " + forward);
         telemetryM.update(telemetry);
+        telemetry.update();
     }
 }
 

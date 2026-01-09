@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
@@ -22,22 +23,24 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .centripetalScaling(0.005)
-            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.02, 0.01))
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.018, 0.02))
-            .forwardZeroPowerAcceleration(-44.223)
-            .lateralZeroPowerAcceleration(-59.188)
-            .mass(9.79);
+            .centripetalScaling(0.00035)
+          .headingPIDFCoefficients(new PIDFCoefficients(1, 0.0001, 0.03, 0))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0.0001, 0.0075, 0))
+            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.025, 0, 0.00001, 0.01, 0.6)))
+            .forwardZeroPowerAcceleration(-46.14914399311541)
+            .lateralZeroPowerAcceleration(-66.34057178113703)
+            .mass(11.4);
 
 
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99,
             100,
-            1.1,
+            0.7,
             1);
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .xVelocity(72.693)
-            .yVelocity(55.886)
+            .xVelocity(74.74229851670154)
+            .yVelocity(61.22060748723548)
+
 
 
 
@@ -56,8 +59,8 @@ public class Constants {
     //right front changed right front
     //right rear
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(0.2)
-            .strafePodX(-4.2)
+            .forwardPodY(-4.0)
+            .strafePodX(-2.25)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
