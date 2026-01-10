@@ -39,7 +39,7 @@ public class TesterinoBlue extends LinearOpMode {
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0; // Example: change hood when distance > 100 inches
-    private static final double CLOSE_HOOD_POSITION = 0.6775; // Hood position for close shots
+    private static final double CLOSE_HOOD_POSITION = .79; // Hood position for close shots
     private static final double FAR_HOOD_POSITION = 0.4204; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
