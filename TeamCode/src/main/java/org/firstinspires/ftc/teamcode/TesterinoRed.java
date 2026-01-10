@@ -130,46 +130,11 @@ public class TesterinoRed extends LinearOpMode {
 
 
             //feed the flame ._.
-            boolean rightBumperPressed = gamepad1.right_bumper && !rightBumperLast;
-            rightBumperLast = gamepad1.right_bumper;
-            
-            if (rightBumperPressed) {
-                // Start the wheel and timer when button is first pressed
-                wheelRunning = true;
-                wheelTimer.reset();
-                theWheelOfTheOx.setPower(1);
-                intake(-1); // Start intake when right bumper is pressed
-            }
-            
-            if (wheelRunning) {
-                // Keep motor running
-                theWheelOfTheOx.setPower(1);
-                intake(-1); // Keep intake running
-                
-                // After 1.5 seconds, move the servo
-                if (wheelTimer.seconds() >= 1.5) {
-                    hood.setPosition(0.37);
-                    // Keep motor running - don't stop it
-                }
-            }
-            
-            if (gamepad1.left_bumper){
-                wheelRunning = false; // Stop the timed sequence if left bumper is pressed
-                theWheelOfTheOx.setPower(-1);
-            }
-            else if (!wheelRunning && !gamepad1.right_bumper) {
-                // Only stop motor if we're not in the timed sequence
-                theWheelOfTheOx.setPower(0);
+            sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
+            if (sumOfTrigs!=0){
+                intake(sumOfTrigs);
             }
 
-            //intake
-            if (!wheelRunning) {
-                // Only use triggers for intake if wheel is not running
-                sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
-                if (sumOfTrigs!=0){
-                    intake(sumOfTrigs);
-                }
-            }
 
 
             //rotator

@@ -142,10 +142,9 @@ public class TesterinoBlue extends LinearOpMode {
             }
 
             //intake
-            if (gamepad1.right_trigger > 0.1){
-                intake.setPower(1);
-            } else if (gamepad1.right_bumper) {
-                theWheelOfTheOx.setPower(-0.3);
+            sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
+            if (sumOfTrigs!=0){
+                intake(sumOfTrigs);
             }
 
 
@@ -259,7 +258,12 @@ public class TesterinoBlue extends LinearOpMode {
         double velocity = 3.30933 * dist + 1507.01002;
         return velocity;
     }
-
+    public void intake(double intakePower){
+        intake.setPower(intakePower);
+        if (!gamepad1.right_bumper) {
+            theWheelOfTheOx.setPower(-0.3);
+        }
+    }
 
 
 
