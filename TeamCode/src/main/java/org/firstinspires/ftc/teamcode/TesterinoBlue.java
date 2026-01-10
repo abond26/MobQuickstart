@@ -145,6 +145,8 @@ public class TesterinoBlue extends LinearOpMode {
             sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
             if (sumOfTrigs!=0){
                 intake(sumOfTrigs);
+            } else {
+                intake.setPower(0);
             }
 
 
