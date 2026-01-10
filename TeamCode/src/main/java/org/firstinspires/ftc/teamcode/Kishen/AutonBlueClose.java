@@ -97,8 +97,8 @@ public class AutonBlueClose extends OpMode {
 
     private final Pose collect2Start = new Pose(52, 57, Math.toRadians(180));
     private final Pose collect2End = new Pose(13, 57, Math.toRadians(180));
-    private final Pose shootBall3ControlPoint = new Pose(65, 43, Math.toRadians(180));
-    private final Pose shootBall3 = new Pose(60, 20, Math.toRadians(180));
+    private final Pose shootBall3ControlPoint = new Pose(55, 43, Math.toRadians(180));
+    private final Pose shootBall3 = new Pose(55, 20, Math.toRadians(180));
 
 
     private final Pose collect3Start = new Pose(46, 33, Math.toRadians(180));
@@ -201,9 +201,9 @@ public class AutonBlueClose extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                adjustRotator(-25);
-                launcher.setVelocity(1675);
-                hood.setPosition(0.150);
+                adjustRotator(-25.5);
+                launcher.setVelocity(1700);
+                hood.setPosition(0.120);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
@@ -229,7 +229,7 @@ public class AutonBlueClose extends OpMode {
                 break;
             case shoot:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 0.5) {
-                    hood.setPosition(0.250);
+                    hood.setPosition(0.185);
                     follower.followPath(shoot2);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                    tree.setPower(1);
@@ -247,9 +247,8 @@ public class AutonBlueClose extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    adjustRotator(-15);
-                    launcher.setVelocity(3000);
-                    hood.setPosition(0.350);
+                    launcher.setVelocity(3250);
+                    hood.setPosition(0.325);
                     follower.followPath(collect2);
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(1);
@@ -258,9 +257,12 @@ public class AutonBlueClose extends OpMode {
                 break;
             case shootAgain:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 0.25) {
-                    follower.followPath(shoot3);
-                    follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    tree.setPower(1);
+                        adjustRotator(-8.5);
+                    if ( pathTimer.getElapsedTimeSeconds() > 1) {
+                        follower.followPath(shoot3);
+                        follower.setMaxPower(NORMAL_DRIVE_POWER);
+                        tree.setPower(1);
+                    }
                     if(pathTimer.getElapsedTimeSeconds()>3) {
                         theWheelOfTheOx.setPower(-1);
                         setPathState((PathState.collectAgainAgain));
@@ -277,7 +279,7 @@ public class AutonBlueClose extends OpMode {
             case collectAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(collect3);
-                    adjustRotator(17);
+                    adjustRotator(10);
                     setPathState((AutonBlueClose.PathState.shootAgainAgain));
                 }
                 break;
@@ -286,7 +288,7 @@ public class AutonBlueClose extends OpMode {
                     follower.followPath(shoot4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
-                    if(pathTimer.getElapsedTimeSeconds()>5) {
+                    if(pathTimer.getElapsedTimeSeconds()>2) {
                         theWheelOfTheOx.setPower(-1);
                         setPathState((PathState.collectAgainAgainAgain));
                     }
@@ -301,6 +303,7 @@ public class AutonBlueClose extends OpMode {
                 break;
             case collectAgainAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
+                    follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(collect4);
                     setPathState((AutonBlueClose.PathState.shootAgainAgainAgain));
                 }
