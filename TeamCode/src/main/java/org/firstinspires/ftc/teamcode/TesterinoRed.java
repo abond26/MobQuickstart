@@ -10,18 +10,24 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp
 
-public class Testerino extends LinearOpMode {
+public class TesterinoRed extends LinearOpMode {
 
+    double newTime;
+    double time;
     //282
     //-301
     double sumOfTrigs;
     boolean yLast = false;
     boolean aLast =false;
     boolean xLast = false;
+    boolean rightBumperLast = false;
+    boolean wheelRunning = false;
+    ElapsedTime wheelTimer = new ElapsedTime();
     int motor180Range = 630;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
@@ -30,6 +36,13 @@ public class Testerino extends LinearOpMode {
     public static double driveMultiplier = 0.7;
     private Limelight3A limelight;
     private Servo hood;
+    public ElapsedTime runtime = new ElapsedTime();
+    
+    // Distance threshold for hood adjustment (tune this value)
+    private static final double DISTANCE_THRESHOLD = 180.0; // Example: change hood when distance > 100 inches
+    private static final double CLOSE_HOOD_POSITION = 0.404; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.4204; // Hood position for far shots
+
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -75,7 +88,7 @@ public class Testerino extends LinearOpMode {
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         if (limelight != null) {
-            limelight.pipelineSwitch(1);
+            limelight.pipelineSwitch(0);
             limelight.start();
             telemetry.addData("LL", "initialized");
         } else {
@@ -117,20 +130,45 @@ public class Testerino extends LinearOpMode {
 
 
             //feed the flame ._.
-            if (gamepad1.right_bumper){
+            boolean rightBumperPressed = gamepad1.right_bumper && !rightBumperLast;
+            rightBumperLast = gamepad1.right_bumper;
+            
+            if (rightBumperPressed) {
+                // Start the wheel and timer when button is first pressed
+                wheelRunning = true;
+                wheelTimer.reset();
                 theWheelOfTheOx.setPower(1);
+                intake(-1); // Start intake when right bumper is pressed
             }
-            else if (gamepad1.left_bumper){
+            
+            if (wheelRunning) {
+                // Keep motor running
+                theWheelOfTheOx.setPower(1);
+                intake(-1); // Keep intake running
+                
+                // After 1.5 seconds, move the servo
+                if (wheelTimer.seconds() >= 1.5) {
+                    hood.setPosition(0.37);
+                    // Keep motor running - don't stop it
+                }
+            }
+            
+            if (gamepad1.left_bumper){
+                wheelRunning = false; // Stop the timed sequence if left bumper is pressed
                 theWheelOfTheOx.setPower(-1);
             }
-            else {
+            else if (!wheelRunning && !gamepad1.right_bumper) {
+                // Only stop motor if we're not in the timed sequence
                 theWheelOfTheOx.setPower(0);
             }
 
             //intake
-            sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
-            if (sumOfTrigs!=0){
-                intake(sumOfTrigs);
+            if (!wheelRunning) {
+                // Only use triggers for intake if wheel is not running
+                sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
+                if (sumOfTrigs!=0){
+                    intake(sumOfTrigs);
+                }
             }
 
 
@@ -170,11 +208,12 @@ public class Testerino extends LinearOpMode {
 
                 }
 
-                telemetry.addData("Distance", getDist(tyDeg));
+                double currentDistance = getDist(tyDeg);
+                telemetry.addData("Distance", currentDistance);
 
-                if (gamepad1.right_stick_button){
-                    jollyCrusader.setVelocity(calcVelocity(getDist(tyDeg)));
-                    hood.setPosition(calcHood(getDist(tyDeg)));
+                if (gamepad1.right_stick_button && currentDistance > 0){
+                    jollyCrusader.setVelocity(calcVelocity(currentDistance));
+                    adjustHoodBasedOnDistance(currentDistance);
                 }
             }
             if (gamepad1.left_stick_button){
@@ -230,24 +269,30 @@ public class Testerino extends LinearOpMode {
     public double getDist(double tyDeg) {
         double tyRad = Math.abs(Math.toRadians(tyDeg+limelightUpAngle));
         double dist = y / Math.tan(tyRad);
-        double realDist = 0.55*dist+40.3;
+        double realDist = 0.55*dist-40.3;
         telemetry.addData("angle", Math.toDegrees(tyRad));
         telemetry.addData("fakeDist", dist);
         telemetry.addData("realDist", realDist);
         return realDist;
     }
     public double calcVelocity(double dist) {
-        double velocity = 0.077 * Math.pow(dist, 2) - 21.02 * dist + 3081;
+        double velocity = 3.30933 * dist + 1507.01002;
         return velocity;
-    }
-    public double calcHood(double dist) {
-        double hoodAngle = 8.48347 * Math.pow(dist, 2) - 0.02334 * dist + 2.0402;
-        return hoodAngle;
     }
     public void intake(double intakePower){
         intake.setPower(intakePower);
         if (!gamepad1.right_bumper) {
             theWheelOfTheOx.setPower(-0.3);
+        }
+    }
+    
+    public void adjustHoodBasedOnDistance(double distance) {
+        if (hood != null) {
+            if (distance > DISTANCE_THRESHOLD) {
+                hood.setPosition(FAR_HOOD_POSITION);
+            } else {
+                hood.setPosition(CLOSE_HOOD_POSITION);
+            }
         }
     }
 

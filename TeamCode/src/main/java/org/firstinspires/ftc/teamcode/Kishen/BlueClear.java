@@ -38,6 +38,11 @@ public class BlueClear extends OpMode {
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
+    
+    // Distance threshold for hood adjustment (tune this value)
+    private static final double DISTANCE_THRESHOLD = 100.0; // Example: change hood when distance > 100 inches
+    private static final double CLOSE_HOOD_POSITION = 0.0119; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.150; // Hood position for far shots
 
     private DcMotor leftFront, leftRear, rightFront, rightRear;
 
@@ -365,12 +370,25 @@ public class BlueClear extends OpMode {
         follower.update();
         statePathUpdate();
         adjustRotator();
+        
+        // Adjust hood based on distance if button is pressed
+        if (gamepad1.right_stick_button) {
+            double distance = getDist();
+            if (distance > 0) { // Only if we have a valid distance reading
+                launcher.setVelocity(calcVelocity(distance));
+                adjustHoodBasedOnDistance();
+            }
+        }
+        
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("jolly crusader velocity", launcher.getVelocity());
+        if (limelight != null) {
+            telemetry.addData("Distance", getDist());
+        }
     }
 
     public void adjustRotator() {
@@ -400,30 +418,51 @@ public class BlueClear extends OpMode {
         rotator.setTargetPosition(newPosition);
     }
 
-    public double getDist(double tyDeg) {
+    public double getDist() {
+        double currentTyDeg = 0.0;
         if (limelight != null) {
             LLResult ll = limelight.getLatestResult();
-            txDeg = 0.0; //horizontal deg
-            tyDeg = 0.0; //vertical deg
             double ta = 0.0;
             boolean llValid = false;
             if (ll != null) {
                 txDeg = ll.getTx();
-                tyDeg = ll.getTy();
+                currentTyDeg = ll.getTy();
+                tyDeg = currentTyDeg;
                 ta = ll.getTa();
                 llValid = ll.isValid();
             }
 
-
             if (llValid) {
                 telemetry.addData("Ta", ta);
                 telemetry.addData("tx", txDeg);
-                telemetry.addData("ty", tyDeg);
+                telemetry.addData("ty", currentTyDeg);
             }
         }
-        double tyRad = Math.toRadians(tyDeg+limelightUpAngle);
+        double tyRad = Math.toRadians(currentTyDeg + limelightUpAngle);
         double dist = y / Math.tan(tyRad);
         return dist;
+    }
+    
+    // Overloaded method for backward compatibility
+    public double getDist(double tyDegParam) {
+        // If parameter is provided but invalid, use limelight value
+        if (tyDegParam == 0.0 || tyDegParam == 180.0) {
+            return getDist();
+        }
+        double tyRad = Math.toRadians(tyDegParam + limelightUpAngle);
+        double dist = y / Math.tan(tyRad);
+        return dist;
+    }
+    
+    public void adjustHoodBasedOnDistance() {
+        if (limelight != null && hood != null) {
+            double distance = getDist();
+            if (distance > DISTANCE_THRESHOLD) {
+                hood.setPosition(FAR_HOOD_POSITION);
+            } else {
+                hood.setPosition(CLOSE_HOOD_POSITION);
+            }
+        }
     }
     public double calcVelocity(double dist) {
         double rice = dist/654.83484;
