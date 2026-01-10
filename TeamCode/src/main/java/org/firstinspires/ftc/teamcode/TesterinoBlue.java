@@ -142,17 +142,12 @@ public class TesterinoBlue extends LinearOpMode {
             }
 
             //intake
-            sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
-            if (gamepad1.left_trigger > 0.1){
-                sumOfTrigs = 1;
-                intake(sumOfTrigs);
-
-            }
             if (gamepad1.right_trigger > 0.1){
-                sumOfTrigs = -1;
-                intake(sumOfTrigs);
-
+                intake.setPower(1);
+            } else if (gamepad1.right_bumper) {
+                theWheelOfTheOx.setPower(-0.3);
             }
+
 
 
             //rotator
@@ -266,12 +261,7 @@ public class TesterinoBlue extends LinearOpMode {
     }
 
 
-    public void intake(double sumOfTrigs){
-        intake.setPower(sumOfTrigs);
-        if (!gamepad1.right_bumper) {
-            theWheelOfTheOx.setPower(-0.3);
-        }
-    }
+
 
     public void adjustHoodBasedOnDistance(double distance) {
         if (hood != null) {
