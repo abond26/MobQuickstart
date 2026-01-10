@@ -203,7 +203,7 @@ public class AutonBlueClose extends OpMode {
             case start:
                 adjustRotator(-25.5);
                 launcher.setVelocity(1700);
-                hood.setPosition(0.120);
+                hood.setPosition(0.175);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);

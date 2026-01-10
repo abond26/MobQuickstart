@@ -36,7 +36,7 @@ public class TesterinoBlue extends LinearOpMode {
     private Limelight3A limelight;
     public ElapsedTime runtime = new ElapsedTime();
     private Servo hood;
-    
+
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0; // Example: change hood when distance > 100 inches
     private static final double CLOSE_HOOD_POSITION = 0.404; // Hood position for close shots
@@ -259,13 +259,13 @@ public class TesterinoBlue extends LinearOpMode {
     }
 
 
-    public void intake(double intakePower){
-        intake.setPower(intakePower);
+    public void intake(double sumOfTrigs){
+        intake.setPower(sumOfTrigs);
         if (!gamepad1.right_bumper) {
             theWheelOfTheOx.setPower(-0.3);
         }
     }
-    
+
     public void adjustHoodBasedOnDistance(double distance) {
         if (hood != null) {
             if (distance > DISTANCE_THRESHOLD) {
