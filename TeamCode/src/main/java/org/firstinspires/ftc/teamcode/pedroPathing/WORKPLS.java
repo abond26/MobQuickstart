@@ -94,14 +94,14 @@ public class WORKPLS extends OpMode {
 
     private final Pose EndofBalls3 = new Pose(4.5, 35, Math.toRadians(180));
 
-    private final Pose Startofballs2 = new Pose(50, 59, Math.toRadians(180));
+    private final Pose Startofballs2 = new Pose(50, 57, Math.toRadians(180));
 
 
-    private final Pose Midofballs2 = new Pose(42, 59, Math.toRadians(180));
+    private final Pose Midofballs2 = new Pose(42, 57, Math.toRadians(180));
 
 
 
-    private final Pose EndofBalls2 = new Pose(4.2, 59, Math.toRadians(180));
+    private final Pose EndofBalls2 = new Pose(4.2, 57, Math.toRadians(180));
 
 
     private final Pose Startofballs1 = new Pose(42, 83, Math.toRadians(180));
