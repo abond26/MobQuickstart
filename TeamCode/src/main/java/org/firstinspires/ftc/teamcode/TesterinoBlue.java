@@ -143,8 +143,15 @@ public class TesterinoBlue extends LinearOpMode {
 
             //intake
             sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
-            if (sumOfTrigs!=0){
+            if (gamepad1.left_trigger > 0.1){
+                sumOfTrigs = 1;
                 intake(sumOfTrigs);
+
+            }
+            if (gamepad1.right_trigger > 0.1){
+                sumOfTrigs = -1;
+                intake(sumOfTrigs);
+
             }
 
 
