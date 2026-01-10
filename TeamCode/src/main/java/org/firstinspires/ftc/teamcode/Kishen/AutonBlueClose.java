@@ -31,6 +31,11 @@ public class AutonBlueClose extends OpMode {
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 1;
     private static final double INTAKE_DRIVE_POWER = 0.6; // tune this
+    
+    // Hood adjustment constants (from TesterinoBlue)
+    private static final double DISTANCE_THRESHOLD = 180.0; // Change hood when distance > 180 inches
+    private static final double CLOSE_HOOD_POSITION = 0.404; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.4204; // Hood position for far shots
 
     private int y = tagHeight - limeHeight;
     //Rotator var
@@ -38,6 +43,12 @@ public class AutonBlueClose extends OpMode {
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
+    
+    // Store last valid limelight values for fallback
+    private double lastValidTx = 0.0;
+    private double lastValidTy = 0.0;
+    private double lastValidDistance = 0.0;
+    private boolean hasValidLimelightData = false;
 
     private DcMotor leftFront, leftRear, rightFront, rightRear;
 
@@ -91,19 +102,19 @@ public class AutonBlueClose extends OpMode {
     private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(180));
 
 
-    private final Pose collect1thing = new Pose(18, 82, Math.toRadians(180));
+    private final Pose collect1thing = new Pose(16, 82, Math.toRadians(180));
     private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(180));
 
 
-    private final Pose collect2Start = new Pose(52, 57, Math.toRadians(180));
-    private final Pose collect2End = new Pose(13, 57, Math.toRadians(180));
+    private final Pose collect2Start = new Pose(52, 55, Math.toRadians(180));
+    private final Pose collect2End = new Pose(8, 55, Math.toRadians(180));
     private final Pose shootBall3ControlPoint = new Pose(55, 43, Math.toRadians(180));
     private final Pose shootBall3 = new Pose(55, 20, Math.toRadians(180));
 
 
     private final Pose collect3Start = new Pose(46, 33, Math.toRadians(180));
 
-    private final Pose collect3End = new Pose(15, 33, Math.toRadians(180)); // FIXED: Changed from same position to actual collection end
+    private final Pose collect3End = new Pose(13, 33, Math.toRadians(180)); // FIXED: Changed from same position to actual collection end
 
 
     private final Pose shootBall4 = new Pose(55, 22, Math.toRadians(180));
@@ -113,7 +124,7 @@ public class AutonBlueClose extends OpMode {
     private final Pose collect4start = new Pose(16, 11, Math.toRadians(180));
 
 
-    private final Pose collect4end = new Pose(8, 11, Math.toRadians(180));
+    private final Pose collect4end = new Pose(5, 11, Math.toRadians(180));
 
     private final Pose shootBall5 = new Pose(50, 22, Math.toRadians(180));
 
@@ -201,14 +212,30 @@ public class AutonBlueClose extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                adjustRotator(-25.5);
-                launcher.setVelocity(1700);
-                hood.setPosition(0.175);
+                // Try to use limelight for initial adjustment, fallback to hardcoded values
+                if (limelight != null) {
+                    LLResult ll = limelight.getLatestResult();
+                    if (ll != null && ll.isValid()) {
+                        updateLimelightAdjustments();
+                    } else {
+                        // Fallback to hardcoded values if limelight not ready
+                        adjustRotator(-25.5);
+                        launcher.setVelocity(1700);
+                        hood.setPosition(0.175);
+                    }
+                } else {
+                    // Fallback if limelight not available
+                    adjustRotator(-25.5);
+                    launcher.setVelocity(1700);
+                    hood.setPosition(0.175);
+                }
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
+                // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy()){
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(-1);
@@ -219,7 +246,7 @@ public class AutonBlueClose extends OpMode {
             case collection:
 
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    adjustRotator(17);
+                    adjustRotator(15);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
@@ -228,8 +255,9 @@ public class AutonBlueClose extends OpMode {
                 }
                 break;
             case shoot:
+                // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 0.5) {
-                    hood.setPosition(0.185);
                     follower.followPath(shoot2);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                    tree.setPower(1);
@@ -247,18 +275,19 @@ public class AutonBlueClose extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(3250);
-                    hood.setPosition(0.325);
+                    launcher.setVelocity(3500);
                     follower.followPath(collect2);
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(1);
+                    //theWheelOfTheOx.setPower(0.005);
                     setPathState((AutonBlueClose.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
+                // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 0.25) {
-                        adjustRotator(-8.5);
-                    if ( pathTimer.getElapsedTimeSeconds() > 1) {
+                    if ( pathTimer.getElapsedTimeSeconds() > 1.5) {
                         follower.followPath(shoot3);
                         follower.setMaxPower(NORMAL_DRIVE_POWER);
                         tree.setPower(1);
@@ -279,11 +308,13 @@ public class AutonBlueClose extends OpMode {
             case collectAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
                     follower.followPath(collect3);
-                    adjustRotator(10);
+                    adjustRotator(9);
                     setPathState((AutonBlueClose.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
+                // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.75) {
                     follower.followPath(shoot4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -309,6 +340,8 @@ public class AutonBlueClose extends OpMode {
                 }
                 break;
             case shootAgainAgainAgain:
+                // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.75) {
                     follower.followPath(shoot5);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -396,35 +429,16 @@ public class AutonBlueClose extends OpMode {
     }
 
     public double getDist(double tyDeg) {
-        if (limelight != null) {
-            LLResult ll = limelight.getLatestResult();
-            txDeg = 0.0; //horizontal deg
-            tyDeg = 0.0; //vertical deg
-            double ta = 0.0;
-            boolean llValid = false;
-            if (ll != null) {
-                txDeg = ll.getTx();
-                tyDeg = ll.getTy();
-                ta = ll.getTa();
-                llValid = ll.isValid();
-            }
-
-
-            if (llValid) {
-                telemetry.addData("Ta", ta);
-                telemetry.addData("tx", txDeg);
-                telemetry.addData("ty", tyDeg);
-            }
-        }
-        double tyRad = Math.toRadians(tyDeg+limelightUpAngle);
+        // Use corrected distance formula from TesterinoBlue
+        double tyRad = Math.abs(Math.toRadians(tyDeg + limelightUpAngle));
         double dist = y / Math.tan(tyRad);
-        return dist;
+        double realDist = 0.55 * dist + 40.3; // Correction formula from TesterinoBlue
+        return realDist;
     }
     public double calcVelocity(double dist) {
-        double rice = dist/654.83484;
-        double velocity = 949.3757*Math.pow(2.72,rice)+ 83.43996;
-        double rpower = velocity/2580;
-        return rpower;
+        // Use simpler linear formula from TesterinoBlue
+        double velocity = 3.30933 * dist + 1507.01002;
+        return velocity;
     }
 
     public void intake(double intakePower){
@@ -438,7 +452,71 @@ public class AutonBlueClose extends OpMode {
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
         int newPosition = rotator.getCurrentPosition() + adjustment - offset;
         rotator.setTargetPosition(newPosition);
-
+    }
+    
+    public void adjustHoodBasedOnDistance(double distance) {
+        if (hood != null) {
+            if (distance > DISTANCE_THRESHOLD) {
+                hood.setPosition(FAR_HOOD_POSITION);
+            } else {
+                hood.setPosition(CLOSE_HOOD_POSITION);
+            }
+        }
+    }
+    
+    /**
+     * Updates limelight-based adjustments (rotator, velocity, hood) during shooting states
+     * Call this continuously in shooting states for auto-adjustment
+     * Uses last valid values as fallback when limelight doesn't see target
+     */
+    public void updateLimelightAdjustments() {
+        if (limelight != null) {
+            LLResult ll = limelight.getLatestResult();
+            if (ll != null && ll.isValid()) {
+                // Limelight sees target - use current values
+                txDeg = ll.getTx();
+                tyDeg = ll.getTy();
+                
+                // Store valid values for fallback
+                lastValidTx = txDeg;
+                lastValidTy = tyDeg;
+                
+                // Calculate distance and store it
+                double currentDistance = getDist(tyDeg);
+                if (currentDistance > 0) {
+                    lastValidDistance = currentDistance;
+                    hasValidLimelightData = true;
+                    
+                    // Adjust rotator based on horizontal offset
+                    adjustRotator(txDeg);
+                    
+                    // Update velocity and hood based on distance
+                    launcher.setVelocity(calcVelocity(currentDistance));
+                    adjustHoodBasedOnDistance(currentDistance);
+                }
+            } else {
+                // Limelight doesn't see target - use last valid values if available
+                if (hasValidLimelightData) {
+                    // Use last known good values (from previous successful detection)
+                    adjustRotator(lastValidTx);
+                    if (lastValidDistance > 0) {
+                        launcher.setVelocity(calcVelocity(lastValidDistance));
+                        adjustHoodBasedOnDistance(lastValidDistance);
+                    }
+                }
+                // If no valid data ever, do nothing (keep current settings from state initialization)
+            }
+        }
+    }
+    
+    /**
+     * Resets limelight data (useful when starting a new shooting sequence)
+     */
+    public void resetLimelightData() {
+        hasValidLimelightData = false;
+        lastValidTx = 0.0;
+        lastValidTy = 0.0;
+        lastValidDistance = 0.0;
     }
 
 }
