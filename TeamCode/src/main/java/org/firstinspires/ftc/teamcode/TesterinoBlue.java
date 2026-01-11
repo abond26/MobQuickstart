@@ -241,8 +241,8 @@ public class TesterinoBlue extends LinearOpMode {
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
     public void adjustRotator(double tx) {
-        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
-        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+        double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
+        int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
         int newPosition = rotator.getCurrentPosition() + adjustment - 28;
         rotator.setTargetPosition(newPosition);
     }

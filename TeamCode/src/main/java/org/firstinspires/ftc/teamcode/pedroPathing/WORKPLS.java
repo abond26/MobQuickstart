@@ -206,7 +206,7 @@ public class WORKPLS extends OpMode {
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(StartShoot, true);
                 launcher.setVelocity(1620);
-                rotator.setPower(0);
+                rotator.setPower(1);
                 setPathState(PathState.PRE_SHOOT);
                 break;
 
@@ -482,9 +482,12 @@ public class WORKPLS extends OpMode {
 
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
+        rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setTargetPosition(0);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rotator.setDirection(DcMotorSimple.Direction.REVERSE);
+        rotator.setPower(1);
 
 
 
@@ -510,7 +513,6 @@ public class WORKPLS extends OpMode {
         adjustRotator();
         follower.update();
         statePathUpdate();
-        adjustRotator();
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
@@ -533,16 +535,19 @@ public class WORKPLS extends OpMode {
                 llValid = ll.isValid();
             }
 
-
             if (llValid) {
                 telemetry.addData("Ta", ta);
                 telemetry.addData("tx", txDeg);
                 telemetry.addData("ty", tyDeg);
+                adjustRotator(txDeg);
             }
         }
-        double fracOfSemiCircum = Math.toRadians(txDeg) / Math.PI;
+    }
+
+    public void adjustRotator(double tx) {
+        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment;
+        int newPosition = rotator.getCurrentPosition() + adjustment - 28;
         rotator.setTargetPosition(newPosition);
     }
 
