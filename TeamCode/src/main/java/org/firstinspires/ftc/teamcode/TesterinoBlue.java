@@ -27,6 +27,10 @@ public class TesterinoBlue extends LinearOpMode {
     boolean yLast = false;
     boolean aLast =false;
     boolean xLast = false;
+    boolean rightBumperLast = false;
+    ElapsedTime rightBumperTimer = new ElapsedTime();
+    boolean rightBumperTimerStarted = false;
+    private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
     int motor180Range = 630;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
@@ -38,9 +42,9 @@ public class TesterinoBlue extends LinearOpMode {
     private Servo hood;
 
     // Distance threshold for hood adjustment (tune this value)
-    private static final double DISTANCE_THRESHOLD = 180.0; // Example: change hood when distance > 100 inches
-    private static final double CLOSE_HOOD_POSITION = .79; // Hood position for close shots
-    private static final double FAR_HOOD_POSITION = 0.4204; // Hood position for far shots
+    private static final double DISTANCE_THRESHOLD = 180.0;
+    private static final double CLOSE_HOOD_POSITION = 0.79; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.5; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -106,6 +110,17 @@ public class TesterinoBlue extends LinearOpMode {
             aLast = gamepad1.a;
             boolean xPressed = gamepad2.x && !xLast;
             xLast = gamepad2.x;
+            boolean rightBumperPressed = gamepad1.right_bumper && !rightBumperLast;
+            rightBumperLast = gamepad1.right_bumper;
+            
+            if (rightBumperPressed) {
+                rightBumperTimer.reset();
+                rightBumperTimerStarted = true;
+            }
+            
+            if (!gamepad1.right_bumper) {
+                rightBumperTimerStarted = false;
+            }
 //            if (gamepad1.x){
 //                limelight.pipelineSwitch(1);
 //            }
@@ -208,6 +223,11 @@ public class TesterinoBlue extends LinearOpMode {
             if (gamepad1.b){
                 hood.setPosition(hood.getPosition()+0.005);
             }
+            
+            if (rightBumperTimerStarted && gamepad1.right_bumper && rightBumperTimer.seconds() >= HOOD_MOVE_DELAY_SECONDS) {
+                hood.setPosition(hood.getPosition()-0.01);
+                rightBumperTimerStarted = false;
+            }
 
 
             telemetry.addData("jolly crusader velocity", jollyCrusader.getVelocity());
@@ -269,9 +289,9 @@ public class TesterinoBlue extends LinearOpMode {
 
 
 
-    public void adjustHoodBasedOnDistance(double distance) {
+    public void adjustHoodBasedOnDistance(double dist) {
         if (hood != null) {
-            if (distance > DISTANCE_THRESHOLD) {
+            if (dist > DISTANCE_THRESHOLD) {
                 hood.setPosition(FAR_HOOD_POSITION);
             } else {
                 hood.setPosition(CLOSE_HOOD_POSITION);
