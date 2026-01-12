@@ -39,8 +39,8 @@ public class TesterinoBlue extends LinearOpMode {
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = 0.254; // Hood position for close shots
-    private static final double FAR_HOOD_POSITION = .355; // Hood position for far shots
+    private static final double CLOSE_HOOD_POSITION = .2541; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.36; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -244,7 +244,7 @@ public class TesterinoBlue extends LinearOpMode {
     public void adjustRotator(double tx) {
         double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 40;
+        int newPosition = rotator.getCurrentPosition() + adjustment - 28;
         rotator.setTargetPosition(newPosition);
     }
 
