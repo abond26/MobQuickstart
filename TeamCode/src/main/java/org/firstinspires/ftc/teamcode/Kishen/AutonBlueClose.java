@@ -212,23 +212,9 @@ public class AutonBlueClose extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                // Try to use limelight for initial adjustment, fallback to hardcoded values
-                if (limelight != null) {
-                    LLResult ll = limelight.getLatestResult();
-                    if (ll != null && ll.isValid()) {
-                        updateLimelightAdjustments();
-                    } else {
-                        // Fallback to hardcoded values if limelight not ready
-                        adjustRotator(-25.5);
-                        launcher.setVelocity(1700);
-                        hood.setPosition(0.175);
-                    }
-                } else {
-                    // Fallback if limelight not available
                     adjustRotator(-25.5);
                     launcher.setVelocity(1700);
                     hood.setPosition(0.175);
-                }
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
@@ -312,6 +298,7 @@ public class AutonBlueClose extends OpMode {
                     setPathState((AutonBlueClose.PathState.shootAgainAgain));
                 }
                 break;
+                //
             case shootAgainAgain:
                 // Continuously adjust based on limelight during shooting
                 updateLimelightAdjustments();
