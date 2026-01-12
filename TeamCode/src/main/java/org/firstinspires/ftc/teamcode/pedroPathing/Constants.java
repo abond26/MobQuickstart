@@ -35,8 +35,8 @@ public class Constants {
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99,
             100,
-            0.7,
-            1);
+            1.1,
+            1);;
     public static MecanumConstants driveConstants = new MecanumConstants()
             .xVelocity(74.74229851670154)
             .yVelocity(61.22060748723548)
