@@ -28,6 +28,13 @@ public class TesterinoBlue extends LinearOpMode {
     boolean aLast =false;
     boolean xLast = false;
     int motor180Range = 630;
+    
+    // Limelight fallback variables
+    private double lastValidTx = 0.0;
+    private boolean hasValidLimelightData = false;
+    private ElapsedTime limelightRestartTimer = new ElapsedTime();
+    private static final double LIMELIGHT_RESTART_DELAY = 1.0; // Wait 1 second before restarting when not tracking
+    private int rotatorStartPosition = 0; // Store starting position
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
@@ -39,7 +46,7 @@ public class TesterinoBlue extends LinearOpMode {
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = .2541; // Hood position for close shots
+    private static final double CLOSE_HOOD_POSITION = .4; // Hood position for close shots
     private static final double FAR_HOOD_POSITION = 0.36; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
@@ -70,7 +77,8 @@ public class TesterinoBlue extends LinearOpMode {
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotator.setTargetPosition(0);
+        rotatorStartPosition = 0; // Store the starting position
+        rotator.setTargetPosition(rotatorStartPosition);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setDirection(DcMotorSimple.Direction.REVERSE);
         rotator.setPower(1);
@@ -88,6 +96,7 @@ public class TesterinoBlue extends LinearOpMode {
         if (limelight != null) {
             limelight.pipelineSwitch(1);
             limelight.start();
+            limelightRestartTimer.reset(); // Initialize restart timer
             telemetry.addData("LL", "initialized");
         } else {
             telemetry.addData("LL", "not found");
@@ -170,6 +179,7 @@ public class TesterinoBlue extends LinearOpMode {
                 double tyDeg = 0.0; //vertical deg
                 double ta = 0.0;
                 boolean llValid = false;
+                
                 if (ll != null) {
                     txDeg = ll.getTx();
                     tyDeg = ll.getTy();
@@ -177,15 +187,36 @@ public class TesterinoBlue extends LinearOpMode {
                     llValid = ll.isValid();
                 }
 
-
                 if (llValid) {
+                    // Limelight sees target - use current values
+                    lastValidTx = txDeg;
+                    hasValidLimelightData = true;
+                    limelightRestartTimer.reset(); // Reset timer when tracking successfully
+                    
                     telemetry.addData("Ta", ta);
                     telemetry.addData("tx", txDeg);
                     telemetry.addData("ty", tyDeg);
+                    
                     if (!gamepad1.dpad_right && !gamepad1.dpad_left){
                         adjustRotator(txDeg);
                     }
-
+                } else {
+                    // Limelight doesn't see target - restart if not tracking for too long
+                    if (limelightRestartTimer.seconds() >= LIMELIGHT_RESTART_DELAY) {
+                        try {
+                            limelight.start(); // Restart limelight when not tracking
+                            limelightRestartTimer.reset();
+                            telemetry.addData("LL Status", "Restarted - not tracking");
+                        } catch (Exception e) {
+                            telemetry.addData("LL Error", "Restart failed");
+                        }
+                    }
+                    
+                    // Return rotator to starting position when limelight isn't detecting
+                    if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                        rotator.setTargetPosition(rotatorStartPosition);
+                        telemetry.addData("LL Status", "Returning to start position: " + rotatorStartPosition);
+                    }
                 }
 
                 double currentDistance = getDist(tyDeg);
@@ -244,7 +275,7 @@ public class TesterinoBlue extends LinearOpMode {
     public void adjustRotator(double tx) {
         double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 28;
+        int newPosition = rotator.getCurrentPosition() + adjustment - 15;
         rotator.setTargetPosition(newPosition);
     }
 
