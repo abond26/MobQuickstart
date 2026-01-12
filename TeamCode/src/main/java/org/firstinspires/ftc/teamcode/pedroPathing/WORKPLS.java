@@ -53,6 +53,7 @@ public class WORKPLS extends OpMode {
         FIRST_SHOT_PREP,
 
         SHOT_1,
+        help,
 
 
         BEFORE_SECOND,
@@ -84,7 +85,7 @@ public class WORKPLS extends OpMode {
     PathState pathState;
     private final Pose startPose = new Pose(57, 9, Math.toRadians(90));
     private final Pose shootPose = new Pose(57 , 100, Math.toRadians(148));
-    private final Pose shootPose2 = new Pose(60 , 100, Math.toRadians(148));
+    private final Pose shootPose2 = new Pose(57 , 100, Math.toRadians(180));
 
 
     private final Pose Startofballs3 = new Pose(57, 35, Math.toRadians(180));
@@ -112,7 +113,7 @@ public class WORKPLS extends OpMode {
 
 
 
-    private PathChain StartShoot, GoingtoIntake, treeuno, bang1, GoingtoIntake2, treedos, bang2, GoingtoIntake3, treetres, bang3, bang3prep,pizza,pizza2,pizza3,bang2prep;
+    private PathChain StartShoot, GoingtoIntake, treeuno, bang1, GoingtoIntake2, treedos, bang2, GoingtoIntake3, treetres, bang3, bang3prep,pizza,pizza2,pizza3,bang2prep,bang2help;
 
     public void buildPaths() {
         StartShoot = follower.pathBuilder()
@@ -142,6 +143,10 @@ public class WORKPLS extends OpMode {
         bang3prep = follower.pathBuilder()
                 .addPath(new BezierLine(EndofBalls3, Startofballs3))
                 .setLinearHeadingInterpolation(EndofBalls3.getHeading(), Startofballs3.getHeading())
+                .build();
+        bang2help = follower.pathBuilder()
+                .addPath(new BezierLine(Startofballs2, shootPose2))
+                .setLinearHeadingInterpolation(Startofballs2.getHeading(), shootPose2.getHeading())
                 .build();
 
 
@@ -173,8 +178,8 @@ public class WORKPLS extends OpMode {
 
 
         bang2 = follower.pathBuilder()
-                .addPath(new BezierLine(EndofBalls2, shootPose2))
-                .setLinearHeadingInterpolation(EndofBalls2.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(shootPose2, shootPose))
+                .setLinearHeadingInterpolation(shootPose2.getHeading(), shootPose.getHeading())
                 .build();
 
         GoingtoIntake = follower.pathBuilder()
@@ -341,6 +346,19 @@ public class WORKPLS extends OpMode {
 
                     setPathState(PathState.SECOND_SHOT_PREP);
                 }
+            case help:
+                if (!follower.isBusy()) {
+                    hood.setPosition(0.254);
+                    launcher.setVelocity(1700);
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    follower.followPath(bang2help, true);
+                    intake(0);
+                    theWheelOfTheOx.setPower(0);
+                    launcher.setVelocity(1700);
+
+                    setPathState(PathState.SHOT_2);
+                }
+
 
 
             case SECOND_SHOT_PREP:

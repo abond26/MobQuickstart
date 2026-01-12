@@ -264,7 +264,7 @@ public class TesterinoRed extends LinearOpMode {
     public void adjustRotator(double tx) {
         double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 23;
+        int newPosition = rotator.getCurrentPosition() + adjustment - 35;
         rotator.setTargetPosition(newPosition);
     }
 
