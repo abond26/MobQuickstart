@@ -25,7 +25,7 @@ public class WORKPLS extends OpMode {
     private int limeHeight = 33;
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 1;
-    private static final double INTAKE_DRIVE_POWER = 0.5; // tune this
+    private static final double INTAKE_DRIVE_POWER = 0.8; // tune this
 
     private int y = tagHeight - limeHeight;
     //Rotator var
@@ -33,6 +33,7 @@ public class WORKPLS extends OpMode {
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
+    private int rotatorStartPosition = 0; // Store starting position
 
     private DcMotor leftFront, leftRear, rightFront, rightRear;
 
@@ -82,47 +83,46 @@ public class WORKPLS extends OpMode {
 
     PathState pathState;
     private final Pose startPose = new Pose(57, 9, Math.toRadians(90));
-    private final Pose shootPose = new Pose(49.5, 85, Math.toRadians(135));
+    private final Pose shootPose = new Pose(57 , 100, Math.toRadians(148));
+    private final Pose shootPose2 = new Pose(60 , 100, Math.toRadians(148));
 
 
-    private final Pose shootPoseover = new Pose(49.5, 85, Math.toRadians(140));
-    
-    private final Pose Startofballs3 = new Pose(50, 35, Math.toRadians(180));
+    private final Pose Startofballs3 = new Pose(57, 35, Math.toRadians(180));
     private final Pose Midofballs3 = new Pose(42, 35, Math.toRadians(180));
 
 
-    private final Pose EndofBalls3 = new Pose(4.5, 35, Math.toRadians(180));
+    private final Pose EndofBalls3 = new Pose(15, 35, Math.toRadians(180));
 
-    private final Pose Startofballs2 = new Pose(50, 57, Math.toRadians(180));
+    private final Pose Startofballs2 = new Pose(57, 57, Math.toRadians(180));
 
 
     private final Pose Midofballs2 = new Pose(42, 57, Math.toRadians(180));
 
 
 
-    private final Pose EndofBalls2 = new Pose(4.2, 57, Math.toRadians(180));
+    private final Pose EndofBalls2 = new Pose(11, 57, Math.toRadians(180));
 
 
-    private final Pose Startofballs1 = new Pose(42, 83, Math.toRadians(180));
+    private final Pose Startofballs1 = new Pose(57, 83, Math.toRadians(180));
 
     private final Pose Midofballs1 = new Pose(45, 84, Math.toRadians(180));
 
-    private final Pose EndofBalls1 = new Pose(11.5, 83, Math.toRadians(180));
+    private final Pose EndofBalls1 = new Pose(15, 83, Math.toRadians(180));
 
 
 
 
-    private PathChain StartShoot, GoingtoIntake, treeuno, bang1, GoingtoIntake2, treedos, bang2, GoingtoIntake3, treetres, bang3, bang3prep,pizza,pizza2,pizza3;
+    private PathChain StartShoot, GoingtoIntake, treeuno, bang1, GoingtoIntake2, treedos, bang2, GoingtoIntake3, treetres, bang3, bang3prep,pizza,pizza2,pizza3,bang2prep;
 
     public void buildPaths() {
         StartShoot = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, shootPoseover))
+                .addPath(new BezierLine(startPose, shootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
 
 
         GoingtoIntake3 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPoseover, Startofballs3))
+                .addPath(new BezierLine(shootPose, Startofballs3))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs3.getHeading())
                 .build();
 
@@ -147,11 +147,11 @@ public class WORKPLS extends OpMode {
 
         bang3 = follower.pathBuilder()
                 .addPath(new BezierLine(Startofballs3, shootPose ))
-                .setLinearHeadingInterpolation(EndofBalls3.getHeading(), shootPoseover.getHeading())
+                .setLinearHeadingInterpolation(EndofBalls3.getHeading(), shootPose.getHeading())
                 .build();
 
         GoingtoIntake2 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPoseover, Startofballs2))
+                .addPath(new BezierLine(shootPose, Startofballs2))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs2.getHeading())
                 .build();
 
@@ -166,19 +166,19 @@ public class WORKPLS extends OpMode {
                 .addPath(new BezierLine(Midofballs2, EndofBalls2))
                 .setLinearHeadingInterpolation(Startofballs2.getHeading(), EndofBalls2.getHeading())
                 .build();
-        bang3prep = follower.pathBuilder()
+        bang2prep = follower.pathBuilder()
                 .addPath(new BezierLine(EndofBalls2,Startofballs2))
                 .setLinearHeadingInterpolation(EndofBalls2.getHeading(), Startofballs2.getHeading())
                 .build();
 
 
         bang2 = follower.pathBuilder()
-                .addPath(new BezierLine(EndofBalls2, shootPoseover))
-                .setLinearHeadingInterpolation(EndofBalls2.getHeading(), shootPoseover.getHeading())
+                .addPath(new BezierLine(EndofBalls2, shootPose2))
+                .setLinearHeadingInterpolation(EndofBalls2.getHeading(), shootPose.getHeading())
                 .build();
 
         GoingtoIntake = follower.pathBuilder()
-                .addPath(new BezierLine(shootPoseover, Startofballs1))
+                .addPath(new BezierLine(shootPose2, Startofballs1))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs1.getHeading())
                 .build();
         pizza3 = follower.pathBuilder()
@@ -192,8 +192,8 @@ public class WORKPLS extends OpMode {
                 .build();
 
         bang1 = follower.pathBuilder()
-                .addPath(new BezierLine(EndofBalls1, shootPoseover))
-                .setLinearHeadingInterpolation(EndofBalls1.getHeading(), shootPoseover.getHeading())
+                .addPath(new BezierLine(EndofBalls1, shootPose))
+                .setLinearHeadingInterpolation(EndofBalls1.getHeading(), shootPose.getHeading())
                 .build();
 
 
@@ -202,20 +202,19 @@ public class WORKPLS extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case DRIVE_START_SHOOT:
-                hood.setPosition(0.8);
+                hood.setPosition(0.254);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(StartShoot, true);
-                launcher.setVelocity(1620);
-                rotator.setPower(1);
+                launcher.setVelocity(1700);
                 setPathState(PathState.PRE_SHOOT);
                 break;
 
 
             case PRE_SHOOT:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4) {
-                    hood.setPosition(0.8);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(1700);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
@@ -226,7 +225,7 @@ public class WORKPLS extends OpMode {
 
             case BEFORE_FIRST:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(GoingtoIntake3, true);
                     intake(0);
@@ -242,7 +241,7 @@ public class WORKPLS extends OpMode {
 
             case PAUSE:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(pizza);
                     setPathState(pathState.VERYYYY_FIRST_INTAKE);
@@ -251,7 +250,7 @@ public class WORKPLS extends OpMode {
 
             case VERYYYY_FIRST_INTAKE:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(treetres, true);
                     intake(1);
@@ -268,12 +267,12 @@ public class WORKPLS extends OpMode {
 
             case FIRST_SHOT_PREP:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang3, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(1700);
 
                     setPathState(PathState.SHOT_1);
                 }
@@ -282,9 +281,9 @@ public class WORKPLS extends OpMode {
 
             case SHOT_1:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(1700);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
@@ -296,7 +295,7 @@ public class WORKPLS extends OpMode {
 
             case BEFORE_SECOND:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(GoingtoIntake2, true);
                     intake(0);
@@ -308,7 +307,7 @@ public class WORKPLS extends OpMode {
 
             case PAUSE2:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(pizza2);
                     setPathState(pathState.VERYYYY_SECOND_INTAKE);
@@ -319,7 +318,7 @@ public class WORKPLS extends OpMode {
 
             case VERYYYY_SECOND_INTAKE:
                 if (!follower.isBusy()){
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(treedos, true);
                     intake(1);
@@ -334,11 +333,11 @@ public class WORKPLS extends OpMode {
                 if (!follower.isBusy()) {
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    hood.setPosition(0.8);
-                    launcher.setVelocity(1620);
+                    hood.setPosition(0.254);
+                    launcher.setVelocity(1700);
 
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    follower.followPath(bang3prep, true);
+                    follower.followPath(bang2prep, true);
 
                     setPathState(PathState.SECOND_SHOT_PREP);
                 }
@@ -346,13 +345,13 @@ public class WORKPLS extends OpMode {
 
             case SECOND_SHOT_PREP:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8);
-                    launcher.setVelocity(1620);
+                    hood.setPosition(0.254);
+                    launcher.setVelocity(1700);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang2, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(1700);
 
                     setPathState(PathState.SHOT_2);
                 }
@@ -361,9 +360,9 @@ public class WORKPLS extends OpMode {
 
             case SHOT_2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(1700);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
@@ -374,7 +373,7 @@ public class WORKPLS extends OpMode {
 
             case BEFORE_THIRD:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(GoingtoIntake, true);
                     intake(0);
@@ -387,7 +386,7 @@ public class WORKPLS extends OpMode {
 
             case PAUSE3:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(pizza3);
                     setPathState(pathState.VERYYYY_THIRD_INTAKE);
@@ -400,10 +399,10 @@ public class WORKPLS extends OpMode {
 
             case VERYYYY_THIRD_INTAKE:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(treeuno, true);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(1700);
                     intake(1);
                     theWheelOfTheOx.setPower(0.1);
 
@@ -414,12 +413,12 @@ public class WORKPLS extends OpMode {
 
             case THIRD_SHOT_PREP:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang1, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(1700);
 
                     setPathState(PathState.SHOT_3);
                 }
@@ -428,9 +427,9 @@ public class WORKPLS extends OpMode {
 
             case SHOT_3:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(0.8);
+                    hood.setPosition(0.254);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1620);
+                    launcher.setVelocity(1700);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
@@ -477,14 +476,14 @@ public class WORKPLS extends OpMode {
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         hood = hardwareMap.get(Servo.class, "hood");
-        hood.scaleRange(0, 0.029);
-        hood.setPosition(0.8);
+        hood.scaleRange(0,0.0328);
 
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotator.setTargetPosition(0);
+        rotatorStartPosition = 0; // Store the starting position
+        rotator.setTargetPosition(rotatorStartPosition);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setDirection(DcMotorSimple.Direction.REVERSE);
         rotator.setPower(1);
@@ -510,7 +509,9 @@ public class WORKPLS extends OpMode {
 
     @Override
     public void loop() {
-        adjustRotator();
+        // Continuously keep rotator at starting position (zero)
+        rotator.setTargetPosition(rotatorStartPosition);
+        rotator.setPower(1); // Ensure rotator has power to move to target position
         follower.update();
         statePathUpdate();
         telemetry.addData("paths state", pathState.toString());
@@ -521,35 +522,6 @@ public class WORKPLS extends OpMode {
         telemetry.addData("jolly crusader velocity", launcher.getVelocity());
     }
 
-    public void adjustRotator() {
-        if (limelight != null) {
-            LLResult ll = limelight.getLatestResult();
-            txDeg = 0.0; //horizontal deg
-            tyDeg = 0.0; //vertical deg
-            double ta = 0.0;
-            boolean llValid = false;
-            if (ll != null) {
-                txDeg = ll.getTx();
-                tyDeg = ll.getTy();
-                ta = ll.getTa();
-                llValid = ll.isValid();
-            }
-
-            if (llValid) {
-                telemetry.addData("Ta", ta);
-                telemetry.addData("tx", txDeg);
-                telemetry.addData("ty", tyDeg);
-                adjustRotator(txDeg);
-            }
-        }
-    }
-
-    public void adjustRotator(double tx) {
-        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
-        int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 28;
-        rotator.setTargetPosition(newPosition);
-    }
 
     public double getDist(double tyDeg) {
         if (limelight != null) {
