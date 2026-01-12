@@ -27,10 +27,6 @@ public class TesterinoBlue extends LinearOpMode {
     boolean yLast = false;
     boolean aLast =false;
     boolean xLast = false;
-    boolean rightBumperLast = false;
-    ElapsedTime rightBumperTimer = new ElapsedTime();
-    boolean rightBumperTimerStarted = false;
-    private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
     int motor180Range = 630;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
@@ -110,17 +106,6 @@ public class TesterinoBlue extends LinearOpMode {
             aLast = gamepad1.a;
             boolean xPressed = gamepad2.x && !xLast;
             xLast = gamepad2.x;
-            boolean rightBumperPressed = gamepad1.right_bumper && !rightBumperLast;
-            rightBumperLast = gamepad1.right_bumper;
-            
-            if (rightBumperPressed) {
-                rightBumperTimer.reset();
-                rightBumperTimerStarted = true;
-            }
-            
-            if (!gamepad1.right_bumper) {
-                rightBumperTimerStarted = false;
-            }
 //            if (gamepad1.x){
 //                limelight.pipelineSwitch(1);
 //            }
@@ -146,6 +131,7 @@ public class TesterinoBlue extends LinearOpMode {
             //feed the flame ._.
             if (gamepad1.right_bumper){
                 theWheelOfTheOx.setPower(1);
+                gamepad1.rumble(100);
 
 
             }
@@ -177,7 +163,7 @@ public class TesterinoBlue extends LinearOpMode {
                 rotator.setTargetPosition(rotator.getCurrentPosition());
             }
 
-            //Limelight calibration
+            //Limelight calibration 
             if (limelight != null) {
                 LLResult ll = limelight.getLatestResult();
                 double txDeg = 0.0; //horizontal deg
@@ -222,11 +208,6 @@ public class TesterinoBlue extends LinearOpMode {
             }
             if (gamepad1.b){
                 hood.setPosition(hood.getPosition()+0.005);
-            }
-            
-            if (rightBumperTimerStarted && gamepad1.right_bumper && rightBumperTimer.seconds() >= HOOD_MOVE_DELAY_SECONDS) {
-                hood.setPosition(hood.getPosition()-0.01);
-                rightBumperTimerStarted = false;
             }
 
 
