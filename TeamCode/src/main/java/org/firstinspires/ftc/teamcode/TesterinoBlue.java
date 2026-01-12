@@ -28,12 +28,6 @@ public class TesterinoBlue extends LinearOpMode {
     boolean aLast =false;
     boolean xLast = false;
     int motor180Range = 630;
-    
-    // Limelight fallback variables
-    private double lastValidTx = 0.0;
-    private boolean hasValidLimelightData = false;
-    private ElapsedTime limelightRestartTimer = new ElapsedTime();
-    private static final double LIMELIGHT_RESTART_DELAY = 1.0; // Wait 1 second before restarting when not tracking
     private int rotatorStartPosition = 0; // Store starting position
     int limelightUpAngle = 20;
     private int limeHeight = 35;
@@ -96,7 +90,6 @@ public class TesterinoBlue extends LinearOpMode {
         if (limelight != null) {
             limelight.pipelineSwitch(1);
             limelight.start();
-            limelightRestartTimer.reset(); // Initialize restart timer
             telemetry.addData("LL", "initialized");
         } else {
             telemetry.addData("LL", "not found");
@@ -172,14 +165,13 @@ public class TesterinoBlue extends LinearOpMode {
                 rotator.setTargetPosition(rotator.getCurrentPosition());
             }
 
-            //Limelight calibration 
+            //Limelight calibration
             if (limelight != null) {
                 LLResult ll = limelight.getLatestResult();
                 double txDeg = 0.0; //horizontal deg
                 double tyDeg = 0.0; //vertical deg
                 double ta = 0.0;
                 boolean llValid = false;
-                
                 if (ll != null) {
                     txDeg = ll.getTx();
                     tyDeg = ll.getTy();
@@ -187,36 +179,16 @@ public class TesterinoBlue extends LinearOpMode {
                     llValid = ll.isValid();
                 }
 
+
                 if (llValid) {
-                    // Limelight sees target - use current values
-                    lastValidTx = txDeg;
-                    hasValidLimelightData = true;
-                    limelightRestartTimer.reset(); // Reset timer when tracking successfully
-                    
                     telemetry.addData("Ta", ta);
                     telemetry.addData("tx", txDeg);
                     telemetry.addData("ty", tyDeg);
-                    
                     if (!gamepad1.dpad_right && !gamepad1.dpad_left){
-                        adjustRotator(txDeg);
-                    }
-                } else {
-                    // Limelight doesn't see target - restart if not tracking for too long
-                    if (limelightRestartTimer.seconds() >= LIMELIGHT_RESTART_DELAY) {
-                        try {
-                            limelight.start(); // Restart limelight when not tracking
-                            limelightRestartTimer.reset();
-                            telemetry.addData("LL Status", "Restarted - not tracking");
-                        } catch (Exception e) {
-                            telemetry.addData("LL Error", "Restart failed");
-                        }
-                    }
-                    
-                    // Return rotator to starting position when limelight isn't detecting
-                    if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                        // Return to starting position when target is detected
                         rotator.setTargetPosition(rotatorStartPosition);
-                        telemetry.addData("LL Status", "Returning to start position: " + rotatorStartPosition);
                     }
+
                 }
 
                 double currentDistance = getDist(tyDeg);
@@ -273,8 +245,8 @@ public class TesterinoBlue extends LinearOpMode {
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
     public void adjustRotator(double tx) {
-        double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
-        int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
+        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
         int newPosition = rotator.getCurrentPosition() + adjustment - 15;
         rotator.setTargetPosition(newPosition);
     }
