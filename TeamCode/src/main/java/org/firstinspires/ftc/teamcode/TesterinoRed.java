@@ -190,19 +190,18 @@ public class TesterinoRed extends LinearOpMode {
                     tyDeg = ll.getTy();
                     ta = ll.getTa();
                     llValid = ll.isValid();
-                }
 
-
-                if (llValid) {
-                    telemetry.addData("Ta", ta);
-                    telemetry.addData("tx", txDeg);
-                    telemetry.addData("ty", tyDeg);
-                    if (!gamepad1.dpad_right && !gamepad1.dpad_left){
-                        adjustRotator(txDeg);
+                    if (llValid) {
+                        telemetry.addData("Ta", ta);
+                        telemetry.addData("tx", txDeg);
+                        telemetry.addData("ty", tyDeg);
+                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                            adjustRotator(txDeg);
+                        }
+                    } else {
+                        telemetry.addLine("no data");
                     }
-
                 }
-
                 double currentDistance = getDist(tyDeg);
                 telemetry.addData("Distance", currentDistance);
 
@@ -262,8 +261,8 @@ public class TesterinoRed extends LinearOpMode {
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
     public void adjustRotator(double tx) {
-        double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
-        int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
+        double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
+        int adjustment = (int) (fracOfFullCircum * motor180Range);
         int newPosition = rotator.getCurrentPosition() + adjustment - 20;
         rotator.setTargetPosition(newPosition);
     }
