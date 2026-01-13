@@ -43,7 +43,7 @@ public class TesterinoRed extends LinearOpMode {
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = .2541; // Hood position for close shots
+    private static final double CLOSE_HOOD_POSITION = .55; // Hood position for close shots
     private static final double FAR_HOOD_POSITION = 0.4065; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
@@ -169,10 +169,10 @@ public class TesterinoRed extends LinearOpMode {
 
             //rotator
             if (gamepad1.dpad_left){
-                rotator.setTargetPosition(rotator.getCurrentPosition()-30);
+                rotator.setTargetPosition(rotator.getCurrentPosition()-50);
             }
             else if (gamepad1.dpad_right){
-                rotator.setTargetPosition(rotator.getCurrentPosition()+30);
+                rotator.setTargetPosition(rotator.getCurrentPosition()+50);
             }
             else{
                 rotator.setTargetPosition(rotator.getCurrentPosition());
@@ -264,7 +264,7 @@ public class TesterinoRed extends LinearOpMode {
     public void adjustRotator(double tx) {
         double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 35;
+        int newPosition = rotator.getCurrentPosition() + adjustment - 20;
         rotator.setTargetPosition(newPosition);
     }
 

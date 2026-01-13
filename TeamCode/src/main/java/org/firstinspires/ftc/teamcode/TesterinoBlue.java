@@ -28,7 +28,6 @@ public class TesterinoBlue extends LinearOpMode {
     boolean aLast =false;
     boolean xLast = false;
     int motor180Range = 630;
-    private int rotatorStartPosition = 0; // Store starting position
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
@@ -40,7 +39,7 @@ public class TesterinoBlue extends LinearOpMode {
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = .4; // Hood position for close shots
+    private static final double CLOSE_HOOD_POSITION = .55; // Hood position for close shots
     private static final double FAR_HOOD_POSITION = 0.36; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
@@ -71,8 +70,7 @@ public class TesterinoBlue extends LinearOpMode {
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotatorStartPosition = 0; // Store the starting position
-        rotator.setTargetPosition(rotatorStartPosition);
+        rotator.setTargetPosition(0);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setDirection(DcMotorSimple.Direction.REVERSE);
         rotator.setPower(1);
@@ -156,10 +154,10 @@ public class TesterinoBlue extends LinearOpMode {
 
             //rotator
             if (gamepad1.dpad_left){
-                rotator.setTargetPosition(rotator.getCurrentPosition()-30);
+                rotator.setTargetPosition(rotator.getCurrentPosition()-50);
             }
             else if (gamepad1.dpad_right){
-                rotator.setTargetPosition(rotator.getCurrentPosition()+30);
+                rotator.setTargetPosition(rotator.getCurrentPosition()+50);
             }
             else{
                 rotator.setTargetPosition(rotator.getCurrentPosition());
@@ -185,8 +183,7 @@ public class TesterinoBlue extends LinearOpMode {
                     telemetry.addData("tx", txDeg);
                     telemetry.addData("ty", tyDeg);
                     if (!gamepad1.dpad_right && !gamepad1.dpad_left){
-                        // Return to starting position when target is detected
-                        rotator.setTargetPosition(rotatorStartPosition);
+                        adjustRotator(txDeg);
                     }
 
                 }
@@ -245,9 +242,9 @@ public class TesterinoBlue extends LinearOpMode {
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
     public void adjustRotator(double tx) {
-        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
-        int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 15;
+        double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
+        int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
+        int newPosition = rotator.getCurrentPosition() + adjustment - 26;
         rotator.setTargetPosition(newPosition);
     }
 
