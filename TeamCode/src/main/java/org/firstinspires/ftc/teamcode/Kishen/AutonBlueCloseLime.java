@@ -117,7 +117,7 @@ public class AutonBlueCloseLime extends OpMode {
 
         SHOT_3,
 
-        JACK_OFF,
+        JACK_OFF,//comm
 
     }
 
