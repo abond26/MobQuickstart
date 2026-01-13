@@ -127,7 +127,7 @@ public class AutonRedCloseLime extends OpMode {
     private final Pose startPose = new Pose(119.6, 126.7, Math.toRadians(37));
     private final Pose shootPose1 = new Pose(92, 82, Math.toRadians(0));
 
-
+//com
     private final Pose collect1thing = new Pose(128, 82, Math.toRadians(0));
     private final Pose shootPose2 = new Pose( 92, 84, Math.toRadians(0));  // "shoot" state - if too far left, increase X (move right)
 
