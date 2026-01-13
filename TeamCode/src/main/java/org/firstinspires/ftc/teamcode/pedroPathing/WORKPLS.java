@@ -33,7 +33,7 @@ public class WORKPLS extends OpMode {
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
-    private int rotatorStartPosition = 0; // Store starting position
+    private int rotatorStartPosition = -3; // Store starting position
 
     private DcMotor leftFront, leftRear, rightFront, rightRear;
 
@@ -144,10 +144,7 @@ public class WORKPLS extends OpMode {
                 .addPath(new BezierLine(EndofBalls3, Startofballs3))
                 .setLinearHeadingInterpolation(EndofBalls3.getHeading(), Startofballs3.getHeading())
                 .build();
-        bang2help = follower.pathBuilder()
-                .addPath(new BezierLine(Startofballs2, shootPose2))
-                .setLinearHeadingInterpolation(Startofballs2.getHeading(), shootPose2.getHeading())
-                .build();
+
 
 
         bang3 = follower.pathBuilder()
@@ -174,6 +171,10 @@ public class WORKPLS extends OpMode {
         bang2prep = follower.pathBuilder()
                 .addPath(new BezierLine(EndofBalls2,Startofballs2))
                 .setLinearHeadingInterpolation(EndofBalls2.getHeading(), Startofballs2.getHeading())
+                .build();
+        bang2help = follower.pathBuilder()
+                .addPath(new BezierLine(Startofballs2, shootPose2))
+                .setLinearHeadingInterpolation(Startofballs2.getHeading(), shootPose2.getHeading())
                 .build();
 
 
