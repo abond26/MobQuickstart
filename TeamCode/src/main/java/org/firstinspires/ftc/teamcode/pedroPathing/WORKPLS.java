@@ -33,7 +33,7 @@ public class WORKPLS extends OpMode {
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
-    private int rotatorStartPosition = -3; // Store starting position
+    private int rotatorStartPosition = 0; // Store starting position
 
     private DcMotor leftFront, leftRear, rightFront, rightRear;
 
@@ -53,7 +53,6 @@ public class WORKPLS extends OpMode {
         FIRST_SHOT_PREP,
 
         SHOT_1,
-        help,
 
 
         BEFORE_SECOND,
@@ -84,36 +83,37 @@ public class WORKPLS extends OpMode {
 
     PathState pathState;
     private final Pose startPose = new Pose(57, 9, Math.toRadians(90));
-    private final Pose shootPose = new Pose(57 , 100, Math.toRadians(148));
-    private final Pose shootPose2 = new Pose(57 , 100, Math.toRadians(180));
+    private final Pose shootPose = new Pose(49.5, 85, Math.toRadians(135));
 
 
-    private final Pose Startofballs3 = new Pose(57, 35, Math.toRadians(180));
+    private final Pose shootPoseover = new Pose(49.5, 85, Math.toRadians(140));
+
+    private final Pose Startofballs3 = new Pose(50, 35, Math.toRadians(180));
     private final Pose Midofballs3 = new Pose(42, 35, Math.toRadians(180));
 
 
-    private final Pose EndofBalls3 = new Pose(15, 35, Math.toRadians(180));
+    private final Pose EndofBalls3 = new Pose(4.5, 35, Math.toRadians(180));
 
-    private final Pose Startofballs2 = new Pose(57, 57, Math.toRadians(180));
+    private final Pose Startofballs2 = new Pose(50, 57, Math.toRadians(180));
 
 
     private final Pose Midofballs2 = new Pose(42, 57, Math.toRadians(180));
 
 
 
-    private final Pose EndofBalls2 = new Pose(11, 57, Math.toRadians(180));
+    private final Pose EndofBalls2 = new Pose(4.2, 57, Math.toRadians(180));
 
 
-    private final Pose Startofballs1 = new Pose(57, 83, Math.toRadians(180));
+    private final Pose Startofballs1 = new Pose(42, 83, Math.toRadians(180));
 
     private final Pose Midofballs1 = new Pose(45, 84, Math.toRadians(180));
 
-    private final Pose EndofBalls1 = new Pose(15, 83, Math.toRadians(180));
+    private final Pose EndofBalls1 = new Pose(11.5, 83, Math.toRadians(180));
 
 
 
 
-    private PathChain StartShoot, GoingtoIntake, treeuno, bang1, GoingtoIntake2, treedos, bang2, GoingtoIntake3, treetres, bang3, bang3prep,pizza,pizza2,pizza3,bang2prep,bang2help;
+    private PathChain StartShoot, GoingtoIntake, treeuno, bang1, GoingtoIntake2, treedos, bang2, GoingtoIntake3, treetres, bang3, bang3prep,pizza,pizza2,pizza3,bang2prep;
 
     public void buildPaths() {
         StartShoot = follower.pathBuilder()
@@ -146,7 +146,6 @@ public class WORKPLS extends OpMode {
                 .build();
 
 
-
         bang3 = follower.pathBuilder()
                 .addPath(new BezierLine(Startofballs3, shootPose ))
                 .setLinearHeadingInterpolation(EndofBalls3.getHeading(), shootPose.getHeading())
@@ -172,19 +171,15 @@ public class WORKPLS extends OpMode {
                 .addPath(new BezierLine(EndofBalls2,Startofballs2))
                 .setLinearHeadingInterpolation(EndofBalls2.getHeading(), Startofballs2.getHeading())
                 .build();
-        bang2help = follower.pathBuilder()
-                .addPath(new BezierLine(Startofballs2, shootPose2))
-                .setLinearHeadingInterpolation(Startofballs2.getHeading(), shootPose2.getHeading())
-                .build();
 
 
         bang2 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose2, shootPose))
-                .setLinearHeadingInterpolation(shootPose2.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(EndofBalls2, shootPoseover))
+                .setLinearHeadingInterpolation(EndofBalls2.getHeading(), shootPose.getHeading())
                 .build();
 
         GoingtoIntake = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose2, Startofballs1))
+                .addPath(new BezierLine(shootPoseover, Startofballs1))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs1.getHeading())
                 .build();
         pizza3 = follower.pathBuilder()
@@ -224,7 +219,7 @@ public class WORKPLS extends OpMode {
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
-                    setPathState(PathState.BEFORE_FIRST);
+                    setPathState(PathState.BEFORE_THIRD);
                 }
                 break;
 
@@ -293,7 +288,7 @@ public class WORKPLS extends OpMode {
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
-                    setPathState(PathState.BEFORE_SECOND);
+                    setPathState(PathState.JACK_OFF);
 
                 }
                 break;
@@ -347,19 +342,6 @@ public class WORKPLS extends OpMode {
 
                     setPathState(PathState.SECOND_SHOT_PREP);
                 }
-            case help:
-                if (!follower.isBusy()) {
-                    hood.setPosition(0.254);
-                    launcher.setVelocity(1700);
-                    follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    follower.followPath(bang2help, true);
-                    intake(0);
-                    theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(1700);
-
-                    setPathState(PathState.SHOT_2);
-                }
-
 
 
             case SECOND_SHOT_PREP:
@@ -385,7 +367,7 @@ public class WORKPLS extends OpMode {
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
-                    setPathState(PathState.BEFORE_THIRD);
+                    setPathState(PathState.BEFORE_FIRST);
                 }
                 break;
 
@@ -452,7 +434,7 @@ public class WORKPLS extends OpMode {
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
-                    setPathState(PathState.JACK_OFF);
+                    setPathState(PathState.BEFORE_SECOND);
                 }
                 break;
 
