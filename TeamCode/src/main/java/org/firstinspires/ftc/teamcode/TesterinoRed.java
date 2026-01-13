@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp
 
-public class TesterinoBlue extends LinearOpMode {
+public class TesterinoRed extends LinearOpMode {
     double newTime;
     double time;
 
@@ -43,8 +43,8 @@ public class TesterinoBlue extends LinearOpMode {
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = 0.79; // Hood position for close shots
-    private static final double FAR_HOOD_POSITION = 0.5; // Hood position for far shots
+    private static final double CLOSE_HOOD_POSITION = .55; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.4065; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -146,6 +146,7 @@ public class TesterinoBlue extends LinearOpMode {
             //feed the flame ._.
             if (gamepad1.right_bumper){
                 theWheelOfTheOx.setPower(1);
+                gamepad1.rumble(100);
 
 
             }
@@ -168,10 +169,10 @@ public class TesterinoBlue extends LinearOpMode {
 
             //rotator
             if (gamepad1.dpad_left){
-                rotator.setTargetPosition(rotator.getCurrentPosition()-30);
+                rotator.setTargetPosition(rotator.getCurrentPosition()-50);
             }
             else if (gamepad1.dpad_right){
-                rotator.setTargetPosition(rotator.getCurrentPosition()+30);
+                rotator.setTargetPosition(rotator.getCurrentPosition()+50);
             }
             else{
                 rotator.setTargetPosition(rotator.getCurrentPosition());
@@ -263,7 +264,7 @@ public class TesterinoBlue extends LinearOpMode {
     public void adjustRotator(double tx) {
         double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
-        int newPosition = rotator.getCurrentPosition() + adjustment + 28;
+        int newPosition = rotator.getCurrentPosition() + adjustment - 20;
         rotator.setTargetPosition(newPosition);
     }
 
