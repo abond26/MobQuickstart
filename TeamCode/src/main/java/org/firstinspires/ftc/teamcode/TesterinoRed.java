@@ -43,8 +43,8 @@ public class TesterinoRed extends LinearOpMode {
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = .55; // Hood position for close shots
-    private static final double FAR_HOOD_POSITION = 0.4065; // Hood position for far shots
+    private static final double CLOSE_HOOD_POSITION = 0.677; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.57; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
