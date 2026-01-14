@@ -36,6 +36,7 @@ public class HelperAuton extends OpMode {
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
+    private int rotatorStartPosition = 0; // Store starting position
 
     private DcMotor leftFront, leftRear, rightFront, rightRear;
 
@@ -128,7 +129,7 @@ public class HelperAuton extends OpMode {
         switch (pathState) {
             case PrepShot1:
                 if (!follower.isBusy()) {
-                    adjustRotator(-3.9);
+                    hood.setPosition(0.56);
                     launcher.setVelocity(2100);
                     setPathState(PathState.TraeYoung1);
 
@@ -138,7 +139,7 @@ public class HelperAuton extends OpMode {
 
             case TraeYoung1:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>4) {
-                    adjustRotator(-0.001);
+                    hood.setPosition(0.56);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
                     setPathState(PathState.GoToIntake);
@@ -150,6 +151,7 @@ public class HelperAuton extends OpMode {
 
             case GoToIntake:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.5) {
+                    hood.setPosition(0.56);
                     follower.followPath(GettingReadyToIntake, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
@@ -161,7 +163,7 @@ public class HelperAuton extends OpMode {
 
             case VerrrryFirstIntake:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
-                    adjustRotator(+3.9);
+                    hood.setPosition(0.56);
                     follower.followPath(Intake1, true);
                     tree.setPower(1);
                     setPathState(PathState.PrepShot2);
@@ -170,7 +172,7 @@ public class HelperAuton extends OpMode {
 
             case PrepShot2:
                 if (!follower.isBusy()) {
-                    adjustRotator(-0.01);
+                    hood.setPosition(0.56);
                     follower.followPath(Prep1, true);
 
                     launcher.setVelocity(2100);
@@ -181,7 +183,7 @@ public class HelperAuton extends OpMode {
             case TraeYoung2:
 
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
-                    adjustRotator(-0.01);
+                    hood.setPosition(0.56);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
                     setPathState(PathState.GoToIntake2);
@@ -190,7 +192,7 @@ public class HelperAuton extends OpMode {
 
             case GoToIntake2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.5) {
-                    adjustRotator(-0.01);
+                    hood.setPosition(0.56);
                     follower.followPath(HIntake1, true);
 
                     intake(1);
@@ -201,7 +203,7 @@ public class HelperAuton extends OpMode {
 
             case PrepShot3:
                 if (!follower.isBusy()) {
-                    adjustRotator(-0.01);
+                    hood.setPosition(0.56);
                     follower.followPath(Prep2, true);
 
                     launcher.setVelocity(2100);
@@ -211,7 +213,7 @@ public class HelperAuton extends OpMode {
 
             case TraeYoung3:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
-                    adjustRotator(-0.01);
+                    hood.setPosition(0.56);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
                     setPathState(PathState.GoToIntake3);
@@ -220,7 +222,7 @@ public class HelperAuton extends OpMode {
 
             case GoToIntake3:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.5) {
-                    adjustRotator(-0.01);
+                    hood.setPosition(0.56);
                     follower.followPath(HIntake1, true);
 
                     intake(1);
@@ -231,7 +233,7 @@ public class HelperAuton extends OpMode {
 
             case PrepShot4:
                 if (!follower.isBusy()) {
-                    adjustRotator(-0.01);
+                    hood.setPosition(0.56);
                     follower.followPath(Prep2, true);
 
                     launcher.setVelocity(2100);
@@ -241,7 +243,7 @@ public class HelperAuton extends OpMode {
 
             case TraeYoung4:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
-                    adjustRotator(-0.01);
+                    hood.setPosition(0.56);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
                     setPathState(PathState.GoToEnd);
@@ -250,7 +252,7 @@ public class HelperAuton extends OpMode {
 
             case GoToEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2) {
-                    adjustRotator(-0.01);
+                    hood.setPosition(0.56);
                     follower.followPath(Endy);
                     intake(1);
 
@@ -311,7 +313,8 @@ public class HelperAuton extends OpMode {
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotator.setTargetPosition(0);
+        rotatorStartPosition = 0; // Store the starting position
+        rotator.setTargetPosition(rotatorStartPosition);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setPower(1);
 
@@ -333,7 +336,9 @@ public class HelperAuton extends OpMode {
 
     @Override
     public void loop() {
-        adjustRotator(); // Automatically adjust rotator based on limelight tracking
+        // Continuously keep rotator at starting position (zero)
+        rotator.setTargetPosition(rotatorStartPosition);
+        rotator.setPower(1); // Ensure rotator has power to move to target position
         follower.update();
         statePathUpdate();
         telemetry.addData("paths state", pathState.toString());
@@ -383,49 +388,6 @@ public class HelperAuton extends OpMode {
         }
     }
 
-    // Automatically adjust rotator based on limelight tracking
-    public void adjustRotator() {
-        if (limelight != null && rotator != null) {
-            LLResult ll = limelight.getLatestResult();
-            double currentTxDeg = 0.0;
-            double currentTyDeg = 0.0;
-            double ta = 0.0;
-            boolean llValid = false;
-
-            if (ll != null) {
-                currentTxDeg = ll.getTx();
-                currentTyDeg = ll.getTy();
-                ta = ll.getTa();
-                llValid = ll.isValid();
-            }
-
-            // Update class variables for use in other methods
-            txDeg = currentTxDeg;
-            tyDeg = currentTyDeg;
-
-            if (llValid) {
-                telemetry.addData("Ta", ta);
-                telemetry.addData("tx", currentTxDeg);
-                telemetry.addData("ty", currentTyDeg);
-
-                // Adjust rotator based on limelight tx degrees
-                double fracOfSemiCircum = Math.toRadians(currentTxDeg) / Math.PI;
-                int adjustment = (int) (fracOfSemiCircum * motor180Range);
-                int newPosition = rotator.getCurrentPosition() + adjustment - 28;
-                rotator.setTargetPosition(newPosition);
-            }
-        }
-    }
-
-    // Manual adjustment method (for backward compatibility with existing code)
-    public void adjustRotator(double tx) {
-        if (rotator != null) {
-            double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
-            int adjustment = (int) (fracOfSemiCircum * motor180Range);
-            int newPosition = rotator.getCurrentPosition() + adjustment - 28;
-            rotator.setTargetPosition(newPosition);
-        }
-    }
 
 
 }
