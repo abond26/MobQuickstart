@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
+package org.firstinspires.ftc.teamcode.Kishen;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -16,6 +16,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
 @Autonomous(name = "lemmetrysomething", group = "Examples")
 public class freaky extends OpMode {
     double txDeg = 0.0; //horizontal deg
@@ -26,9 +28,9 @@ public class freaky extends OpMode {
     private int limeHeight = 33;
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 1;
-    private static final double PRECISE_DRIVE = 0.4;
+    private static final double PRECISE_DRIVE = 0.2;
 
-    private static final double INTAKE_DRIVE_POWER = 0.6; // tune this
+    private static final double INTAKE_DRIVE_POWER = 0.8; // tune this
 
     private int y = tagHeight - limeHeight;
     //Rotator var
@@ -62,7 +64,7 @@ public class freaky extends OpMode {
 
 
     private final Pose GettingReadyForIntake1 = new Pose(50, 57, Math.toRadians(180));
-    private final Pose Intake1Endpoint = new Pose(29, 68, Math.toRadians(180));
+    private final Pose Intake1Endpoint = new Pose(33, 68, Math.toRadians(180));
     private final Pose Intake1ControlPoint = new Pose(0, 60, Math.toRadians(180));
     private final Pose ClearEnd = new Pose(17, 68, Math.toRadians(180));
     private final Pose Shot2ControlPoint = new Pose(72, 72, Math.toRadians(138));
@@ -114,7 +116,7 @@ public class freaky extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case DRIVE_START_SHOOT:
-                hood.setPosition(.4);
+                hood.setPosition(.2);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(StartShoot, true);
                 launcher.setVelocity(1670);
@@ -124,7 +126,7 @@ public class freaky extends OpMode {
 
             case PRE_SHOOT:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
-                    hood.setPosition(.4);
+                    hood.setPosition(.2);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     launcher.setVelocity(1670);
                     intake(1);
@@ -135,6 +137,7 @@ public class freaky extends OpMode {
                 break;
             case GoToGetReady:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                    theWheelOfTheOx.setPower(0);
                     intake(0);
                     follower.followPath(PrepIntake1, true);
                     setPathState(PathState.CurvyIntake);
@@ -144,7 +147,7 @@ public class freaky extends OpMode {
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(Intake1Curve, true);
-                    intake(1);
+                    intake(0.75);
                     setPathState(PathState.Clear);
                 }
                 break;
@@ -166,7 +169,7 @@ public class freaky extends OpMode {
                 break;
             case SHOT2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(.4);
+                    hood.setPosition(.2);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     launcher.setVelocity(1670);
                     intake(1);
@@ -285,7 +288,7 @@ public class freaky extends OpMode {
     }
     public double calcVelocity(double dist) {
         double rice = dist/654.83484;
-        double velocity = 949.3757*Math.pow(2.72,rice)+ 83.43996;
+        double velocity = 949.3757*Math.pow(2.72,rice)+ 83.23996;
         double rpower = velocity/2580;
         return rpower;
     }

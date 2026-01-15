@@ -24,9 +24,10 @@ public class TesterinoBlue extends LinearOpMode {
     //282
     //-301
     double sumOfTrigs;
+    boolean limelightOn = false;
     boolean yLast = false;
     boolean aLast =false;
-    boolean xLast = false;
+    boolean rbLast = false;
     int motor180Range = 630;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
@@ -39,8 +40,8 @@ public class TesterinoBlue extends LinearOpMode {
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = .4; // Hood position for close shots
-    private static final double FAR_HOOD_POSITION = .54; // Hood position for far shots
+    private static final double CLOSE_HOOD_POSITION = 0.32; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.4; // Hood position for far shots
     //j
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
@@ -100,19 +101,23 @@ public class TesterinoBlue extends LinearOpMode {
         follower.startTeleopDrive();
         while (opModeIsActive()){
             time = runtime.time();
+
             boolean yPressed = gamepad1.y && !yLast;
             yLast = gamepad1.y;
 
             boolean aPressed = gamepad1.a && !aLast;
             aLast = gamepad1.a;
-            boolean xPressed = gamepad2.x && !xLast;
-            xLast = gamepad2.x;
+
+            boolean rightButtonPressed = gamepad1.right_stick_button && !rbLast;
+            rbLast = gamepad1.right_stick_button;
 //            if (gamepad1.x){
 //                limelight.pipelineSwitch(1);
 //            }
 //            if (gamepad1.b){
 //                limelight.pipelineSwitch(0);
 //            }
+
+
 
             drive();
 
@@ -171,6 +176,8 @@ public class TesterinoBlue extends LinearOpMode {
                 double tyDeg = 0.0; //vertical deg
                 double ta = 0.0;
                 boolean llValid = false;
+                double currentDistance = getDist(tyDeg);
+
                 if (ll != null) {
                     txDeg = ll.getTx();
                     tyDeg = ll.getTy();
@@ -181,22 +188,24 @@ public class TesterinoBlue extends LinearOpMode {
                         telemetry.addData("Ta", ta);
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
-                        telemetry.addData("Limelight Detecting", llValid ? "YES" : "NO");
-                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                        telemetry.addLine("Limelight Detecting");
+                        if (!gamepad1.dpad_right && !gamepad1.dpad_left && limelightOn) {
                             adjustRotator(txDeg);
+                        }
+                        if (currentDistance > 0) {
+                            jollyCrusader.setVelocity(calcVelocity(currentDistance));
+                            adjustHoodBasedOnDistance(currentDistance);
                         }
 
                     } else {
+                        telemetry.addLine("no Limelight Detecting");
+
                         telemetry.addLine("no data");
                     }
                 }
 
-                double currentDistance = getDist(tyDeg);
-                telemetry.addData("Distance", currentDistance);
-
-                if (gamepad1.right_stick_button && currentDistance > 0){
-                    jollyCrusader.setVelocity(calcVelocity(currentDistance));
-                    adjustHoodBasedOnDistance(currentDistance);
+                if (rightButtonPressed && currentDistance > 0){
+                    limelightOn = !limelightOn;
                 }
 
 
