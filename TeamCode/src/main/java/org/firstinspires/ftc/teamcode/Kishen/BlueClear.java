@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.WORKPLS;
 
-@Autonomous(name = "Test", group = "Examples")
+@Autonomous(name = "Test", group = "zzzz")
 public class BlueClear extends OpMode {
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg

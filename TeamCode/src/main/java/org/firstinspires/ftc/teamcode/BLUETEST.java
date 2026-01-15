@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 //@Config
-@TeleOp
+//@TeleOp
 public class  BLUETEST extends LinearOpMode {
     //time
     private static double reaccelerationTime = 0.4; //determines how long between shooting

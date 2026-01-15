@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 //@Config
-@TeleOp
+//@TeleOp
 public class ToiletBlue extends LinearOpMode {
     //time
     private static double reaccelerationTime = 0.6; //determines how long between shooting

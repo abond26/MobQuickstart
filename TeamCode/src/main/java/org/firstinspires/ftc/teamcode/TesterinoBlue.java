@@ -41,6 +41,7 @@ public class TesterinoBlue extends LinearOpMode {
     private static final double DISTANCE_THRESHOLD = 180.0;
     private static final double CLOSE_HOOD_POSITION = .4; // Hood position for close shots
     private static final double FAR_HOOD_POSITION = .54; // Hood position for far shots
+    //j
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
