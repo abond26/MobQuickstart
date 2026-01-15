@@ -360,7 +360,7 @@ public class WORKPLS extends OpMode {
 
 
             case SHOT_2:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
                     hood.setPosition(.4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     launcher.setVelocity(1670);

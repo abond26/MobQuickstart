@@ -193,6 +193,7 @@ public class TesterinoRed extends LinearOpMode {
                     llValid = ll.isValid();
 
                     if (llValid) {
+                        telemetry.addLine("Limelight Detecting Yes");
                         telemetry.addData("Ta", ta);
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
@@ -200,6 +201,7 @@ public class TesterinoRed extends LinearOpMode {
                             adjustRotator(txDeg);
                         }
                     } else {
+                        telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
                     }
                 }
@@ -264,7 +266,7 @@ public class TesterinoRed extends LinearOpMode {
     public void adjustRotator(double tx) {
         double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 5;
+        int newPosition = rotator.getCurrentPosition() + adjustment + 8;
         rotator.setTargetPosition(newPosition);
     }
 
