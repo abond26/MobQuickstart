@@ -39,8 +39,8 @@ public class TesterinoBlue extends LinearOpMode {
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = .55; // Hood position for close shots
-    private static final double FAR_HOOD_POSITION = 0.36; // Hood position for far shots
+    private static final double CLOSE_HOOD_POSITION = .32; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.35; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -119,10 +119,10 @@ public class TesterinoBlue extends LinearOpMode {
 
             //launcha
             if (aPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+50);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+20);
             }
             if (yPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-50);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-20);
             }
 
 
@@ -175,17 +175,18 @@ public class TesterinoBlue extends LinearOpMode {
                     tyDeg = ll.getTy();
                     ta = ll.getTa();
                     llValid = ll.isValid();
-                }
 
+                    if (llValid) {
+                        telemetry.addData("Ta", ta);
+                        telemetry.addData("tx", txDeg);
+                        telemetry.addData("ty", tyDeg);
+                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                            adjustRotator(txDeg);
+                        }
 
-                if (llValid) {
-                    telemetry.addData("Ta", ta);
-                    telemetry.addData("tx", txDeg);
-                    telemetry.addData("ty", tyDeg);
-                    if (!gamepad1.dpad_right && !gamepad1.dpad_left){
-                        adjustRotator(txDeg);
+                    } else {
+                        telemetry.addLine("no data");
                     }
-
                 }
 
                 double currentDistance = getDist(tyDeg);
@@ -242,9 +243,9 @@ public class TesterinoBlue extends LinearOpMode {
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
     public void adjustRotator(double tx) {
-        double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
-        int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 26;
+        double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
+        int adjustment = (int) (fracOfFullCircum * motor180Range);
+        int newPosition = rotator.getCurrentPosition() + adjustment - 24;
         rotator.setTargetPosition(newPosition);
     }
 

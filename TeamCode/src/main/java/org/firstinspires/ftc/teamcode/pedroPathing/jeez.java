@@ -15,18 +15,17 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name = "notbetterthanleftovers", group = "Examples")
+@Autonomous(name = "RedBackAutonK", group = "Examples")
 public class jeez extends OpMode {
+    double txDeg = 0.0; //horizontal deg
+    double tyDeg = 0.0; //vertical deg
     private Follower follower;
 
     private Servo hood;
     private int limeHeight = 33;
     private int tagHeight = 75;
-    private static final double SHOOT_POWER = 1;
-
-
-    private static final double NORMAL_DRIVE_POWER = 0.93;
-    private static final double INTAKE_DRIVE_POWER = 0.4; // tune this
+    private static final double NORMAL_DRIVE_POWER = 1;
+    private static final double INTAKE_DRIVE_POWER = 0.8; // tune this
 
     private int y = tagHeight - limeHeight;
     //Rotator var
@@ -34,13 +33,13 @@ public class jeez extends OpMode {
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
+    private int rotatorStartPosition = 1; // Store starting position
 
     private DcMotor leftFront, leftRear, rightFront, rightRear;
 
 
-
-    private DcMotor tree, theWheelOfTheOx,  rotator;
-    public DcMotorEx launcher;
+    private DcMotorEx launcher;
+    private DcMotor tree, theWheelOfTheOx, rotator;
     private Timer pathTimer, opModeTimer;
 
     public enum PathState {
@@ -83,45 +82,49 @@ public class jeez extends OpMode {
     }
 
     PathState pathState;
-    private final Pose startPose = new Pose(56, 8, Math.toRadians(115));
-
-    private final Pose Startofballs3 = new Pose(50, 35, Math.toRadians(180));
-    private final Pose Midofballs3 = new Pose(42, 35, Math.toRadians(180));
+    private final Pose startPose = new Pose(86, 9, Math.toRadians(90));
+    private final Pose shootPose = new Pose(86, 85, Math.toRadians(55));
 
 
-    private final Pose EndofBalls3 = new Pose(4.5, 35, Math.toRadians(180));
+    private final Pose shootPoseover = new Pose(86, 85, Math.toRadians(55));
 
-    private final Pose Startofballs2 = new Pose(50, 59, Math.toRadians(180));
-
-
-    private final Pose Midofballs2 = new Pose(42, 59, Math.toRadians(180));
+    private final Pose Startofballs3 = new Pose(86, 35, Math.toRadians(0));
+    private final Pose Midofballs3 = new Pose(100, 35, Math.toRadians(0));
 
 
+    private final Pose EndofBalls3 = new Pose(124, 35, Math.toRadians(0));
 
-    private final Pose EndofBalls2 = new Pose(5, 59, Math.toRadians(180));
+    private final Pose Startofballs2 = new Pose(86, 59, Math.toRadians(0));
 
 
-    private final Pose Startofballs1 = new Pose(42, 84, Math.toRadians(180));
-
-    private final Pose Midofballs1 = new Pose(45, 84, Math.toRadians(180));
-
-    private final Pose EndofBalls1 = new Pose(12.5, 84, Math.toRadians(180));
+    private final Pose Midofballs2 = new Pose(100, 59, Math.toRadians(0));
 
 
 
+    private final Pose EndofBalls2 = new Pose(122, 59, Math.toRadians(0));
 
-    private PathChain StartShoot, GoingtoIntake, treeuno, bang1, GoingtoIntake2, treedos, bang2, GoingtoIntake3, treetres, bang3, bang3prep,pizza,pizza2,pizza3;
+
+    private final Pose Startofballs1 = new Pose(86, 83, Math.toRadians(0));
+
+    private final Pose Midofballs1 = new Pose(100, 83, Math.toRadians(0));
+
+    private final Pose EndofBalls1 = new Pose(125, 83, Math.toRadians(0));
+
+
+
+
+    private PathChain StartShoot, GoingtoIntake, treeuno, bang1, GoingtoIntake2, treedos, bang2, GoingtoIntake3, treetres, bang3, bang3prep,pizza,pizza2,pizza3,bang2prep;
 
     public void buildPaths() {
         StartShoot = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, startPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), startPose.getHeading())
+                .addPath(new BezierLine(startPose, shootPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
 
 
         GoingtoIntake3 = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, Startofballs3))
-                .setLinearHeadingInterpolation(startPose.getHeading(), Startofballs3.getHeading())
+                .addPath(new BezierLine(shootPose, Startofballs3))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs3.getHeading())
                 .build();
 
 
@@ -144,13 +147,13 @@ public class jeez extends OpMode {
 
 
         bang3 = follower.pathBuilder()
-                .addPath(new BezierLine(Startofballs3, startPose ))
-                .setLinearHeadingInterpolation(EndofBalls3.getHeading(), startPose.getHeading())
+                .addPath(new BezierLine(Startofballs3, shootPose ))
+                .setLinearHeadingInterpolation(EndofBalls3.getHeading(), shootPose.getHeading())
                 .build();
 
         GoingtoIntake2 = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, Startofballs2))
-                .setLinearHeadingInterpolation(startPose.getHeading(), Startofballs2.getHeading())
+                .addPath(new BezierLine(shootPose, Startofballs2))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs2.getHeading())
                 .build();
 
 
@@ -164,20 +167,20 @@ public class jeez extends OpMode {
                 .addPath(new BezierLine(Midofballs2, EndofBalls2))
                 .setLinearHeadingInterpolation(Startofballs2.getHeading(), EndofBalls2.getHeading())
                 .build();
-        bang3prep = follower.pathBuilder()
+        bang2prep = follower.pathBuilder()
                 .addPath(new BezierLine(EndofBalls2,Startofballs2))
                 .setLinearHeadingInterpolation(EndofBalls2.getHeading(), Startofballs2.getHeading())
                 .build();
 
 
         bang2 = follower.pathBuilder()
-                .addPath(new BezierLine(EndofBalls2, startPose))
-                .setLinearHeadingInterpolation(EndofBalls2.getHeading(), startPose.getHeading())
+                .addPath(new BezierLine(EndofBalls2, shootPoseover))
+                .setLinearHeadingInterpolation(EndofBalls2.getHeading(), shootPose.getHeading())
                 .build();
 
         GoingtoIntake = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, Startofballs1))
-                .setLinearHeadingInterpolation(startPose.getHeading(), Startofballs1.getHeading())
+                .addPath(new BezierLine(shootPoseover, Startofballs1))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), Startofballs1.getHeading())
                 .build();
         pizza3 = follower.pathBuilder()
                 .addPath(new BezierLine(Startofballs1, Midofballs1))
@@ -190,8 +193,8 @@ public class jeez extends OpMode {
                 .build();
 
         bang1 = follower.pathBuilder()
-                .addPath(new BezierLine(EndofBalls1, startPose))
-                .setLinearHeadingInterpolation(EndofBalls1.getHeading(), startPose.getHeading())
+                .addPath(new BezierLine(EndofBalls1, shootPose))
+                .setLinearHeadingInterpolation(EndofBalls1.getHeading(), shootPose.getHeading())
                 .build();
 
 
@@ -200,27 +203,30 @@ public class jeez extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case DRIVE_START_SHOOT:
-                launcher.setVelocity(2080);
+                hood.setPosition(.25);
+                follower.setMaxPower(NORMAL_DRIVE_POWER);
+                follower.followPath(StartShoot, true);
+                launcher.setVelocity(1750);
                 setPathState(PathState.PRE_SHOOT);
                 break;
 
 
             case PRE_SHOOT:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4) {
-                    hood.setPosition(0.75862068965);
-                    follower.setMaxPower(SHOOT_POWER);
-                    launcher.setVelocity(2080);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
+                    hood.setPosition(.25);
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    launcher.setVelocity(1750);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
-                    setPathState(PathState.BEFORE_FIRST);
+                    setPathState(PathState.BEFORE_THIRD);
                 }
                 break;
 
 
             case BEFORE_FIRST:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(GoingtoIntake3, true);
                     intake(0);
@@ -236,7 +242,7 @@ public class jeez extends OpMode {
 
             case PAUSE:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(pizza);
                     setPathState(pathState.VERYYYY_FIRST_INTAKE);
@@ -245,7 +251,7 @@ public class jeez extends OpMode {
 
             case VERYYYY_FIRST_INTAKE:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(treetres, true);
                     intake(1);
@@ -262,12 +268,12 @@ public class jeez extends OpMode {
 
             case FIRST_SHOT_PREP:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang3, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(2080);
+                    launcher.setVelocity(1750);
 
                     setPathState(PathState.SHOT_1);
                 }
@@ -276,14 +282,13 @@ public class jeez extends OpMode {
 
             case SHOT_1:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    follower.setMaxPower(SHOOT_POWER);
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(2080);
+                    launcher.setVelocity(1750);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
-                    setPathState(PathState.BEFORE_SECOND);
+                    setPathState(PathState.JACK_OFF);
 
                 }
                 break;
@@ -291,7 +296,7 @@ public class jeez extends OpMode {
 
             case BEFORE_SECOND:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(GoingtoIntake2, true);
                     intake(0);
@@ -303,7 +308,7 @@ public class jeez extends OpMode {
 
             case PAUSE2:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(pizza2);
                     setPathState(pathState.VERYYYY_SECOND_INTAKE);
@@ -314,7 +319,7 @@ public class jeez extends OpMode {
 
             case VERYYYY_SECOND_INTAKE:
                 if (!follower.isBusy()){
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(treedos, true);
                     intake(1);
@@ -329,11 +334,11 @@ public class jeez extends OpMode {
                 if (!follower.isBusy()) {
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    hood.setPosition(0.75862068965);
-                    launcher.setVelocity(2080);
+                    hood.setPosition(.25);
+                    launcher.setVelocity(1750);
 
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    follower.followPath(bang3prep, true);
+                    follower.followPath(bang2prep, true);
 
                     setPathState(PathState.SECOND_SHOT_PREP);
                 }
@@ -341,13 +346,13 @@ public class jeez extends OpMode {
 
             case SECOND_SHOT_PREP:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.75862068965);
-                    launcher.setVelocity(0.8);
+                    hood.setPosition(.25);
+                    launcher.setVelocity(1750);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang2, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(2080);
+                    launcher.setVelocity(1750);
 
                     setPathState(PathState.SHOT_2);
                 }
@@ -356,21 +361,20 @@ public class jeez extends OpMode {
 
             case SHOT_2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    follower.setMaxPower(SHOOT_POWER);
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(2080);
+                    launcher.setVelocity(1750);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
-                    setPathState(PathState.BEFORE_THIRD);
+                    setPathState(PathState.BEFORE_FIRST);
                 }
                 break;
 
 
             case BEFORE_THIRD:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(GoingtoIntake, true);
                     intake(0);
@@ -383,7 +387,7 @@ public class jeez extends OpMode {
 
             case PAUSE3:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(pizza3);
                     setPathState(pathState.VERYYYY_THIRD_INTAKE);
@@ -396,10 +400,10 @@ public class jeez extends OpMode {
 
             case VERYYYY_THIRD_INTAKE:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(treeuno, true);
-                    launcher.setVelocity(2080);
+                    launcher.setVelocity(1750);
                     intake(1);
                     theWheelOfTheOx.setPower(0.1);
 
@@ -410,12 +414,12 @@ public class jeez extends OpMode {
 
             case THIRD_SHOT_PREP:
                 if (!follower.isBusy()) {
-                    hood.setPosition(0.75862068965);
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(bang1, true);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
-                    launcher.setVelocity(2080);
+                    launcher.setVelocity(1750);
 
                     setPathState(PathState.SHOT_3);
                 }
@@ -423,15 +427,13 @@ public class jeez extends OpMode {
 
 
             case SHOT_3:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    follower.setMaxPower(SHOOT_POWER);
-                    hood.setPosition(0.75862068965);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
+                    hood.setPosition(.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(2080);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
 
-                    setPathState(PathState.JACK_OFF);
+                    setPathState(PathState.BEFORE_SECOND);
                 }
                 break;
 
@@ -439,7 +441,7 @@ public class jeez extends OpMode {
             case JACK_OFF:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
                     hood.setPosition(0);
-                    launcher.setVelocity(0);
+                    launcher.setPower(0);
                     intake(0);
                     theWheelOfTheOx.setPower(0);
 
@@ -474,11 +476,17 @@ public class jeez extends OpMode {
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         hood = hardwareMap.get(Servo.class, "hood");
-        hood.scaleRange(0, 0.758620689659);
-        hood.setPosition(0.75862068965);
+        hood.scaleRange(0,0.0328);
 
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
+        rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotatorStartPosition = 0; // Store the starting position
+        rotator.setTargetPosition(rotatorStartPosition);
+        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rotator.setDirection(DcMotorSimple.Direction.REVERSE);
+        rotator.setPower(1);
 
 
 
@@ -497,10 +505,29 @@ public class jeez extends OpMode {
         } else {
             telemetry.addData("LL", "not found");
         }
+    }
+
+    @Override
+    public void loop() {
+        // Continuously keep rotator at starting position (zero)
+        rotator.setTargetPosition(rotatorStartPosition);
+        rotator.setPower(1); // Ensure rotator has power to move to target position
+        follower.update();
+        statePathUpdate();
+        telemetry.addData("paths state", pathState.toString());
+        telemetry.addData("x", follower.getPose().getX());
+        telemetry.addData("y", follower.getPose().getY());
+        telemetry.addData("Heading", follower.getPose().getHeading());
+        telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
+        telemetry.addData("jolly crusader velocity", launcher.getVelocity());
+    }
+
+
+    public double getDist(double tyDeg) {
         if (limelight != null) {
             LLResult ll = limelight.getLatestResult();
-            double txDeg = 0.0; //horizontal deg
-            double tyDeg = 0.0; //vertical deg
+            txDeg = 0.0; //horizontal deg
+            tyDeg = 0.0; //vertical deg
             double ta = 0.0;
             boolean llValid = false;
             if (ll != null) {
@@ -515,35 +542,8 @@ public class jeez extends OpMode {
                 telemetry.addData("Ta", ta);
                 telemetry.addData("tx", txDeg);
                 telemetry.addData("ty", tyDeg);
-                adjustRotator(txDeg);
-
             }
-            adjustRotator(txDeg);
-
         }
-
-
-    }
-
-    @Override
-    public void loop() {
-        follower.update();
-        statePathUpdate();
-        telemetry.addData("paths state", pathState.toString());
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("Heading", follower.getPose().getHeading());
-        telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
-
-    }
-
-    public void adjustRotator(double tx) {
-        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
-        int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment;
-        rotator.setTargetPosition(newPosition);
-    }
-    public double getDist(double tyDeg) {
         double tyRad = Math.toRadians(tyDeg+limelightUpAngle);
         double dist = y / Math.tan(tyRad);
         return dist;

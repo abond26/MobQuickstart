@@ -4,7 +4,6 @@ import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
@@ -17,15 +16,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.pedroPathing.WORKPLS;
 
-@Autonomous(name = "Haolin was here blue no lime", group = "auton")
-public class AutonBlueClose extends OpMode {
+@Autonomous(name = "Reliable 9 blue close", group = "auton")
+public class close9blue extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
-    
+
     // Flags to prevent path oscillation - ensure paths are only called once per state
     private boolean shoot2Started = false;
     private boolean shoot3Started = false;
@@ -38,7 +36,7 @@ public class AutonBlueClose extends OpMode {
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 1;
     private static final double INTAKE_DRIVE_POWER = 0.6; // tune this
-    
+
     // Hood adjustment constants (from TesterinoBlue)
     private static final double DISTANCE_THRESHOLD = 180.0;
     private static final double CLOSE_HOOD_POSITION = .2541; // Hood position for close shots
@@ -50,7 +48,7 @@ public class AutonBlueClose extends OpMode {
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
-    
+
     // Store last valid limelight values for fallback
     private double lastValidTx = 0.0;
     private double lastValidTy = 0.0;
@@ -107,37 +105,18 @@ public class AutonBlueClose extends OpMode {
 
     PathState pathState;
     private final Pose startPose = new Pose(24.4, 126.7, Math.toRadians(143));
-    private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(139));
+    private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(137));
     private final Pose collect1thingstart=new Pose(52, 82, Math.toRadians(180));
 
 
     private final Pose collect1thing = new Pose(16, 82, Math.toRadians(180));
-    private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(139));
+    private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(137));
 
 
     private final Pose collect2Start = new Pose(52, 55, Math.toRadians(180));
     private final Pose collect2End = new Pose(13, 55, Math.toRadians(180));
-    private final Pose shootBall3ControlPoint = new Pose(55, 43, Math.toRadians(180));
-    private final Pose shootBall3 = new Pose(53, 18, Math.toRadians(120));
-
-
-    private final Pose collect3Start = new Pose(46, 33, Math.toRadians(180));
-
-    private final Pose collect3End = new Pose(13, 33, Math.toRadians(180)); // FIXED: Changed from same position to actual collection end
-
-
-    private final Pose shootBall4 = new Pose(53, 18, Math.toRadians(120));
-
-
-
-    private final Pose collect4start = new Pose(16, 11, Math.toRadians(180));
-
-
-    private final Pose collect4end = new Pose(5, 11, Math.toRadians(180));
-
-    private final Pose shootBall5 = new Pose(53, 22, Math.toRadians(120));
-
-    private final Pose park = new Pose(16, 11, Math.toRadians(180));
+    private final Pose shootBall3 = new Pose(52, 84, Math.toRadians(137));
+    private final Pose park = new Pose(35, 84, Math.toRadians(137));
 
 
 
@@ -180,45 +159,14 @@ public class AutonBlueClose extends OpMode {
 
 
         shoot3 = follower.pathBuilder()
-                .addPath(new BezierCurve(collect2End, shootBall3ControlPoint, shootBall3))
+                .addPath(new BezierLine(collect2End, shootBall3))
                 .setLinearHeadingInterpolation(collect2End.getHeading(), shootBall3.getHeading())
                 .build();
-
-        goToCollect3 = follower.pathBuilder()
-                .addPath(new BezierLine(shootBall3, collect3Start))
-                .setLinearHeadingInterpolation(shootBall3.getHeading(), collect3Start.getHeading())
+        parking=follower.pathBuilder()
+                .addPath(new BezierLine(shootBall3, park))
+                .setLinearHeadingInterpolation(shootBall3.getHeading(), park.getHeading())
                 .build();
 
-
-        collect3 = follower.pathBuilder()
-                .addPath(new BezierLine(collect3Start, collect3End))
-                .setLinearHeadingInterpolation(collect3Start.getHeading(), collect3End.getHeading())
-                .build();
-
-
-        shoot4 = follower.pathBuilder()
-                .addPath(new BezierLine(collect3End, shootBall4))
-                .setLinearHeadingInterpolation(collect3End.getHeading(), shootBall4.getHeading())
-                .build();
-        goToCollect4 = follower.pathBuilder()
-                .addPath(new BezierLine(shootBall4,collect4start))
-                .setLinearHeadingInterpolation(shootBall4.getHeading(), collect4start.getHeading())
-                .build();
-
-
-        collect4 = follower.pathBuilder()
-                .addPath(new BezierLine(collect4start, collect4end))
-                .setLinearHeadingInterpolation(collect4start.getHeading(), collect4end.getHeading())
-                .build();
-
-        shoot5 = follower.pathBuilder()
-                .addPath(new BezierLine(collect4end, shootBall5))
-                .setLinearHeadingInterpolation(collect4end.getHeading(), shootBall5.getHeading())
-                .build();
-        parking = follower.pathBuilder()
-                .addPath(new BezierLine(shootBall5, park))
-                .setLinearHeadingInterpolation(shootBall5.getHeading(), park.getHeading())
-                .build();
 
     }
 
@@ -226,11 +174,11 @@ public class AutonBlueClose extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1600);
-                hood.setPosition(0.265);
+                launcher.setVelocity(1000);
+                hood.setPosition(0.15);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
-                setPathState(AutonBlueClose.PathState.actuallyshoot1);
+                setPathState(PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
                 // Continuously adjust based on limelight during shooting
@@ -238,7 +186,7 @@ public class AutonBlueClose extends OpMode {
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(-1);
                     if (pathTimer.getElapsedTimeSeconds()>3.5) {
-                        setPathState(AutonBlueClose.PathState.collection);
+                        setPathState(close9blue.PathState.collection);
                     }
                 }
                 break;
@@ -246,7 +194,7 @@ public class AutonBlueClose extends OpMode {
                 if(!follower.isBusy())
                 {
                     follower.followPath(goToCollect1);
-                    setPathState(AutonBlueClose.PathState.collection);
+                    setPathState(PathState.collection);
                 }
                 break;
 
@@ -255,47 +203,49 @@ public class AutonBlueClose extends OpMode {
 
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
+                    launcher.setVelocity(750);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
-                    setPathState((AutonBlueClose.PathState.shoot));
+                    setPathState((close9blue.PathState.shoot));
                 }
                 break;
             case shoot:
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1700);
-                    hood.setPosition(0.3);
+                    launcher.setVelocity(750);
+                    hood.setPosition(0.425);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot2Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>4) {
+                    if(pathTimer.getElapsedTimeSeconds()>5) {
+                        tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>5) {
-                        setPathState((AutonBlueClose.PathState.collectAgain));
+                    if(pathTimer.getElapsedTimeSeconds()>6) {
+                        setPathState((PathState.collectAgain));
                     }
                 }
                 break;
             case collectAgain:
                 if (!follower.isBusy()) {
                     follower.followPath(goToCollect2);
-                    setPathState((AutonBlueClose.PathState.collectAgainEnd));
+                    setPathState((PathState.collectAgainEnd));
                 }
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(3000);
+                    launcher.setVelocity(750);
                     follower.followPath(collect2);
                     tree.setPower(1);
-                    hood.setPosition(0.25);
+                    hood.setPosition(0.425);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
-                    setPathState((AutonBlueClose.PathState.shootAgain));
+                    setPathState((close9blue.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
@@ -307,77 +257,22 @@ public class AutonBlueClose extends OpMode {
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot3Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>4) {
+                    if(pathTimer.getElapsedTimeSeconds()>5) {
                         theWheelOfTheOx.setPower(-1);
-                        setPathState((PathState.collectAgainAgain));
                     }
-                }
-                break;
-            case collectAgainAgain:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    follower.followPath(goToCollect3);
-                    theWheelOfTheOx.setPower(1);
-                    setPathState((AutonBlueClose.PathState.collectAgainAgainEnd));
-                }
-                break;
-            case collectAgainAgainEnd:
-                if (!follower.isBusy()) {
-                    follower.followPath(collect3);
-                    setPathState((AutonBlueClose.PathState.shootAgainAgain));
-                }
-                break;
-            case shootAgainAgain:
-                // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.75 && !shoot4Started) {
-                    follower.followPath(shoot4);
-                    follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    tree.setPower(1);
-                    shoot4Started = true; // Mark as started to prevent calling again
-                }
-                if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>2) {
-                        theWheelOfTheOx.setPower(-1);
-                        setPathState((PathState.collectAgainAgainAgain));
-                    }
-                }
-                break;
-            case collectAgainAgainAgain:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    follower.followPath(goToCollect4);
-                    theWheelOfTheOx.setPower(1);
-                    setPathState((AutonBlueClose.PathState.collectAgainAgainAgainEnd));
-                }
-                break;
-            case collectAgainAgainAgainEnd:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    follower.followPath(collect4);
-                    setPathState((AutonBlueClose.PathState.shootAgainAgainAgain));
-                }
-                break;
-            case shootAgainAgainAgain:
-                // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.75 && !shoot5Started) {
-                    follower.followPath(shoot5);
-                    follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    tree.setPower(1);
-                    shoot5Started = true; // Mark as started to prevent calling again
-                }
-                if (!follower.isBusy() && shoot5Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>2) {
-                        theWheelOfTheOx.setPower(-1);
+                    if(pathTimer.getElapsedTimeSeconds()>6)
+                    {
                         setPathState((PathState.parklol));
                     }
                 }
                 break;
             case parklol:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
                     follower.followPath(parking);
-                    setPathState((AutonBlueClose.PathState.done));
-                    // Path complete - autonomous ends here
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
+                        setPathState((PathState.parklol));
+                    }
                 }
-                break;
-
             case done:
                 break;
 
@@ -470,7 +365,7 @@ public class AutonBlueClose extends OpMode {
         int newPosition = rotator.getCurrentPosition() + adjustment - offset;
         rotator.setTargetPosition(newPosition);
     }
-    
+
     public void adjustHoodBasedOnDistance(double distance) {
         if (hood != null) {
             if (distance > DISTANCE_THRESHOLD) {
@@ -480,7 +375,7 @@ public class AutonBlueClose extends OpMode {
             }
         }
     }
-    
+
     /**
      * Updates limelight-based adjustments (rotator, velocity, hood) during shooting states
      * Call this continuously in shooting states for auto-adjustment
@@ -493,20 +388,20 @@ public class AutonBlueClose extends OpMode {
                 // Limelight sees target - use current values
                 txDeg = ll.getTx();
                 tyDeg = ll.getTy();
-                
+
                 // Store valid values for fallback
                 lastValidTx = txDeg;
                 lastValidTy = tyDeg;
-                
+
                 // Calculate distance and store it
                 double currentDistance = getDist(tyDeg);
                 if (currentDistance > 0) {
                     lastValidDistance = currentDistance;
                     hasValidLimelightData = true;
-                    
+
                     // Adjust rotator based on horizontal offset
                     adjustRotator(txDeg);
-                    
+
                     // Update velocity and hood based on distance
                     launcher.setVelocity(calcVelocity(currentDistance));
                     adjustHoodBasedOnDistance(currentDistance);
@@ -525,7 +420,7 @@ public class AutonBlueClose extends OpMode {
             }
         }
     }
-    
+
     /**
      * Resets limelight data (useful when starting a new shooting sequence)
      */

@@ -36,15 +36,15 @@ public class TesterinoRed extends LinearOpMode {
     private int limeHeight = 35;
     private int tagHeight = 75;
     private int y = tagHeight - limeHeight;
-    public static double driveMultiplier = 0.7;
+    public static double driveMultiplier = 1;
     private Limelight3A limelight;
     public ElapsedTime runtime = new ElapsedTime();
     private Servo hood;
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = .55; // Hood position for close shots
-    private static final double FAR_HOOD_POSITION = 0.4065; // Hood position for far shots
+    private static final double CLOSE_HOOD_POSITION = 0.32; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.4; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -134,10 +134,10 @@ public class TesterinoRed extends LinearOpMode {
 
             //launcha
             if (aPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+50);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+20);
             }
             if (yPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-50);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-20);
             }
 
 
@@ -146,6 +146,7 @@ public class TesterinoRed extends LinearOpMode {
             //feed the flame ._.
             if (gamepad1.right_bumper){
                 theWheelOfTheOx.setPower(1);
+                intake.setPower(-1);
                 gamepad1.rumble(100);
 
 
@@ -161,7 +162,7 @@ public class TesterinoRed extends LinearOpMode {
             sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
             if (sumOfTrigs!=0){
                 intake(sumOfTrigs);
-            } else {
+            } else if (!gamepad1.right_bumper) {
                 intake.setPower(0);
             }
 
@@ -190,19 +191,18 @@ public class TesterinoRed extends LinearOpMode {
                     tyDeg = ll.getTy();
                     ta = ll.getTa();
                     llValid = ll.isValid();
-                }
 
-
-                if (llValid) {
-                    telemetry.addData("Ta", ta);
-                    telemetry.addData("tx", txDeg);
-                    telemetry.addData("ty", tyDeg);
-                    if (!gamepad1.dpad_right && !gamepad1.dpad_left){
-                        adjustRotator(txDeg);
+                    if (llValid) {
+                        telemetry.addData("Ta", ta);
+                        telemetry.addData("tx", txDeg);
+                        telemetry.addData("ty", tyDeg);
+                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                            adjustRotator(txDeg);
+                        }
+                    } else {
+                        telemetry.addLine("no data");
                     }
-
                 }
-
                 double currentDistance = getDist(tyDeg);
                 telemetry.addData("Distance", currentDistance);
 
@@ -262,9 +262,9 @@ public class TesterinoRed extends LinearOpMode {
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
     public void adjustRotator(double tx) {
-        double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
-        int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 20;
+        double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
+        int adjustment = (int) (fracOfFullCircum * motor180Range);
+        int newPosition = rotator.getCurrentPosition() + adjustment - 5;
         rotator.setTargetPosition(newPosition);
     }
 
@@ -284,7 +284,7 @@ public class TesterinoRed extends LinearOpMode {
     public void intake(double intakePower){
         intake.setPower(intakePower);
         if (!gamepad1.right_bumper) {
-            theWheelOfTheOx.setPower(-0.3);
+            theWheelOfTheOx.setPower(-0.4);
         }
     }
 
