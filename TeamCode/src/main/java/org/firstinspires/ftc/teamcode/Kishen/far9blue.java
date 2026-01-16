@@ -197,7 +197,7 @@ public class far9blue extends OpMode {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
                 launcher.setVelocity(2350);
-                hood.setPosition(0.615);
+                hood.setPosition(0.4);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
@@ -235,8 +235,8 @@ public class far9blue extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(2400);
-                    hood.setPosition(0.625);
+                    launcher.setVelocity(2200);
+                    hood.setPosition(0.4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -259,10 +259,10 @@ public class far9blue extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(2400);
+                    launcher.setVelocity(2200);
                     follower.followPath(collect2);
                     tree.setPower(1);
-                    hood.setPosition(0.625);
+                    hood.setPosition(0.4);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -278,7 +278,7 @@ public class far9blue extends OpMode {
                 break;
             case collectAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(2400);
+                    launcher.setVelocity(2200);
                     follower.followPath(collect2Again);
                     tree.setPower(1);
                     hood.setPosition(0.575);

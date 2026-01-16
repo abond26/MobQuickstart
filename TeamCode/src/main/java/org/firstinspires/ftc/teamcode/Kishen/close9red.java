@@ -113,8 +113,8 @@ public class close9red extends OpMode {
     private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(50));
 
 
-    private final Pose collect2Start = new Pose(88, 57, Math.toRadians(0));
-    private final Pose collect2End = new Pose(127, 57, Math.toRadians(0));
+    private final Pose collect2Start = new Pose(88, 57.5, Math.toRadians(0));
+    private final Pose collect2End = new Pose(127, 57.5, Math.toRadians(0));
     private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(50));
 //    private final Pose collect3start=new Pose(88, 55, Math.toRadians(180));
 //
@@ -195,8 +195,8 @@ public class close9red extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1750);
-                hood.setPosition(0.4);
+                launcher.setVelocity(2050);
+                hood.setPosition(0.25);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
@@ -224,7 +224,7 @@ public class close9red extends OpMode {
 
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    launcher.setVelocity(1750);
+                    launcher.setVelocity(1850);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
@@ -235,8 +235,8 @@ public class close9red extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1750);
-                    hood.setPosition(0.475);
+                    launcher.setVelocity(1850);
+                    hood.setPosition(0.3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -260,10 +260,10 @@ public class close9red extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(1750);
+                    launcher.setVelocity(1850);
                     follower.followPath(collect2);
                     tree.setPower(1);
-                    hood.setPosition(0.475);
+                    hood.setPosition(0.3);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -296,7 +296,7 @@ public class close9red extends OpMode {
 //                break;
 //            case collectAgainAgainEnd:
 //                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-//                    launcher.setVelocity(1800);
+//                    launcher.setVelocity(1850);
 //                    follower.followPath(collect3);
 //                    tree.setPower(1);
 //                    hood.setPosition(0.45);
