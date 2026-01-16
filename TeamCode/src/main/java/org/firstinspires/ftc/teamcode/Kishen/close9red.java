@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Reliable 9 red close", group = "auton")
+@Autonomous(name = "Reliable 9 red close", group = "auton red")
 public class close9red extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
@@ -49,7 +49,7 @@ public class close9red extends OpMode {
     private int vMultiplier = 9;
     private Limelight3A limelight;
 
-    // Store last valid limelight values for fallback
+    // Store last valid limelight values for fallback   
     private double lastValidTx = 0.0;
     private double lastValidTy = 0.0;
     private double lastValidDistance = 0.0;
@@ -104,19 +104,24 @@ public class close9red extends OpMode {
     }
 
     PathState pathState;
-    private final Pose startPose = new Pose(119.6, 126.7, Math.toRadians(37));
-    private final Pose shootPose1 = new Pose(92, 75, Math.toRadians(55));
-    private final Pose collect1thingstart=new Pose(92, 82, Math.toRadians(0));
+    private final Pose startPose = new Pose(117.6, 130, Math.toRadians(36.5));
+    private final Pose shootPose1 = new Pose(85, 88, Math.toRadians(50));
+    private final Pose collect1thingstart=new Pose(85, 84, Math.toRadians(0));
 
 
-    private final Pose collect1thing = new Pose(128, 82, Math.toRadians(0));
-    private final Pose shootPose2 = new Pose( 92, 75, Math.toRadians(55));
+    private final Pose collect1thing = new Pose(120, 84, Math.toRadians(0));
+    private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(50));
 
 
-    private final Pose collect2Start = new Pose(92, 55, Math.toRadians(0));
-    private final Pose collect2End = new Pose(131, 55, Math.toRadians(0));
-    private final Pose shootBall3 = new Pose(92, 75, Math.toRadians(55));
-    private final Pose park = new Pose(109, 84, Math.toRadians(49));
+    private final Pose collect2Start = new Pose(88, 57.5, Math.toRadians(0));
+    private final Pose collect2End = new Pose(127, 57.5, Math.toRadians(0));
+    private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(50));
+//    private final Pose collect3start=new Pose(88, 55, Math.toRadians(180));
+//
+//
+//    private final Pose collect3end = new Pose(16, 82, Math.toRadians(180));
+//    private final Pose shootBall4 = new Pose(52, 84, Math.toRadians(143));
+    private final Pose park = new Pose(104, 84, Math.toRadians(50));
 
 
 
@@ -162,6 +167,22 @@ public class close9red extends OpMode {
                 .addPath(new BezierLine(collect2End, shootBall3))
                 .setLinearHeadingInterpolation(collect2End.getHeading(), shootBall3.getHeading())
                 .build();
+//        goToCollect3 = follower.pathBuilder()
+//                .addPath(new BezierLine(shootBall3, collect3start))
+//                .setLinearHeadingInterpolation(shootBall3.getHeading(), collect3start.getHeading())
+//                .build();
+//
+//        collect3 = follower.pathBuilder()
+//                .addPath(new BezierLine(collect3start, collect3end))
+//                .setLinearHeadingInterpolation(collect3start.getHeading(), collect3end.getHeading())
+//                .build();
+//
+//
+//        shoot4 = follower.pathBuilder()
+//                .addPath(new BezierLine(collect3end, shootBall4))
+//                .setLinearHeadingInterpolation(collect3end.getHeading(), shootBall4.getHeading())
+//                .build();
+
         parking=follower.pathBuilder()
                 .addPath(new BezierLine(shootBall3, park))
                 .setLinearHeadingInterpolation(shootBall3.getHeading(), park.getHeading())
@@ -174,8 +195,8 @@ public class close9red extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1600);
-                hood.setPosition(0.265);
+                launcher.setVelocity(2050);
+                hood.setPosition(0.25);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
@@ -203,6 +224,7 @@ public class close9red extends OpMode {
 
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
+                    launcher.setVelocity(1850);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
@@ -213,33 +235,35 @@ public class close9red extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1700);
-                    hood.setPosition(0.2);
+                    launcher.setVelocity(1850);
+                    hood.setPosition(0.3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot2Started) {
                     if(pathTimer.getElapsedTimeSeconds()>4) {
+                        tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>5) {
+                    if(pathTimer.getElapsedTimeSeconds()>6) {
                         setPathState((PathState.collectAgain));
                     }
                 }
                 break;
             case collectAgain:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(goToCollect2);
                     setPathState((PathState.collectAgainEnd));
                 }
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(1700);
+                    launcher.setVelocity(1850);
                     follower.followPath(collect2);
                     tree.setPower(1);
-                    hood.setPosition(0.23);
+                    hood.setPosition(0.3);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -257,10 +281,49 @@ public class close9red extends OpMode {
                 if (!follower.isBusy() && shoot3Started) {
                     if(pathTimer.getElapsedTimeSeconds()>5) {
                         theWheelOfTheOx.setPower(-1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>6)
+                    {
                         setPathState((PathState.parklol));
                     }
                 }
                 break;
+//            case collectAgainAgain:
+//                if (!follower.isBusy()) {
+//                    follower.followPath(goToCollect3);
+//                    setPathState((PathState.collectAgainAgainEnd));
+//                }
+//                break;
+//            case collectAgainAgainEnd:
+//                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+//                    launcher.setVelocity(1850);
+//                    follower.followPath(collect3);
+//                    tree.setPower(1);
+//                    hood.setPosition(0.45);
+//                    theWheelOfTheOx.setPower(1);
+//                    //theWheelOfTheOx.setPower(0.005);
+//                    //hood.setPosition(0.225);
+//                    setPathState((close9red.PathState.shootAgainAgain));
+//                }
+//                break;
+//            case shootAgainAgain:
+//                // Continuously adjust based on limelight during shooting
+//                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5 && !shoot3Started) {
+//                    follower.followPath(shoot4);
+//                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+//                    tree.setPower(1);
+//                    shoot3Started = true; // Mark as started to prevent calling again
+//                }
+//                if (!follower.isBusy() && shoot3Started) {
+//                    if(pathTimer.getElapsedTimeSeconds()>5) {
+//                        theWheelOfTheOx.setPower(-1);
+//                    }
+//                    if(pathTimer.getElapsedTimeSeconds()>6)
+//                    {
+//                        setPathState((PathState.parklol));
+//                    }
+//                }
+//                break;
             case parklol:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
                     follower.followPath(parking);

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.teleOps;
 
 //import com.acmerobotics.dashboard.FtcDashboard;
 //import com.acmerobotics.dashboard.config.Config;
@@ -19,25 +19,25 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 //@Config
-@TeleOp
-public class ToiletRed extends LinearOpMode {
+//@TeleOp
+public class ToiletBlue extends LinearOpMode {
     //time
-    private static double reaccelerationTime = 0.4; //determines how long between shooting
+    private static double reaccelerationTime = 0.6; //determines how long between shooting
     public static double speedUpWait = 1.5; //how long we wait before the motor is up to speed
     public static double shootTime1 = 1.6; //how long we push the balls through the turret for
     public static double reaccelerateWait1 = shootTime1+reaccelerationTime; //how long we wait before the motor is up to speed again
-    public static double shootTime2 = 2.1; //how long we push the balls through the turret for
+    public static double shootTime2 = 2.2; //how long we push the balls through the turret for
     public static double reaccelerateWait2 = shootTime2+reaccelerationTime; //how long we wait before the motor is up to speed again
-    public static double shootTime3 = 2.6;
-    public static double driveMultiplier = 0.7;
+    public static double shootTime3 = 2.8;
+    public static double driveMultiplier = 0.75;
 
 
-    private int limeHeight = 33;
+    private int limeHeight = 25;
     private int tagHeight = 75;
     private int y = tagHeight - limeHeight;
     //Rotator var
     int motor180Range = 910;
-    int limelightUpAngle = 30;
+    int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
     double time;
@@ -47,8 +47,6 @@ public class ToiletRed extends LinearOpMode {
     boolean yLast = false;
     //y is 1
     boolean aLast =false;
-
-
     //a is 0.6
     private int rotatorSpeed = 50;
 
@@ -58,7 +56,6 @@ public class ToiletRed extends LinearOpMode {
     private DcMotorEx launcher;
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
     public ElapsedTime runtime = new ElapsedTime();
-
 
     public void runOpMode() throws InterruptedException{
         follower = Constants.createFollower(hardwareMap);
@@ -96,7 +93,7 @@ public class ToiletRed extends LinearOpMode {
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         if (limelight != null) {
-            limelight.pipelineSwitch(0);
+            limelight.pipelineSwitch(1);
             limelight.start();
             telemetry.addData("LL", "initialized");
         } else {
@@ -160,16 +157,19 @@ public class ToiletRed extends LinearOpMode {
 
                 }
                 adjustRotator(txDeg);
+
+
                 if (yPressed) {
-                    launcher.setVelocity(launcher.getVelocity()+50);
+                    launcher.setVelocity(launcher.getVelocity()+30);
                 }
                 if (aPressed) {
-                    launcher.setVelocity(launcher.getVelocity()-50);
+                    launcher.setVelocity(launcher.getVelocity()-30);
                 }
-                if (gamepad2.b) {
-                    launcher.setPower(calcVelocity(getDist(tyDeg))*(1.03));
+                if (gamepad1.b) {
+                    launcher.setVelocity(calcVelocity(getDist(tyDeg))*1.01);
+                }
 
-                }
+
                 telemetry.addData("dist", getDist(tyDeg));
                 telemetry.addData("CalcVelocity", calcVelocity(getDist(tyDeg)));
 
@@ -183,37 +183,37 @@ public class ToiletRed extends LinearOpMode {
 
                 if (xPressed){
                     newTime = runtime.time();
-                    launcher.setVelocity(calcVelocity(getDist(tyDeg)));
+                    launcher.setPower(calcVelocity(getDist(tyDeg)));
                     while (newTime-time<speedUpWait){
-                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
+                        launcher.setPower(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
                     intake.setPower(-1);
                     flicker.setPower(1);
                     while (newTime-time<shootTime1){
-                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
+                        launcher.setPower(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
                     intake.setPower(0);
                     flicker.setPower(0);
                     while (newTime-time<reaccelerateWait1){
-                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
+                        launcher.setPower(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
                     intake.setPower(-1);
                     flicker.setPower(1);
                     while (newTime-time<shootTime2){
-                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
+                        launcher.setPower(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
                     intake.setPower(0);
                     flicker.setPower(0);
                     while (newTime-time<reaccelerateWait2){
-                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
+                        launcher.setPower(calcVelocity(getDist(tyDeg)));
                         drive();
                         newTime = runtime.time();
                     }
@@ -221,9 +221,11 @@ public class ToiletRed extends LinearOpMode {
                     flicker.setPower(1);
                     while (newTime-time<shootTime3){
                         drive();
-                        launcher.setVelocity(calcVelocity(getDist(tyDeg)));
+                        launcher.setPower(calcVelocity(getDist(tyDeg)));
                         newTime = runtime.time();
                     }
+
+
 
 
                 }
@@ -239,10 +241,23 @@ public class ToiletRed extends LinearOpMode {
                     intake.setPower(0);
                 }
                 //launcher movements
+                if (gamepad1.left_trigger > 0.1) {
+                    flicker.setPower(gamepad1.left_trigger);     // Forward
+                }
+                else if (gamepad1.right_trigger > 0.1) {
+                    flicker.setPower(-gamepad1.right_trigger);   // Reverse
+                }
+                else {
+                    flicker.setPower(0);                         // Stop
+                }
 
-                flicker.setPower(gamepad1.left_trigger);
                 telemetry.addData("Launcher velocity (ticks/sec)", launcher.getVelocity());
             }
+
+            if (gamepad2.right_trigger > 0.1){
+                launcher.setPower(0);
+            }
+
 
 
 
@@ -267,10 +282,12 @@ public class ToiletRed extends LinearOpMode {
     }
 
     public double calcVelocity(double dist) {
-        double rice = dist/759.11885;
-        double velocity = 1253.0478*Math.pow(2.72,rice)+ 62.005321;
-        double rpower = velocity/2460;
-        return rpower;
+            double rice = dist/654.83484;
+            double velocity = 1149.3757*Math.pow(2.72,rice)+ 83.439116;
+            double rpower = velocity/2580;
+            return rpower;
+
+
     }
 
     public void drive(){
@@ -293,4 +310,3 @@ public class ToiletRed extends LinearOpMode {
 
 
 }
-

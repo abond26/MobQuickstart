@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.WORKPLS;
 
-@Autonomous(name = "Haolin was here blue no lime", group = "auton")
+@Autonomous(name = "Haolin was here blue no lime", group = "zzzzzz")
 public class AutonBlueClose extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg

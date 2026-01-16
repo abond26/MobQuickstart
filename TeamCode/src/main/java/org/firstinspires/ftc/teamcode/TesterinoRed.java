@@ -117,7 +117,7 @@ public class TesterinoRed extends LinearOpMode {
                 rightBumperTimer.reset();
                 rightBumperTimerStarted = true;
             }
-
+//j
             if (!gamepad1.right_bumper) {
                 rightBumperTimerStarted = false;
             }
@@ -266,7 +266,7 @@ public class TesterinoRed extends LinearOpMode {
     public void adjustRotator(double tx) {
         double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment + 8;
+        int newPosition = rotator.getCurrentPosition() + adjustment;
         rotator.setTargetPosition(newPosition);
     }
 
