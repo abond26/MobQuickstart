@@ -28,7 +28,7 @@ public class freaky extends OpMode {
     private int limeHeight = 33;
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 1;
-    private static final double PRECISE_DRIVE = 0.2;
+    private static final double PRECISE_DRIVE = 0.6;
 
     private static final double INTAKE_DRIVE_POWER = 0.8; // tune this
 
@@ -55,19 +55,35 @@ public class freaky extends OpMode {
         Clear,
         Shot2Before,
         SHOT2,
+        GoToGetReady2,
+        RegIntake,
+        Shot3Before,
+        Shot3,
+        GoToGetReady3,
+        RegIntake2,
+        Shot4Before,
+        Shot4,
+        Skeddadle,
+
+
+
 
     }
 
     PathState pathState;
     private final Pose startPose = new Pose(27 , 129, Math.toRadians(138));
     private final Pose shootPose = new Pose(50, 105, Math.toRadians(138));
-
+    private final Pose farshootPose = new Pose(56, 14, Math.toRadians(122));
 
     private final Pose GettingReadyForIntake1 = new Pose(50, 57, Math.toRadians(180));
-    private final Pose Intake1Endpoint = new Pose(33, 68, Math.toRadians(180));
-    private final Pose Intake1ControlPoint = new Pose(0, 60, Math.toRadians(180));
-    private final Pose ClearEnd = new Pose(17, 68, Math.toRadians(180));
+    private final Pose Intake1Endpoint = new Pose(29, 68, Math.toRadians(180));
+    private final Pose Intake1ControlPoint = new Pose(2, 60, Math.toRadians(180));
+    private final Pose ClearEnd = new Pose(15.5, 68, Math.toRadians(180));
     private final Pose Shot2ControlPoint = new Pose(72, 72, Math.toRadians(138));
+    private final Pose GettingReadyForIntake2 = new Pose(50, 83, Math.toRadians(180));
+    private final Pose Intake2 = new Pose(50, 83, Math.toRadians(180));
+    private final Pose GettingReadyForIntake3 = new Pose(50, 35, Math.toRadians(180));
+    private final Pose Intake3end = new Pose(20, 35, Math.toRadians(180));
 
 
 
@@ -81,7 +97,13 @@ public class freaky extends OpMode {
 
 
 
-    private PathChain StartShoot,PrepIntake1,Intake1Curve,Clearing,Shot2Curve;
+
+
+
+
+
+
+    private PathChain StartShoot,PrepIntake1,Intake1Curve,Clearing,Shot2Curve,PrepIntake2,IntakeTwo,Shoot2,PrepIntake3,Intake3,Shoot3;
 
     public void buildPaths() {
         StartShoot = follower.pathBuilder()
@@ -104,6 +126,31 @@ public class freaky extends OpMode {
                 .addPath(new BezierCurve(ClearEnd,Shot2ControlPoint,shootPose))
                 .setLinearHeadingInterpolation(ClearEnd.getHeading(),shootPose.getHeading())
                 .build();
+        PrepIntake2 = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, GettingReadyForIntake2))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), GettingReadyForIntake2.getHeading())
+                .build();
+        IntakeTwo = follower.pathBuilder()
+                .addPath(new BezierLine(GettingReadyForIntake2, Intake2))
+                .setLinearHeadingInterpolation(GettingReadyForIntake2.getHeading(), Intake2.getHeading())
+                .build();
+        Shoot2 = follower.pathBuilder()
+                .addPath(new BezierLine(Intake2, shootPose))
+                .setLinearHeadingInterpolation(Intake2.getHeading(), shootPose.getHeading())
+                .build();
+        PrepIntake3 = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, GettingReadyForIntake3))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), GettingReadyForIntake3.getHeading())
+                .build();
+        Intake3 = follower.pathBuilder()
+                .addPath(new BezierLine(GettingReadyForIntake3, Intake3end))
+                .setLinearHeadingInterpolation(GettingReadyForIntake3.getHeading(), Intake3end.getHeading())
+                .build();
+        Shoot3 = follower.pathBuilder()
+                .addPath(new BezierLine(Intake3end, farshootPose))
+                .setLinearHeadingInterpolation(Intake3end.getHeading(), farshootPose.getHeading())
+                .build();
+
 
 
 
@@ -116,7 +163,7 @@ public class freaky extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case DRIVE_START_SHOOT:
-                hood.setPosition(.2);
+                hood.setPosition(0);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(StartShoot, true);
                 launcher.setVelocity(1670);
@@ -125,8 +172,8 @@ public class freaky extends OpMode {
 
 
             case PRE_SHOOT:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
-                    hood.setPosition(.2);
+                if (!follower.isBusy() && launcher.getVelocity() >= 1670) {
+                    hood.setPosition(0);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     launcher.setVelocity(1670);
                     intake(1);
@@ -137,7 +184,6 @@ public class freaky extends OpMode {
                 break;
             case GoToGetReady:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    theWheelOfTheOx.setPower(0);
                     intake(0);
                     follower.followPath(PrepIntake1, true);
                     setPathState(PathState.CurvyIntake);
@@ -147,7 +193,7 @@ public class freaky extends OpMode {
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     follower.followPath(Intake1Curve, true);
-                    intake(0.75);
+                    intake(1);
                     setPathState(PathState.Clear);
                 }
                 break;
@@ -169,14 +215,59 @@ public class freaky extends OpMode {
                 break;
             case SHOT2:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    hood.setPosition(.2);
+                    hood.setPosition(0);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     launcher.setVelocity(1670);
                     intake(1);
                     theWheelOfTheOx.setPower(-1);
+                    setPathState(PathState.SHOT2);
 
                 }
                 break;
+            case GoToGetReady2:
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                    hood.setPosition(0);
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    launcher.setVelocity(1670);
+                    intake(0);
+                    theWheelOfTheOx.setPower(0);
+                    follower.followPath(PrepIntake2);
+                    setPathState(PathState.RegIntake);
+
+                    ;
+
+                }
+                break;
+            case RegIntake:
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                    follower.setMaxPower(INTAKE_DRIVE_POWER);
+                    launcher.setVelocity(1670);
+                    intake(1);
+                    follower.followPath(IntakeTwo);
+                    setPathState(PathState.Shot3Before);
+
+                }
+                break;
+            case Shot3Before:
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    intake(0);
+                    follower.followPath(Shoot2);
+                    setPathState(PathState.Shot3);
+
+                }
+                break;
+            case Shot3:
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                    hood.setPosition(0);
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    intake(1);
+                    theWheelOfTheOx.setPower(-1);
+                    setPathState(PathState.GoToGetReady3);
+
+                }
+                break;
+            case GoToGetReady3:
 
 
 
@@ -186,7 +277,12 @@ public class freaky extends OpMode {
 
 
 
-        }
+
+
+
+
+
+                }
     }
 
     public void setPathState(PathState newState) {
@@ -288,7 +384,7 @@ public class freaky extends OpMode {
     }
     public double calcVelocity(double dist) {
         double rice = dist/654.83484;
-        double velocity = 949.3757*Math.pow(2.72,rice)+ 83.23996;
+        double velocity = 949.3757*Math.pow(2.72,rice)+ 8303996;
         double rpower = velocity/2580;
         return rpower;
     }
