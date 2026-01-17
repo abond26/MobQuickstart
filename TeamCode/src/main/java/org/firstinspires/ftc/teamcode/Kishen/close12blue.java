@@ -121,7 +121,7 @@ public class close12blue extends OpMode {
     private final Pose openGateEnd = new Pose(15.5, 73, Math.toRadians(90));
     private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(143));
 
-
+//test
     private final Pose collect2Start = new Pose(52, 55, Math.toRadians(180)); //should be 52 82 180
     private final Pose collect2End = new Pose(13, 55, Math.toRadians(180)); //should be 16 82 180
     private final Pose shootBall3 = new Pose(52, 84, Math.toRadians(143));
