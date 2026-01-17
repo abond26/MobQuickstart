@@ -24,25 +24,29 @@ public class TesterinoBlue extends LinearOpMode {
     //282
     //-301
     double sumOfTrigs;
-    boolean limelightOn = false;
     boolean yLast = false;
     boolean aLast =false;
-    boolean rbLast = false;
+    boolean xLast = false;
+    boolean rightBumperLast = false;
+    ElapsedTime rightBumperTimer = new ElapsedTime();
+    boolean rightBumperTimerStarted = false;
+    private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
     int motor180Range = 630;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
     private int y = tagHeight - limeHeight;
-    public static double driveMultiplier = 0.7;
+    public static double driveMultiplier = 1;
     private Limelight3A limelight;
     public ElapsedTime runtime = new ElapsedTime();
     private Servo hood;
 
     // Distance threshold for hood adjustment (tune this value)
-    private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = 0.32; // Hood position for close shots
-    private static final double FAR_HOOD_POSITION = 0.4; // Hood position for far shots
-    //j
+    private static final double FIRST_DISTANCE_THRESHOLD = 140.0;
+    private static final double SECOND_DISTANCE_THRESHOLD = 200;
+    private static final double CLOSE_HOOD_POSITION = 0.0339; // Hood position for close shots
+    private static final double MID_HOOD_POSITION = 0.203+0.0167;
+    private static final double FAR_HOOD_POSITION = 0.25+.0129; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -101,23 +105,30 @@ public class TesterinoBlue extends LinearOpMode {
         follower.startTeleopDrive();
         while (opModeIsActive()){
             time = runtime.time();
-
-            boolean yPressed = gamepad1.y && !yLast;
+            boolean yPressed = gamepad1.dpad_down && !yLast;
             yLast = gamepad1.y;
 
-            boolean aPressed = gamepad1.a && !aLast;
+            boolean aPressed = gamepad1.dpad_up && !aLast;
             aLast = gamepad1.a;
+            boolean xPressed = gamepad2.x && !xLast;
+            xLast = gamepad2.x;
+            boolean rightBumperPressed = gamepad1.right_bumper && !rightBumperLast;
+            rightBumperLast = gamepad1.right_bumper;
 
-            boolean rightButtonPressed = gamepad1.right_stick_button && !rbLast;
-            rbLast = gamepad1.right_stick_button;
+            if (rightBumperPressed) {
+                rightBumperTimer.reset();
+                rightBumperTimerStarted = true;
+            }
+//j
+            if (!gamepad1.right_bumper) {
+                rightBumperTimerStarted = false;
+            }
 //            if (gamepad1.x){
 //                limelight.pipelineSwitch(1);
 //            }
 //            if (gamepad1.b){
 //                limelight.pipelineSwitch(0);
 //            }
-
-
 
             drive();
 
@@ -137,6 +148,7 @@ public class TesterinoBlue extends LinearOpMode {
             //feed the flame ._.
             if (gamepad1.right_bumper){
                 theWheelOfTheOx.setPower(1);
+                intake.setPower(-1);
                 gamepad1.rumble(100);
 
 
@@ -152,7 +164,7 @@ public class TesterinoBlue extends LinearOpMode {
             sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
             if (sumOfTrigs!=0){
                 intake(sumOfTrigs);
-            } else {
+            } else if (!gamepad1.right_bumper) {
                 intake.setPower(0);
             }
 
@@ -176,8 +188,6 @@ public class TesterinoBlue extends LinearOpMode {
                 double tyDeg = 0.0; //vertical deg
                 double ta = 0.0;
                 boolean llValid = false;
-                double currentDistance = getDist(tyDeg);
-
                 if (ll != null) {
                     txDeg = ll.getTx();
                     tyDeg = ll.getTy();
@@ -185,27 +195,24 @@ public class TesterinoBlue extends LinearOpMode {
                     llValid = ll.isValid();
 
                     if (llValid) {
+                        telemetry.addLine("Limelight Detecting Yes");
                         telemetry.addData("Ta", ta);
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
-                        telemetry.addLine("Limelight Detecting");
-                        if (!gamepad1.dpad_right && !gamepad1.dpad_left && limelightOn) {
-                            adjustRotator(txDeg);
+                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                            adjustRotator(txDeg, getDist(txDeg));
                         }
-                        if (currentDistance > 0) {
-                            jollyCrusader.setVelocity(calcVelocity(currentDistance));
-                            adjustHoodBasedOnDistance(currentDistance);
-                        }
-
                     } else {
-                        telemetry.addLine("no Limelight Detecting");
-
+                        telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
                     }
                 }
+                double currentDistance = getDist(tyDeg);
+                telemetry.addData("Distance", currentDistance);
 
-                if (rightButtonPressed && currentDistance > 0){
-                    limelightOn = !limelightOn;
+                if (gamepad1.right_stick_button && currentDistance > 0){
+                    jollyCrusader.setVelocity(calcVelocity(currentDistance));
+                    adjustHoodBasedOnDistance(currentDistance);
                 }
 
 
@@ -215,6 +222,10 @@ public class TesterinoBlue extends LinearOpMode {
             }
 
 
+            if (gamepad1.a){
+                jollyCrusader.setVelocity(1400);
+                hood.setPosition(0);
+            }
             if (gamepad1.x){
                 hood.setPosition(hood.getPosition()-0.005);
             }
@@ -228,7 +239,6 @@ public class TesterinoBlue extends LinearOpMode {
             telemetry.addData("hood pos", hood.getPosition());
             telemetry.addData("x", follower.getPose().getX());
             telemetry.addData("y", follower.getPose().getY());
-
             telemetry.update();
 
 
@@ -254,10 +264,14 @@ public class TesterinoBlue extends LinearOpMode {
         rightFront.setPower(rightFrontPower);
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
-    public void adjustRotator(double tx) {
+    public void adjustRotator(double tx, double distance) {
         double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment - 24;
+        int offset = 14;
+        if (distance > 200) {
+            offset = 4;
+        }
+        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
         rotator.setTargetPosition(newPosition);
     }
 
@@ -271,25 +285,34 @@ public class TesterinoBlue extends LinearOpMode {
         return realDist;
     }
     public double calcVelocity(double dist) {
-        double velocity = 3.30933 * dist + 1507.01002;
+        double velocity;
+        if (dist < FIRST_DISTANCE_THRESHOLD) {
+            velocity = 4.94*dist + 1008;
+        } else if (dist < SECOND_DISTANCE_THRESHOLD){
+            velocity = 4.22*dist + 1129;
+        }
+        else{
+            velocity = 16.66*dist - 1420;
+        }
         return velocity;
     }
     public void intake(double intakePower){
         intake.setPower(intakePower);
         if (!gamepad1.right_bumper) {
-            theWheelOfTheOx.setPower(-0.3);
+            theWheelOfTheOx.setPower(-0.4);
         }
     }
 
 
 
     public void adjustHoodBasedOnDistance(double dist) {
-        if (hood != null) {
-            if (dist > DISTANCE_THRESHOLD) {
-                hood.setPosition(FAR_HOOD_POSITION);
-            } else {
-                hood.setPosition(CLOSE_HOOD_POSITION);
-            }
+        if (dist < FIRST_DISTANCE_THRESHOLD) {
+            hood.setPosition(CLOSE_HOOD_POSITION);
+        } else if (dist < SECOND_DISTANCE_THRESHOLD){
+            hood.setPosition(MID_HOOD_POSITION);
+        }
+        else{
+            hood.setPosition(FAR_HOOD_POSITION);
         }
     }
 
