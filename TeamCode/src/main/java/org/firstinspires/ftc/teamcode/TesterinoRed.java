@@ -215,7 +215,7 @@ public class TesterinoRed extends LinearOpMode {
                     adjustHoodBasedOnDistance(currentDistance);
                 }
 
-
+//cool
             }
             if (gamepad1.left_stick_button){
                 jollyCrusader.setVelocity(0);

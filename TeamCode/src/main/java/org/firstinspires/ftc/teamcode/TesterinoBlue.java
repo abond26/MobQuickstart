@@ -220,7 +220,7 @@ public class TesterinoBlue extends LinearOpMode {
             if (gamepad1.left_stick_button){
                 jollyCrusader.setVelocity(0);
             }
-
+//cool
 
             if (gamepad1.a){
                 jollyCrusader.setVelocity(1400);
