@@ -224,7 +224,7 @@ public class TesterinoBlue extends LinearOpMode {
 
             if (gamepad1.a){
                 jollyCrusader.setVelocity(1400);
-                hood.setPosition(0);
+                hood.setPosition(0.0339);
             }
             if (gamepad1.x){
                 hood.setPosition(hood.getPosition()-0.005);

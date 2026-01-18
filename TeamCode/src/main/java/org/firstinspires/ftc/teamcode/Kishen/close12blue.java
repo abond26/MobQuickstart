@@ -112,19 +112,19 @@ public class close12blue extends OpMode {
 
     PathState pathState;
     private final Pose startPose = new Pose(24.4, 126.7, Math.toRadians(143));
-    private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(143));
-    private final Pose collect1thingstart=new Pose(52, 82, Math.toRadians(180)); //has to do two so 52 55 180
+    private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(137));
+    private final Pose collect1thingstart=new Pose(52, 80, Math.toRadians(180)); //has to do two so 52 55 180
 
-    private final Pose collect1thing = new Pose(16, 82, Math.toRadians(180));// should be 13 55 180
+    private final Pose collect1thing = new Pose(16, 80, Math.toRadians(180));// should be 13 55 180
     //private final Pose awayFromGate = new Pose(35, 70, Math.toRadians(90));
     private final Pose openGateStart = new Pose(20, 73, Math.toRadians(90));
-    private final Pose openGateEnd = new Pose(15.5, 73, Math.toRadians(90));
+    private final Pose openGateEnd = new Pose(18.5, 73, Math.toRadians(90));
     private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(143));
 
 //test
     private final Pose collect2Start = new Pose(52, 55, Math.toRadians(180)); //should be 52 82 180
     private final Pose collect2End = new Pose(13, 55, Math.toRadians(180)); //should be 16 82 180
-    private final Pose shootBall3 = new Pose(52, 84, Math.toRadians(143));
+    private final Pose shootBall3 = new Pose(52, 84, Math.toRadians(140));
     private final Pose collect3start=new Pose(46, 33, Math.toRadians(180));
 
 
@@ -217,8 +217,8 @@ public class close12blue extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1850);
-                hood.setPosition(0.3);
+                launcher.setVelocity(2050);
+                hood.setPosition(0.25);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
@@ -247,7 +247,7 @@ public class close12blue extends OpMode {
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     launcher.setVelocity(1850);
-                    hood.setPosition(0.325);
+                    hood.setPosition(0.315);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
@@ -309,10 +309,10 @@ public class close12blue extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(1850);
+                    launcher.setVelocity(1775);
                     follower.followPath(collect2);
                     tree.setPower(1);
-                    hood.setPosition(0.3);
+                    hood.setPosition(0.325);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -345,10 +345,10 @@ public class close12blue extends OpMode {
                 break;
             case collectAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(1850);
+                    launcher.setVelocity(1825);
                     follower.followPath(collect3);
                     tree.setPower(1);
-                    hood.setPosition(0.335);
+                    hood.setPosition(0.325);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
