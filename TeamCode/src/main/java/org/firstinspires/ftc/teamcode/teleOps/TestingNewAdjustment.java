@@ -32,6 +32,7 @@ public class TestingNewAdjustment extends LinearOpMode {
     boolean rightBumperTimerStarted = false;
     private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
     int motor180Range = 630;
+    private static final int FULL_CIRCLE_TICKS = 1260; // 360 degrees = motor180Range * 2
 
     // Velocity rumble tracking
     private double targetVelocity = 0;
@@ -180,6 +181,14 @@ public class TestingNewAdjustment extends LinearOpMode {
 
 
             //rotator
+            int currentRotatorPos = rotator.getCurrentPosition();
+            if (Math.abs(currentRotatorPos) >= FULL_CIRCLE_TICKS) {
+                // Reset encoder to 0 (360 degrees becomes new zero)
+                rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rotator.setPower(1);
+            }
+            
             if (gamepad1.dpad_left){
                 rotator.setTargetPosition(rotator.getCurrentPosition()-50);
             }
@@ -316,10 +325,17 @@ public class TestingNewAdjustment extends LinearOpMode {
 
 
     public void adjustRotator(double localizationAngleDeg, double limelightTxDeg, double distance) {
+        // Check if rotator has reached 360 degrees and reset encoder
+        int currentPos = rotator.getCurrentPosition();
+        if (Math.abs(currentPos) >= FULL_CIRCLE_TICKS) {
+            rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rotator.setPower(1);
+        }
+        
         // Coarse adjustment from localization (full range)
         double fracOfFullCircum = Math.toRadians(localizationAngleDeg) / Math.PI;
         int coarseAdjustment = (int) (fracOfFullCircum * motor180Range);
-
 
         double fineAdjustment = limelightTxDeg * 0.3; // Scale factor for fine tuning
         int fineTicks = (int) (Math.toRadians(fineAdjustment) / Math.PI * motor180Range);
