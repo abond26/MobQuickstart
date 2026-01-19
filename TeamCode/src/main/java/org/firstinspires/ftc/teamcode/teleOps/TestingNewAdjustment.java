@@ -32,12 +32,11 @@ public class TestingNewAdjustment extends LinearOpMode {
     boolean rightBumperTimerStarted = false;
     private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
     int motor180Range = 630;
-    private static final int FULL_CIRCLE_TICKS = 1260; // 360 degrees = motor180Range * 2
+    private static final int DEGREES_270_TICKS = 945; 
 
-    // Velocity rumble tracking
     private double targetVelocity = 0;
     private boolean hasRumbledForVelocity = false;
-    private static final double VELOCITY_TOLERANCE = 20.0; // Rumble when within 20 ticks of target
+    private static final double VELOCITY_LENIANCE = 20.0;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
@@ -182,14 +181,11 @@ public class TestingNewAdjustment extends LinearOpMode {
 
             //rotator
             int currentRotatorPos = rotator.getCurrentPosition();
-            if (Math.abs(currentRotatorPos) >= FULL_CIRCLE_TICKS) {
-                // Reset encoder to 0 (360 degrees becomes new zero)
-                rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rotator.setPower(1);
+            // If rotator reaches 270 degrees, return to zero position
+            if (Math.abs(currentRotatorPos) >= DEGREES_270_TICKS) {
+                rotator.setTargetPosition(0);
             }
-            
-            if (gamepad1.dpad_left){
+            else if (gamepad1.dpad_left){
                 rotator.setTargetPosition(rotator.getCurrentPosition()-50);
             }
             else if (gamepad1.dpad_right){
@@ -241,7 +237,7 @@ public class TestingNewAdjustment extends LinearOpMode {
 
                 if (targetVelocity > 0 && !hasRumbledForVelocity) {
                     double currentVelocity = jollyCrusader.getVelocity();
-                    if (Math.abs(currentVelocity - targetVelocity) <= VELOCITY_TOLERANCE) {
+                    if (Math.abs(currentVelocity - targetVelocity) <= VELOCITY_LENIANCE) {
                         gamepad1.rumble(200); // Rumble for 200ms
                         hasRumbledForVelocity = true; // Only rumble once per target
                         telemetry.addLine("Velocity Reached!");
@@ -325,12 +321,11 @@ public class TestingNewAdjustment extends LinearOpMode {
 
 
     public void adjustRotator(double localizationAngleDeg, double limelightTxDeg, double distance) {
-        // Check if rotator has reached 360 degrees and reset encoder
+        // Check if rotator has reached 270 degrees, return to zero position
         int currentPos = rotator.getCurrentPosition();
-        if (Math.abs(currentPos) >= FULL_CIRCLE_TICKS) {
-            rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rotator.setPower(1);
+        if (Math.abs(currentPos) >= DEGREES_270_TICKS) {
+            rotator.setTargetPosition(0);
+            return;
         }
         
         // Coarse adjustment from localization (full range)
