@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp
 
-public class TesterinoBlue extends LinearOpMode {
+public class TestingNewAdjustment extends LinearOpMode {
     double newTime;
     double time;
 
@@ -32,6 +32,11 @@ public class TesterinoBlue extends LinearOpMode {
     boolean rightBumperTimerStarted = false;
     private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
     int motor180Range = 630;
+
+    // Velocity rumble tracking
+    private double targetVelocity = 0;
+    private boolean hasRumbledForVelocity = false;
+    private static final double VELOCITY_TOLERANCE = 20.0; // Rumble when within 20 ticks of target
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
@@ -47,6 +52,10 @@ public class TesterinoBlue extends LinearOpMode {
     private static final double CLOSE_HOOD_POSITION = 0.0339; // Hood position for close shots
     private static final double MID_HOOD_POSITION = 0.203+0.0167;
     private static final double FAR_HOOD_POSITION = 0.25+.0129; // Hood position for far shots
+
+    private static final double APRILTAG_X = 15.0; // AprilTag X position on field (inches) - UPDATE THIS
+    private static final double APRILTAG_Y = 128.0; // AprilTag Y position on field (inches) - UPDATE THIS
+
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -200,7 +209,11 @@ public class TesterinoBlue extends LinearOpMode {
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
                         if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
-                            adjustRotator(txDeg, getDist(txDeg));
+                            double localizationAngle = calculateAngleToAprilTag();
+                            double currentDistance = getDist(tyDeg);
+                            adjustRotator(localizationAngle, txDeg, currentDistance);
+
+                            telemetry.addData("Localization Angle", localizationAngle);
                         }
                     } else {
                         telemetry.addLine("Limelight Detecting No");
@@ -211,8 +224,19 @@ public class TesterinoBlue extends LinearOpMode {
                 telemetry.addData("Distance", currentDistance);
 
                 if (gamepad1.right_stick_button && currentDistance > 0){
-                    jollyCrusader.setVelocity(calcVelocity(currentDistance));
+                    targetVelocity = calcVelocity(currentDistance);
+                    jollyCrusader.setVelocity(targetVelocity);
                     adjustHoodBasedOnDistance(currentDistance);
+                    hasRumbledForVelocity = false;
+                }
+
+                if (targetVelocity > 0 && !hasRumbledForVelocity) {
+                    double currentVelocity = jollyCrusader.getVelocity();
+                    if (Math.abs(currentVelocity - targetVelocity) <= VELOCITY_TOLERANCE) {
+                        gamepad1.rumble(200); // Rumble for 200ms
+                        hasRumbledForVelocity = true; // Only rumble once per target
+                        telemetry.addLine("Velocity Reached!");
+                    }
                 }
 
 
@@ -264,14 +288,50 @@ public class TesterinoBlue extends LinearOpMode {
         rightFront.setPower(rightFrontPower);
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
-    public void adjustRotator(double tx, double distance) {
-        double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
-        int adjustment = (int) (fracOfFullCircum * motor180Range);
+    /**
+     * Calculate the angle from robot to AprilTag using localization
+     * @return angle in degrees (relative to robot's front)
+     */
+    public double calculateAngleToAprilTag() {
+        Pose robotPose = follower.getPose();
+        double robotX = robotPose.getX();
+        double robotY = robotPose.getY();
+        double robotHeading = robotPose.getHeading();
+
+        double deltaX = APRILTAG_X - robotX;
+        double deltaY = APRILTAG_Y - robotY;
+
+        // Calculate absolute angle to AprilTag (in radians)
+        double angleToTag = Math.atan2(deltaY, deltaX);
+
+
+        double relativeAngle = angleToTag - robotHeading;
+
+        // Normalize to [-PI, PI]
+        while (relativeAngle > Math.PI) relativeAngle -= 2 * Math.PI;
+        while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
+
+        return Math.toDegrees(relativeAngle);
+    }
+
+
+    public void adjustRotator(double localizationAngleDeg, double limelightTxDeg, double distance) {
+        // Coarse adjustment from localization (full range)
+        double fracOfFullCircum = Math.toRadians(localizationAngleDeg) / Math.PI;
+        int coarseAdjustment = (int) (fracOfFullCircum * motor180Range);
+
+
+        double fineAdjustment = limelightTxDeg * 0.3; // Scale factor for fine tuning
+        int fineTicks = (int) (Math.toRadians(fineAdjustment) / Math.PI * motor180Range);
+
+        int totalAdjustment = coarseAdjustment + fineTicks;
+
         int offset = 14;
         if (distance > 200) {
             offset = 4;
         }
-        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
+
+        int newPosition = rotator.getCurrentPosition() + totalAdjustment - offset;
         rotator.setTargetPosition(newPosition);
     }
 
