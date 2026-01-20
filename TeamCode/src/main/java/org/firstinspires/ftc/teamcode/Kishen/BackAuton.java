@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name = "notbetterthanleftovers", group = "Examples")
+@Autonomous(name = "notbetterthanleftovers", group = "zzzz")
 public class BackAuton extends OpMode {
     private Follower follower;
 
