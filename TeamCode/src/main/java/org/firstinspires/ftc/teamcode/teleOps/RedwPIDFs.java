@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.teleOps;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp
 
-public class TesterinoRed extends LinearOpMode {
+public class RedwPIDFs extends LinearOpMode {
     double newTime;
     double time;
 
@@ -215,11 +215,12 @@ public class TesterinoRed extends LinearOpMode {
                     adjustHoodBasedOnDistance(currentDistance);
                 }
 
-//cool
+
             }
             if (gamepad1.left_stick_button){
                 jollyCrusader.setVelocity(0);
             }
+//cool
 
             if (gamepad1.a){
                 jollyCrusader.setVelocity(1400);
@@ -268,9 +269,9 @@ public class TesterinoRed extends LinearOpMode {
         int adjustment = (int) (fracOfFullCircum * motor180Range);
         int offset = 14;
         if (distance > 200) {
-            offset = 15;
+            offset = 4;
         }
-        int newPosition = rotator.getCurrentPosition() + adjustment + offset;
+        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
         rotator.setTargetPosition(newPosition);
     }
 
