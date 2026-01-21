@@ -4,7 +4,6 @@ import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
@@ -18,54 +17,42 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Haolin was here", group = "zzzz")
+@Autonomous(name = "limelight blue", group = "LimeLight")
 public class AutonBlueCloseLime extends OpMode {
+    private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
-    
-    // Flags to prevent path oscillation
+
+    // Flags to prevent path oscillation - ensure paths are only called once per state
     private boolean shoot2Started = false;
     private boolean shoot3Started = false;
     private boolean shoot4Started = false;
     private boolean shoot5Started = false;
-    private boolean manualRotatorAdjustment = false; // Track if manual adjustment was just made
-    
-    // Limelight adjustment improvements
-    private int desiredRotatorPosition = 0; // Track desired position to fix cumulative adjustment
-    private int adjustmentLoopCounter = 0; // Rate limiting counter
-    private static final int ADJUSTMENT_RATE_LIMIT = 8; // Adjust every 8 loops (~4 times/second)
-    private static final int MIN_MOVEMENT_THRESHOLD = 5; // Minimum ticks to move
-    private static final double TX_DEADBAND = 0.5; // Deadband in degrees
-    private static final int TX_SMOOTHING_SAMPLES = 3; // Number of samples for smoothing
-    private double[] txHistory = new double[TX_SMOOTHING_SAMPLES];
-    private boolean[] txHistoryValid = new boolean[TX_SMOOTHING_SAMPLES]; // Track which samples are valid
-    private int txHistoryIndex = 0;
-    private int txHistoryCount = 0; // Count of valid samples in history
-    private Timer lastAdjustmentTimer = new Timer(); // Track time since last adjustment
-    private Timer manualAdjustmentTimer = new Timer(); // Track time since manual adjustment started
-    private static final boolean VERBOSE_DEBUG = false; // Set to true for detailed debug telemetry
+    private boolean goAwayFromGateStarted = false;
+    private boolean goTowardsGateStarted = false;
+    private boolean opengateStarted = false;
+    private boolean parkingStarted = false;
 
     private Servo hood;
-    // Limelight constants (matching TesterinoBlue exactly)
-    private int limeHeight = 35;
+    private int limeHeight = 33;
     private int offset = 28;
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 1;
     private static final double INTAKE_DRIVE_POWER = 0.6; // tune this
-    
+
     // Hood adjustment constants (from TesterinoBlue)
-    private static final double DISTANCE_THRESHOLD = 180.0; // Change hood when distance > 180 inches
-    private static final double CLOSE_HOOD_POSITION = 0.79; // Hood position for close shots (matches TesterinoBlue)
-    private static final double FAR_HOOD_POSITION = 0.5; // Hood position for far shots
+    private static final double DISTANCE_THRESHOLD = 180.0;
+    private static final double CLOSE_HOOD_POSITION = .2541; // Hood position for close shots
+    private static final double FAR_HOOD_POSITION = 0.36; // Hood position for far shots
 
     private int y = tagHeight - limeHeight;
-    //Rotator var (matching TesterinoBlue exactly)
-    int motor180Range = 630;  // Changed from 910 to match TesterinoBlue
-    int limelightUpAngle = 20;  // Changed from 25 to match TesterinoBlue
+    //Rotator var
+    int motor180Range = 910;
+    int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
-    
+
     // Store last valid limelight values for fallback
     private double lastValidTx = 0.0;
     private double lastValidTy = 0.0;
@@ -82,12 +69,14 @@ public class AutonBlueCloseLime extends OpMode {
     public enum PathState {
         start,
         actuallyshoot1,
+        gotocollect,
         collection,
+        goAwayFromGate,
+        goTowardsGate,
+        opengate,
         shoot,
         collectAgain,
         collectAgainEnd,
-        opengatestart,
-        opengateend,
 
 
         shootAgain,
@@ -117,53 +106,36 @@ public class AutonBlueCloseLime extends OpMode {
 
         SHOT_3,
 
-        JACK_OFF,//comm
+        JACK_OFF,
 
     }
 
     PathState pathState;
     private final Pose startPose = new Pose(24.4, 126.7, Math.toRadians(143));
-    private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(180));
+    private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(137));
+    private final Pose collect1thingstart=new Pose(52, 80, Math.toRadians(180)); //has to do two so 52 55 180
+
+    private final Pose collect1thing = new Pose(16, 80, Math.toRadians(180));// should be 13 55 180
+    //private final Pose awayFromGate = new Pose(35, 70, Math.toRadians(90));
+    private final Pose openGateStart = new Pose(20, 73, Math.toRadians(90));
+    private final Pose openGateEnd = new Pose(18.5, 73, Math.toRadians(90));
+    private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(143));
+
+    //test
+    private final Pose collect2Start = new Pose(52, 55, Math.toRadians(180)); //should be 52 82 180
+    private final Pose collect2End = new Pose(13, 55, Math.toRadians(180)); //should be 16 82 180
+    private final Pose shootBall3 = new Pose(52, 84, Math.toRadians(140));
+    private final Pose collect3start=new Pose(46, 33, Math.toRadians(180));
 
 
-    private final Pose collect1thing = new Pose(16, 82, Math.toRadians(180));
-    private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(180));
-
-
-    private final Pose collect2Start = new Pose(45, 55, Math.toRadians(180));
-    private final Pose collect2End = new Pose(8, 55, Math.toRadians(180));
-    private final Pose openGateStart = new Pose(31, 71, Math.toRadians(180));
-    private final Pose openGateControlPoint = new Pose(26.18163265306122, 60.4122448979592, Math.toRadians(180));
-    private final Pose openGateEnd = new Pose(18, 71, Math.toRadians(180));
-
-
-    private final Pose shootBall3 = new Pose(62, 28, Math.toRadians(180));
-
-
-    private final Pose collect3Start = new Pose(46, 33, Math.toRadians(180));
-
-    private final Pose collect3End = new Pose(13, 33, Math.toRadians(180)); // FIXED: Changed from same position to actual collection end
-
-
-    private final Pose shootBall4 = new Pose(62, 28, Math.toRadians(180));
-
-
-
-    private final Pose collect4start = new Pose(9, 25.5, Math.toRadians(270));
-
- private final Pose collect4ControlPoint = new Pose( 31.324489795918367, 37.937755102040825);
-    private final Pose collect4end = new Pose(9, 10, Math.toRadians(270));
-
-    private final Pose shoot5ControlPoint = new Pose( 13.969387755102037, 38.86938775510206);
-
-    private final Pose shootBall5 = new Pose(9, 10, Math.toRadians(180));
-
-    private final Pose park = new Pose(16, 11, Math.toRadians(180));
+    private final Pose collect3end = new Pose(13, 33, Math.toRadians(180));
+    private final Pose shootBall4 = new Pose(52, 84, Math.toRadians(143));
+    private final Pose park = new Pose(35, 84, Math.toRadians(143));
 
 
 
 
-    private PathChain shoot1, collect1, shoot2, goToCollect2, collect2, goToGate, openGate, shoot3, goToCollect3, collect3, shoot4, goToCollect4, collect4, shoot5, parking;
+    private PathChain shoot1, goToCollect1, collect1, shoot2, goToCollect2, collect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
 
     public void buildPaths() {
         shoot1 = follower.pathBuilder()
@@ -171,17 +143,33 @@ public class AutonBlueCloseLime extends OpMode {
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
                 .build();
 
-
-        collect1 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose1, collect1thing))
-                .setLinearHeadingInterpolation(shootPose1.getHeading(), collect1thing.getHeading())
+        goToCollect1 = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose1, collect1thingstart))
+                .setLinearHeadingInterpolation(shootPose1.getHeading(), collect1thingstart.getHeading())
                 .build();
 
+        collect1 = follower.pathBuilder()
+                .addPath(new BezierLine(collect1thingstart, collect1thing))
+                .setLinearHeadingInterpolation(collect1thingstart.getHeading(), collect1thing.getHeading())
+                .build();
+//        awayfromGate = follower.pathBuilder()
+//                .addPath(new BezierLine(collect1thing, awayFromGate))
+//                .setLinearHeadingInterpolation(collect1thing.getHeading(), awayFromGate.getHeading())
+//                .build();
 
+        goToGate = follower.pathBuilder()
+                .addPath(new BezierLine(collect1thing, openGateStart))
+                .setLinearHeadingInterpolation(collect1thing.getHeading(), openGateStart.getHeading())
+                .build();
+
+        openGate = follower.pathBuilder()
+                .addPath(new BezierLine(openGateStart, openGateEnd))
+                .setLinearHeadingInterpolation(openGateStart.getHeading(), openGateEnd.getHeading())
+                .build();
 
         shoot2 = follower.pathBuilder()
-                .addPath(new BezierLine(collect1thing, shootPose2))
-                .setLinearHeadingInterpolation(collect1thing.getHeading(), shootPose2.getHeading())
+                .addPath(new BezierLine(openGateEnd, shootPose2))
+                .setLinearHeadingInterpolation(openGateEnd.getHeading(), shootPose2.getHeading())
                 .build();
 
 
@@ -195,334 +183,209 @@ public class AutonBlueCloseLime extends OpMode {
                 .setLinearHeadingInterpolation(collect2Start.getHeading(), collect2End.getHeading())
                 .build();
 
-        goToGate = follower.pathBuilder()
-                .addPath(new BezierCurve(collect2End, openGateControlPoint, openGateStart))
-                .setLinearHeadingInterpolation(collect2End.getHeading(), openGateStart.getHeading())
-                .build();
 
-        openGate = follower.pathBuilder()
-                .addPath(new BezierLine(openGateStart, openGateEnd))
-                .setLinearHeadingInterpolation(openGateStart.getHeading(), openGateEnd.getHeading())
-                .build();
 
         shoot3 = follower.pathBuilder()
                 .addPath(new BezierLine(collect2End, shootBall3))
                 .setLinearHeadingInterpolation(collect2End.getHeading(), shootBall3.getHeading())
                 .build();
-
         goToCollect3 = follower.pathBuilder()
-                .addPath(new BezierLine(shootBall3, collect3Start))
-                .setLinearHeadingInterpolation(shootBall3.getHeading(), collect3Start.getHeading())
+                .addPath(new BezierLine(shootBall3, collect3start))
+                .setLinearHeadingInterpolation(shootBall3.getHeading(), collect3start.getHeading())
                 .build();
 
-
         collect3 = follower.pathBuilder()
-                .addPath(new BezierLine(collect3Start, collect3End))
-                .setLinearHeadingInterpolation(collect3Start.getHeading(), collect3End.getHeading())
+                .addPath(new BezierLine(collect3start, collect3end))
+                .setLinearHeadingInterpolation(collect3start.getHeading(), collect3end.getHeading())
                 .build();
 
 
         shoot4 = follower.pathBuilder()
-                .addPath(new BezierLine(collect3End, shootBall4))
-                .setLinearHeadingInterpolation(collect3End.getHeading(), shootBall4.getHeading())
-                .build();
-        goToCollect4 = follower.pathBuilder()
-                .addPath(new BezierCurve(shootBall4,collect4ControlPoint, collect4start))
-                .setLinearHeadingInterpolation(shootBall4.getHeading(), collect4start.getHeading())
+                .addPath(new BezierLine(collect3end, shootBall4))
+                .setLinearHeadingInterpolation(collect3end.getHeading(), shootBall4.getHeading())
                 .build();
 
-
-        collect4 = follower.pathBuilder()
-                .addPath(new BezierLine(collect4start, collect4end))
-                .setLinearHeadingInterpolation(collect4start.getHeading(), collect4end.getHeading())
+        parking=follower.pathBuilder()
+                .addPath(new BezierLine(shootBall4, park))
+                .setLinearHeadingInterpolation(shootBall4.getHeading(), park.getHeading())
                 .build();
 
-        shoot5 = follower.pathBuilder()
-                .addPath(new BezierCurve(collect4end,shoot5ControlPoint ,shootBall5))
-                .setLinearHeadingInterpolation(collect4end.getHeading(), shootBall5.getHeading())
-                .build();
-        parking = follower.pathBuilder()
-                .addPath(new BezierLine(shootBall5, park))
-                .setLinearHeadingInterpolation(shootBall5.getHeading(), park.getHeading())
-                .build();
 
     }
 
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                // Set initial velocity to 1700 (will be updated by limelight if it sees target)
-                launcher.setVelocity(1700);
-                // Use hardcoded initial values - limelight will adjust once we're in position
-                adjustRotator(25.5);
-                hood.setPosition(0.175);
+                // Try to use limelight for initial adjustment, fallback to hardcoded values
+                launcher.setVelocity(2050);
+                hood.setPosition(0.25);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
-                // Set velocity to 1700 (will be updated by limelight if it sees target)
-                launcher.setVelocity(1700);
                 // Continuously adjust based on limelight during shooting
                 updateLimelightAdjustments();
-                if (!follower.isBusy()){
-                    // Only start shooting when aligned (limelight sees target and tx is close to 0)
-                    // OR if timeout (4 seconds) - don't wait forever
-                    boolean isAligned = false;
-                    if (limelight != null) {
-                        LLResult ll = limelight.getLatestResult();
-                        if (ll != null && ll.isValid()) {
-                            double currentTx = ll.getTx();
-                            // Consider aligned if tx is within 1.5 degrees of center
-                            if (Math.abs(currentTx) < 1.5) {
-                                isAligned = true;
-                            }
-                        }
-                    }
-                    
-                    // Shoot if aligned OR if timeout (4 seconds) - ensure velocity and motors are set
-                    if (isAligned || pathTimer.getElapsedTimeSeconds() > 4.0) {
-                        launcher.setVelocity(1700); // Ensure velocity is set
-                        tree.setPower(1);
-                        theWheelOfTheOx.setPower(-1);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2){
+                    tree.setPower(1);
+                    theWheelOfTheOx.setPower(-1);
+                    if (pathTimer.getElapsedTimeSeconds()>3.5) {
                         setPathState(AutonBlueCloseLime.PathState.collection);
                     }
-                    // If not aligned and not timeout, stay in this state and keep adjusting
                 }
                 break;
+            case gotocollect:
+                if(!follower.isBusy())
+                {
+                    follower.followPath(goToCollect1);
+                    setPathState(PathState.collection);
+                }
+                break;
+
 
             case collection:
 
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    adjustRotator(25);
+                if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
+                    launcher.setVelocity(1850);
+                    hood.setPosition(0.315);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
-                    setPathState((AutonBlueCloseLime.PathState.shoot));
+                    setPathState((PathState.goTowardsGate));
+                }
+                break;
+//            case goAwayFromGate:
+//                if (!follower.isBusy() && !goAwayFromGateStarted) {
+//                    follower.followPath(awayfromGate);
+//                    goAwayFromGateStarted = true; // Mark as started to prevent calling again
+//                }
+//                if (!follower.isBusy() && goAwayFromGateStarted && pathTimer.getElapsedTimeSeconds() > 5) {
+//                    setPathState(PathState.goTowardsGate);
+//                }
+//                break;
+            case goTowardsGate:
+                if (!follower.isBusy() && !goTowardsGateStarted) {
+                    follower.followPath(goToGate);
+                    goTowardsGateStarted = true; // Mark as started to prevent calling again
+                }
+                if (!follower.isBusy() && goTowardsGateStarted && pathTimer.getElapsedTimeSeconds() > 1.5) {
+                    setPathState(PathState.opengate);
+                }
+                break;
+            case opengate:
+                if (!follower.isBusy() && !opengateStarted) {
+                    follower.followPath(openGate);
+                    opengateStarted = true; // Mark as started to prevent calling again
+                }
+                if (!follower.isBusy() && opengateStarted && pathTimer.getElapsedTimeSeconds() > 2) {
+                    setPathState(PathState.shoot);
                 }
                 break;
             case shoot:
-                // Set velocity to 1700 initially (will be updated by limelight if it sees target)
-                launcher.setVelocity(1700);
                 // Continuously adjust based on limelight during shooting
                 updateLimelightAdjustments();
-                
-                // Only follow path once - use flag to prevent oscillation
-                if (pathTimer.getElapsedTimeSeconds() > 0.5 && !follower.isBusy() && !shoot2Started) {
+                if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
+                    launcher.setVelocity(1850);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
-                    shoot2Started = true; // Mark as started
+                    shoot2Started = true; // Mark as started to prevent calling again
                 }
-                
-                // Only start shooting (theWheelOfTheOx) when aligned and path is done
-                // OR if timeout (4 seconds) - shoot anyway
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.5) {
-                    boolean isAligned = false;
-                    if (limelight != null) {
-                        LLResult ll = limelight.getLatestResult();
-                        if (ll != null && ll.isValid()) {
-                            double currentTx = ll.getTx();
-                            // Consider aligned if tx is within 1.5 degrees of center
-                            if (Math.abs(currentTx) < 1.5) {
-                                isAligned = true;
-                            }
-                        }
-                    }
-                    
-                    // Shoot if aligned OR if timeout (4 seconds) - ensure velocity and motors are set
-                    if (isAligned || pathTimer.getElapsedTimeSeconds() > 4.0) {
-                        launcher.setVelocity(1700); // Ensure velocity is set
-                        tree.setPower(1); // Ensure tree is running
+                if (!follower.isBusy() && shoot2Started) {
+                    if(pathTimer.getElapsedTimeSeconds()>3) {
+                        tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>5) {
                         setPathState((PathState.collectAgain));
                     }
                 }
                 break;
+
             case collectAgain:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
+                if (!follower.isBusy()) {
                     follower.followPath(goToCollect2);
                     setPathState((PathState.collectAgainEnd));
                 }
                 break;
             case collectAgainEnd:
-                if (!follower.isBusy()) {
-                    // Set initial velocity to 3500 (will be updated by limelight if it sees target)
-                    launcher.setVelocity(3500);
-                    adjustRotator(-25);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                    launcher.setVelocity(1775);
                     follower.followPath(collect2);
                     tree.setPower(1);
+                    hood.setPosition(0.325);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
-                    setPathState((PathState.opengatestart));
+                    //hood.setPosition(0.225);
+                    setPathState((AutonBlueCloseLime.PathState.shootAgain));
                 }
                 break;
-            case opengatestart:
-                if (!follower.isBusy())
-                {
-                    follower.followPath(goToGate);
-                    setPathState(PathState.opengateend);
-                }
-                break;
-            case opengateend:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2)
-                {
-                    follower.followPath(openGate);
-                    setPathState(PathState.shootAgain);
-                }
-                break;
-
             case shootAgain:
-                // Set velocity to 3500 initially (will be updated by limelight if it sees target)
-                launcher.setVelocity(3500);
                 // Continuously adjust based on limelight during shooting
                 updateLimelightAdjustments();
-                if (pathTimer.getElapsedTimeSeconds() > 1.5 && !follower.isBusy() && !shoot3Started) {
-                    // Only follow path once - use flag to prevent oscillation
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5 && !shoot3Started) {
                     follower.followPath(shoot3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
-                    shoot3Started = true; // Mark as started
+                    shoot3Started = true; // Mark as started to prevent calling again
                 }
-                
-                // Only start shooting (theWheelOfTheOx) when aligned and path is done
-                // Add timeout so it doesn't wait forever
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
-                    boolean isAligned = false;
-                    if (limelight != null) {
-                        LLResult ll = limelight.getLatestResult();
-                        if (ll != null && ll.isValid()) {
-                            double currentTx = ll.getTx();
-                            // Consider aligned if tx is within 1.5 degrees of center
-                            if (Math.abs(currentTx) < 1.5) {
-                                isAligned = true;
-                            }
-                        }
-                    }
-                    
-                    // Shoot if aligned OR if timeout (4 seconds) - ensure velocity and motors are set
-                    if (isAligned || pathTimer.getElapsedTimeSeconds() > 4.0) {
-                        launcher.setVelocity(3500); // Ensure velocity is set
-                        tree.setPower(1); // Ensure tree is running
+                if (!follower.isBusy() && shoot3Started) {
+                    if(pathTimer.getElapsedTimeSeconds()>3) {
                         theWheelOfTheOx.setPower(-1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>5)
+                    {
                         setPathState((PathState.collectAgainAgain));
                     }
                 }
                 break;
             case collectAgainAgain:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
+                if (!follower.isBusy()) {
                     follower.followPath(goToCollect3);
-                    theWheelOfTheOx.setPower(1);
-                    setPathState((AutonBlueCloseLime.PathState.collectAgainAgainEnd));
+                    setPathState((PathState.collectAgainAgainEnd));
                 }
                 break;
             case collectAgainAgainEnd:
-                if (!follower.isBusy())
-                {
-                    // Set initial velocity to 3500 (will be updated by limelight if it sees target)
-                    launcher.setVelocity(3500);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
+                    launcher.setVelocity(1825);
                     follower.followPath(collect3);
-                    adjustRotator(9);
+                    tree.setPower(1);
+                    hood.setPosition(0.325);
+                    theWheelOfTheOx.setPower(1);
+                    //theWheelOfTheOx.setPower(0.005);
+                    //hood.setPosition(0.225);
                     setPathState((AutonBlueCloseLime.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
-                // Set velocity to 3500 initially (will be updated by limelight if it sees target)
-                launcher.setVelocity(3500);
                 // Continuously adjust based on limelight during shooting
                 updateLimelightAdjustments();
-                if (pathTimer.getElapsedTimeSeconds() > 1.75 && !follower.isBusy() && !shoot4Started) {
-                    // Only follow path once - use flag to prevent oscillation
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5 && !shoot4Started) {
                     follower.followPath(shoot4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
-                    shoot4Started = true; // Mark as started
+                    shoot4Started = true; // Mark as started to prevent calling again
                 }
-                
-                // Only start shooting (theWheelOfTheOx) when aligned and path is done
-                // OR if timeout (4 seconds) - shoot anyway
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    boolean isAligned = false;
-                    if (limelight != null) {
-                        LLResult ll = limelight.getLatestResult();
-                        if (ll != null && ll.isValid()) {
-                            double currentTx = ll.getTx();
-                            // Consider aligned if tx is within 1.5 degrees of center
-                            if (Math.abs(currentTx) < 1.5) {
-                                isAligned = true;
-                            }
-                        }
-                    }
-                    
-                    // Shoot if aligned OR if timeout (4 seconds) - ensure velocity and motors are set
-                    if (isAligned || pathTimer.getElapsedTimeSeconds() > 4.0) {
-                        launcher.setVelocity(3500); // Ensure velocity is set
-                        tree.setPower(1); // Ensure tree is running
+                if (!follower.isBusy() && shoot4Started) {
+                    if(pathTimer.getElapsedTimeSeconds()>3) {
                         theWheelOfTheOx.setPower(-1);
-                        setPathState((PathState.collectAgainAgainAgain));
                     }
-                }
-                break;
-            case collectAgainAgainAgain:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    follower.followPath(goToCollect4);
-                    theWheelOfTheOx.setPower(1);
-                    setPathState((AutonBlueCloseLime.PathState.collectAgainAgainAgainEnd));
-                }
-                break;
-            case collectAgainAgainAgainEnd:
-                if (!follower.isBusy()) {
-                    follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    follower.followPath(collect4);
-                    setPathState((AutonBlueCloseLime.PathState.shootAgainAgainAgain));
-                }
-                break;
-            case shootAgainAgainAgain:
-                // Set velocity to 3500 initially (will be updated by limelight if it sees target)
-                launcher.setVelocity(3500);
-                // Continuously adjust based on limelight during shooting
-                updateLimelightAdjustments();
-                if (pathTimer.getElapsedTimeSeconds() > 1.75 && !follower.isBusy() && !shoot5Started) {
-                    // Only follow path once - use flag to prevent oscillation
-                    follower.followPath(shoot5);
-                    follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    tree.setPower(1);
-                    shoot5Started = true; // Mark as started
-                }
-                
-                // Only start shooting (theWheelOfTheOx) when aligned and path is done
-                // OR if timeout (4 seconds) - shoot anyway
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    boolean isAligned = false;
-                    if (limelight != null) {
-                        LLResult ll = limelight.getLatestResult();
-                        if (ll != null && ll.isValid()) {
-                            double currentTx = ll.getTx();
-                            // Consider aligned if tx is within 1.5 degrees of center
-                            if (Math.abs(currentTx) < 1.5) {
-                                isAligned = true;
-                            }
-                        }
-                    }
-                    
-                    // Shoot if aligned OR if timeout (4 seconds) - ensure velocity and motors are set
-                    if (isAligned || pathTimer.getElapsedTimeSeconds() > 4.0) {
-                        launcher.setVelocity(3500); // Ensure velocity is set
-                        tree.setPower(1); // Ensure tree is running
-                        theWheelOfTheOx.setPower(-1);
-                        setPathState((PathState.done));
+                    if(pathTimer.getElapsedTimeSeconds()>5)
+                    {
+                        setPathState((PathState.parklol));
                     }
                 }
                 break;
             case parklol:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1 && !parkingStarted) {
                     follower.followPath(parking);
-                    setPathState((AutonBlueCloseLime.PathState.done));
-                    // Path complete - autonomous ends here
+                    parkingStarted = true; // Mark as started to prevent calling again
+                }
+                if (!follower.isBusy() && parkingStarted && pathTimer.getElapsedTimeSeconds() > 2) {
+                    setPathState((PathState.done));
                 }
                 break;
-
             case done:
                 break;
 
@@ -531,24 +394,15 @@ public class AutonBlueCloseLime extends OpMode {
     public void setPathState(PathState newState) {
         pathState = newState;
         pathTimer.resetTimer();
-        // Reset flags when state changes
+        // Reset flags when state changes to allow paths to be called again in new state
         shoot2Started = false;
         shoot3Started = false;
         shoot4Started = false;
         shoot5Started = false;
-        manualRotatorAdjustment = false; // Reset manual adjustment flag
-        manualAdjustmentTimer.resetTimer(); // Reset manual adjustment timer
-        adjustmentLoopCounter = 0; // Reset rate limiting counter
-        txHistoryIndex = 0; // Reset smoothing history index
-        txHistoryCount = 0; // Reset valid sample count
-        // Clear smoothing history when state changes
-        for (int i = 0; i < TX_SMOOTHING_SAMPLES; i++) {
-            txHistoryValid[i] = false;
-        }
-        // Reset desired position to current position when state changes
-        if (rotator != null) {
-            desiredRotatorPosition = rotator.getCurrentPosition();
-        }
+        goAwayFromGateStarted = false;
+        goTowardsGateStarted = false;
+        opengateStarted = false;
+        parkingStarted = false;
     }
 
     @Override
@@ -577,12 +431,10 @@ public class AutonBlueCloseLime extends OpMode {
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotator.setTargetPosition(0);
+        rotatorStartPosition=0;
+        rotator.setTargetPosition(rotatorStartPosition);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setDirection(DcMotorSimple.Direction.REVERSE);  // Match TesterinoBlue
-        rotator.setPower(1.0);  // Ensure power is set
-        desiredRotatorPosition = 0; // Initialize desired position
-        lastAdjustmentTimer.resetTimer(); // Reset timer
+        rotator.setPower(1);
 
         theWheelOfTheOx.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -590,6 +442,8 @@ public class AutonBlueCloseLime extends OpMode {
         tree.setDirection(DcMotorSimple.Direction.REVERSE);
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        
+        // Initialize Limelight
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         if (limelight != null) {
             limelight.pipelineSwitch(1);
@@ -604,27 +458,12 @@ public class AutonBlueCloseLime extends OpMode {
     public void loop() {
         follower.update();
         statePathUpdate();
-        // Essential telemetry - keep it clean
-        telemetry.addData("State", pathState.toString());
-        telemetry.addData("Pose", String.format("(%.1f, %.1f, %.1f°)", 
-            follower.getPose().getX(), 
-            follower.getPose().getY(), 
-            Math.toDegrees(follower.getPose().getHeading())));
-        telemetry.addData("Launcher", (int)launcher.getVelocity());
-        telemetry.addData("Rotator", rotator.getCurrentPosition() + "/" + rotator.getTargetPosition());
-        
-        // Verbose debug telemetry (only if enabled)
-        if (VERBOSE_DEBUG) {
-            telemetry.addData("Path Time", String.format("%.2f", pathTimer.getElapsedTimeSeconds()));
-            telemetry.addData("TX", String.format("%.2f", txDeg));
-            telemetry.addData("TY", String.format("%.2f", tyDeg));
-            if (Math.abs(txDeg) > 0.1) {
-                // Match actual calculation (full circle)
-                double fracOfFullCircum = Math.toRadians(txDeg) / (2 * Math.PI);
-                int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
-                telemetry.addData("Calc Adj", adjustment);
-            }
-        }
+        telemetry.addData("paths state", pathState.toString());
+        telemetry.addData("x", follower.getPose().getX());
+        telemetry.addData("y", follower.getPose().getY());
+        telemetry.addData("Heading", follower.getPose().getHeading());
+        telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
+        telemetry.addData("jolly crusader velocity", launcher.getVelocity());
     }
 
     public double getDist(double tyDeg) {
@@ -646,205 +485,69 @@ public class AutonBlueCloseLime extends OpMode {
             theWheelOfTheOx.setPower(-0.3);
         }
     }
+    //comment
     public void adjustRotator(double tx) {
-        // Match TesterinoBlue exactly - simple and direct
-        // Only skip if already very close to 0 (deadband) - but allow manual adjustments
-        // Manual adjustments (like 25.5, 15, 9) should always work, only skip limelight adjustments when close
-        boolean isManualAdjustment = Math.abs(tx) > 10; // If tx > 10, it's likely a manual adjustment
-        
-        // Apply deadband (increased to 0.5 degrees)
-        if (!isManualAdjustment && Math.abs(tx) < TX_DEADBAND) {
-            return; // Already aligned, don't adjust (only for limelight)
-        }
-        
-        // Calculate adjustment - match TesterinoBlue exactly (full circle)
-        double fracOfFullCircum = Math.toRadians(tx) / (2 * Math.PI);
-        int adjustment = (int) (fracOfFullCircum * motor180Range * 2);
-        
-        // Apply minimum movement threshold - don't adjust if movement is too small
-        if (!isManualAdjustment && Math.abs(adjustment) < MIN_MOVEMENT_THRESHOLD) {
-            return; // Movement too small, skip adjustment
-        }
-        
-        // Fix cumulative adjustment: calculate from desired position, not current position
-        // This prevents "chasing" when rotator hasn't reached previous target
-        int currentPos = rotator.getCurrentPosition();
-        int currentTarget = rotator.getTargetPosition();
-        
-        // If rotator is close to its current target (within 10 ticks), use current position
-        // Otherwise, use the desired position to prevent cumulative errors
-        int basePosition;
-        if (Math.abs(currentPos - currentTarget) < 10) {
-            // Rotator is close to target, use current position
-            basePosition = currentPos;
-            desiredRotatorPosition = currentPos; // Update desired to match
-        } else {
-            // Rotator is still moving, use desired position to prevent cumulative adjustment
-            basePosition = desiredRotatorPosition;
-        }
-        
-        int newPosition = basePosition + adjustment - offset;
-        desiredRotatorPosition = newPosition; // Update desired position
-        
-        // Always set target - let it continuously adjust to drive tx toward 0
-        // Make sure rotator is in correct mode and has power
-        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
         rotator.setTargetPosition(newPosition);
-        rotator.setPower(1.0);
-        
-        // Mark if this is a manual adjustment
-        if (isManualAdjustment) {
-            manualRotatorAdjustment = true;
-            manualAdjustmentTimer.resetTimer(); // Start timer for manual adjustment
-            // For manual adjustments, reset desired position to current
-            desiredRotatorPosition = currentPos;
-        }
-        
-        // Essential telemetry only
-        telemetry.addData("Rotator Pos", currentPos);
-        telemetry.addData("Rotator Target", newPosition);
-        telemetry.addData("Rotator TX", String.format("%.2f", tx));
-        
-        // Verbose debug telemetry (only if enabled)
-        if (VERBOSE_DEBUG) {
-            int actualTarget = rotator.getTargetPosition();
-            telemetry.addData("Adj", adjustment);
-            telemetry.addData("Desired Pos", desiredRotatorPosition);
-            telemetry.addData("Target Match", newPosition == actualTarget);
-            telemetry.addData("At Target", Math.abs(currentPos - actualTarget) < 3);
-            telemetry.addData("Manual Adj", isManualAdjustment);
-        }
     }
-    
+
     public void adjustHoodBasedOnDistance(double distance) {
         if (hood != null) {
             if (distance > DISTANCE_THRESHOLD) {
                 hood.setPosition(FAR_HOOD_POSITION);
-                if (VERBOSE_DEBUG) {
-                    telemetry.addData("Hood", "FAR");
-                }
             } else {
                 hood.setPosition(CLOSE_HOOD_POSITION);
-                if (VERBOSE_DEBUG) {
-                    telemetry.addData("Hood", "CLOSE");
-                }
-            }
-            if (VERBOSE_DEBUG) {
-                telemetry.addData("Hood Dist", String.format("%.1f", distance));
             }
         }
     }
-    
+
     /**
      * Updates limelight-based adjustments (rotator, velocity, hood) during shooting states
      * Call this continuously in shooting states for auto-adjustment
-     * Only updates when limelight actually sees target (keeps initial settings otherwise)
+     * Uses last valid values as fallback when limelight doesn't see target
      */
     public void updateLimelightAdjustments() {
         if (limelight != null) {
             LLResult ll = limelight.getLatestResult();
             if (ll != null && ll.isValid()) {
-                // Only show essential limelight data when valid
-                telemetry.addData("LL TX", String.format("%.2f", ll.getTx()));
-                telemetry.addData("LL TY", String.format("%.2f", ll.getTy()));
-                if (VERBOSE_DEBUG) {
-                    telemetry.addData("LL TA", String.format("%.3f", ll.getTa()));
-                }
-            } else {
-                telemetry.addData("LL Status", "No Target");
-            }
-            
-            if (ll != null && ll.isValid()) {
                 // Limelight sees target - use current values
-                double rawTx = ll.getTx();
+                txDeg = ll.getTx();
                 tyDeg = ll.getTy();
-                
-                // Apply smoothing/filtering to tx to reduce noise
-                txHistory[txHistoryIndex] = rawTx;
-                if (!txHistoryValid[txHistoryIndex]) {
-                    txHistoryCount++; // Increment count when adding new valid sample
-                }
-                txHistoryValid[txHistoryIndex] = true;
-                txHistoryIndex = (txHistoryIndex + 1) % TX_SMOOTHING_SAMPLES;
-                
-                // Calculate smoothed tx (average of last N valid samples)
-                double smoothedTx = 0.0;
-                int validSamples = 0;
-                for (int i = 0; i < TX_SMOOTHING_SAMPLES; i++) {
-                    if (txHistoryValid[i]) { // Only count valid samples (0.0 is valid!)
-                        smoothedTx += txHistory[i];
-                        validSamples++;
-                    }
-                }
-                if (validSamples > 0) {
-                    smoothedTx = smoothedTx / validSamples;
-                } else {
-                    smoothedTx = rawTx; // Fallback to raw if no valid samples
-                }
-                
-                txDeg = smoothedTx; // Use smoothed value
-                
-                // Store valid values for reference
+
+                // Store valid values for fallback
                 lastValidTx = txDeg;
                 lastValidTy = tyDeg;
-                
-                // Only adjust rotator with limelight if:
-                // 1. Manual adjustment was made and rotator has reached target (or timeout passed)
-                // 2. OR no manual adjustment was made
-                // This ensures manual adjustments complete before limelight fine-tunes
-                boolean shouldUseLimelight = true;
-                if (manualRotatorAdjustment) {
-                    int currentPos = rotator.getCurrentPosition();
-                    int targetPos = rotator.getTargetPosition();
-                    // Use dedicated timer for manual adjustment timeout (0.5 seconds) and 10 ticks threshold
-                    if (Math.abs(currentPos - targetPos) < 10 || manualAdjustmentTimer.getElapsedTimeSeconds() > 0.5) {
-                        manualRotatorAdjustment = false; // Manual adjustment complete, limelight can take over
-                    } else {
-                        shouldUseLimelight = false; // Still moving to manual position, don't override
-                    }
-                }
-                
-                // Rate limiting: only adjust every N loops or every 150ms
-                adjustmentLoopCounter++;
-                boolean shouldAdjustNow = false;
-                if (shouldUseLimelight) {
-                    if (adjustmentLoopCounter >= ADJUSTMENT_RATE_LIMIT || 
-                        lastAdjustmentTimer.getElapsedTimeSeconds() > 0.15) {
-                        shouldAdjustNow = true;
-                        adjustmentLoopCounter = 0;
-                        lastAdjustmentTimer.resetTimer();
-                    }
-                }
-                
-                // Only show verbose debug info
-                if (VERBOSE_DEBUG) {
-                    telemetry.addData("Use LL", shouldUseLimelight);
-                    telemetry.addData("Adjust Now", shouldAdjustNow);
-                    telemetry.addData("Raw TX", String.format("%.2f", rawTx));
-                    telemetry.addData("Smoothed TX", String.format("%.2f", smoothedTx));
-                }
-                
-                if (shouldUseLimelight && shouldAdjustNow) {
-                    // Adjust rotator based on horizontal offset (only when we see target)
-                    adjustRotator(txDeg);
-                }
-                
-                // Calculate distance and update velocity/hood only when we see target
+
+                // Calculate distance and store it
                 double currentDistance = getDist(tyDeg);
                 if (currentDistance > 0) {
                     lastValidDistance = currentDistance;
                     hasValidLimelightData = true;
-                    
-                    // Update velocity and hood based on distance (only when limelight sees target)
+
+                    // Adjust rotator based on horizontal offset
+                    adjustRotator(txDeg);
+
+                    // Update velocity and hood based on distance
                     launcher.setVelocity(calcVelocity(currentDistance));
                     adjustHoodBasedOnDistance(currentDistance);
                 }
+            } else {
+                // Limelight doesn't see target - use last valid values if available
+                if (hasValidLimelightData) {
+                    // Use last known good values (from previous successful detection)
+                    adjustRotator(lastValidTx);
+                    if (lastValidDistance > 0) {
+                        launcher.setVelocity(calcVelocity(lastValidDistance));
+                        adjustHoodBasedOnDistance(lastValidDistance);
+                    }
+                }
+                // If no valid data ever, do nothing (keep current settings from state initialization)
             }
-            // If limelight doesn't see target, do nothing - keep current settings
-            // (rotator stays where it is, velocity stays at initial 1700/3500)
         }
     }
-    
+
     /**
      * Resets limelight data (useful when starting a new shooting sequence)
      */
