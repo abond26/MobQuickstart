@@ -309,7 +309,6 @@ public class TesterinoBlue extends LinearOpMode {
     }
 
 
-
     public void adjustHoodBasedOnDistance(double dist) {
         if (dist < FIRST_DISTANCE_THRESHOLD) {
             hood.setPosition(CLOSE_HOOD_POSITION);

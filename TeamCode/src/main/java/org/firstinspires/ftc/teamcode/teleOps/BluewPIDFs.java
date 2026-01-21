@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -40,6 +41,9 @@ public class BluewPIDFs extends LinearOpMode {
     private Limelight3A limelight;
     public ElapsedTime runtime = new ElapsedTime();
     private Servo hood;
+    //Tuning
+    double F = 200;
+    double P = 12.8;
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double FIRST_DISTANCE_THRESHOLD = 140.0;
@@ -72,6 +76,8 @@ public class BluewPIDFs extends LinearOpMode {
         jollyCrusader.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         jollyCrusader.setVelocity(0);
         //jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+        jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
