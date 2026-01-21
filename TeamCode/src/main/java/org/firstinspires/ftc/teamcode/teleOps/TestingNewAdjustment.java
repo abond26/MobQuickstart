@@ -214,15 +214,28 @@ public class TestingNewAdjustment extends LinearOpMode {
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
                         if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
-                            double localizationAngle = calculateAngleToAprilTag();
                             double currentDistance = getDist(tyDeg);
-                            adjustRotator(localizationAngle, txDeg, currentDistance);
-
-                            telemetry.addData("Localization Angle", localizationAngle);
+                            // Use ONLY limelight when it's detecting
+                            adjustRotatorWithLimelight(txDeg, currentDistance);
                         }
                     } else {
                         telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
+                        // Use ONLY localization when limelight isn't detecting
+                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                            double localizationAngle = calculateAngleToAprilTag();
+                            
+                            // Limit localization angle to reasonable range (±180 degrees)
+                            if (localizationAngle > 180) localizationAngle -= 360;
+                            if (localizationAngle < -180) localizationAngle += 360;
+                            
+                            adjustRotatorWithLocalization(localizationAngle);
+                            
+                            telemetry.addData("Localization Angle", localizationAngle);
+                            telemetry.addData("Robot X", follower.getPose().getX());
+                            telemetry.addData("Robot Y", follower.getPose().getY());
+                            telemetry.addData("Robot Heading", Math.toDegrees(follower.getPose().getHeading()));
+                        }
                     }
                 }
                 double currentDistance = getDist(tyDeg);
@@ -307,20 +320,38 @@ public class TestingNewAdjustment extends LinearOpMode {
         double deltaY = APRILTAG_Y - robotY;
 
         // Calculate absolute angle to AprilTag (in radians)
+        // atan2(y, x) gives angle from positive x-axis
         double angleToTag = Math.atan2(deltaY, deltaX);
 
-
+        // Calculate relative angle (how much to rotate from robot's current heading)
+        // This is the angle the turret needs to point relative to robot's front
         double relativeAngle = angleToTag - robotHeading;
 
         // Normalize to [-PI, PI]
         while (relativeAngle > Math.PI) relativeAngle -= 2 * Math.PI;
         while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
 
-        return Math.toDegrees(relativeAngle);
+        // Convert to degrees
+        double angleDeg = Math.toDegrees(relativeAngle);
+        
+        // Debug telemetry
+        telemetry.addData("Robot X", robotX);
+        telemetry.addData("Robot Y", robotY);
+        telemetry.addData("Robot Heading Deg", Math.toDegrees(robotHeading));
+        telemetry.addData("Delta X", deltaX);
+        telemetry.addData("Delta Y", deltaY);
+        telemetry.addData("Angle to Tag Rad", angleToTag);
+        telemetry.addData("Angle to Tag Deg", Math.toDegrees(angleToTag));
+        telemetry.addData("Relative Angle Deg", angleDeg);
+        
+        return angleDeg;
     }
 
 
-    public void adjustRotator(double localizationAngleDeg, double limelightTxDeg, double distance) {
+    /**
+     * Adjust rotator using ONLY limelight (when limelight is detecting)
+     */
+    public void adjustRotatorWithLimelight(double limelightTxDeg, double distance) {
         // Check if rotator has reached 270 degrees, return to zero position
         int currentPos = rotator.getCurrentPosition();
         if (Math.abs(currentPos) >= DEGREES_270_TICKS) {
@@ -328,22 +359,86 @@ public class TestingNewAdjustment extends LinearOpMode {
             return;
         }
         
-        // Coarse adjustment from localization (full range)
-        double fracOfFullCircum = Math.toRadians(localizationAngleDeg) / Math.PI;
-        int coarseAdjustment = (int) (fracOfFullCircum * motor180Range);
-
-        double fineAdjustment = limelightTxDeg * 0.3; // Scale factor for fine tuning
-        int fineTicks = (int) (Math.toRadians(fineAdjustment) / Math.PI * motor180Range);
-
-        int totalAdjustment = coarseAdjustment + fineTicks;
+        // Use limelight tx directly (semicircle: 180 degrees = motor180Range)
+        double fracOfSemiCircum = Math.toRadians(limelightTxDeg) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+        
+        // Rate limiting: prevent large jumps (max 50 ticks per cycle)
+        int maxAdjustmentPerCycle = 50;
+        if (Math.abs(adjustment) > maxAdjustmentPerCycle) {
+            adjustment = adjustment > 0 ? maxAdjustmentPerCycle : -maxAdjustmentPerCycle;
+        }
+        
+        // Check if adjustment would exceed 270 degrees
+        if (Math.abs(currentPos + adjustment) >= DEGREES_270_TICKS) {
+            rotator.setTargetPosition(0);
+            return;
+        }
 
         int offset = 14;
         if (distance > 200) {
             offset = 4;
         }
 
-        int newPosition = rotator.getCurrentPosition() + totalAdjustment - offset;
+        int newPosition = currentPos + adjustment - offset;
         rotator.setTargetPosition(newPosition);
+        
+        telemetry.addData("Using", "Limelight Only");
+        telemetry.addData("Limelight tx", limelightTxDeg);
+        telemetry.addData("Adjustment Ticks", adjustment);
+        telemetry.addData("New Pos", newPosition);
+    }
+    
+    /**
+     * Adjust rotator using ONLY localization (when limelight is NOT detecting)
+     */
+    public void adjustRotatorWithLocalization(double localizationAngleDeg) {
+        // Check if rotator has reached 270 degrees, return to zero position
+        int currentPos = rotator.getCurrentPosition();
+        if (Math.abs(currentPos) >= DEGREES_270_TICKS) {
+            rotator.setTargetPosition(0);
+            return;
+        }
+        
+        // Apply deadband - don't adjust if angle is very small
+        if (Math.abs(localizationAngleDeg) < 2.0) {
+            // Already close, maintain current position
+            rotator.setTargetPosition(currentPos);
+            return;
+        }
+        
+        // Use localization angle (semicircle: 180 degrees = motor180Range)
+        // Convert angle to fraction of semicircle
+        double fracOfSemiCircum = Math.toRadians(localizationAngleDeg) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+        
+        // If direction is wrong, try negating the adjustment
+        // The sign might be inverted depending on your coordinate system
+        adjustment = -adjustment; // Negate to fix direction (remove this line if it makes it worse)
+        
+        // Rate limiting: prevent large jumps (max 30 ticks per cycle for localization)
+        int maxAdjustmentPerCycle = 30;
+        if (Math.abs(adjustment) > maxAdjustmentPerCycle) {
+            adjustment = adjustment > 0 ? maxAdjustmentPerCycle : -maxAdjustmentPerCycle;
+        }
+        
+        // Check if adjustment would exceed 270 degrees
+        if (Math.abs(currentPos + adjustment) >= DEGREES_270_TICKS) {
+            rotator.setTargetPosition(0);
+            return;
+        }
+
+        int offset = 14; // Default offset
+
+        int newPosition = currentPos + adjustment - offset;
+        rotator.setTargetPosition(newPosition);
+        
+        telemetry.addData("Using", "Localization Only");
+        telemetry.addData("Loc Angle Deg", localizationAngleDeg);
+        telemetry.addData("Frac of SemiCircum", fracOfSemiCircum);
+        telemetry.addData("Adjustment Ticks", adjustment);
+        telemetry.addData("Current Pos", currentPos);
+        telemetry.addData("New Pos", newPosition);
     }
 
     public double getDist(double tyDeg) {
