@@ -349,6 +349,7 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     tree.setPower(1);
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
+                //stuff needed
                 if (!follower.isBusy() && shoot3Started) {
                     if(pathTimer.getElapsedTimeSeconds()>3) {
                         theWheelOfTheOx.setPower(-1);
