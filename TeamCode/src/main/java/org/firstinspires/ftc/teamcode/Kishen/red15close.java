@@ -100,12 +100,12 @@ inBetweenThing,
 
     PathState pathState;
     private final Pose startPose = new Pose(117.6, 130, Math.toRadians(36.5));
-    private final Pose shootPose1 = new Pose(85, 88, Math.toRadians(46));
+    private final Pose shootPose1 = new Pose(85, 88, Math.toRadians(48));
     private final Pose collect1thingstart=new Pose(85, 84, Math.toRadians(0));
 
 
     private final Pose collect1thing = new Pose(120, 84, Math.toRadians(0));
-    private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(48.5));
+    private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(49.5));
 
     private final Pose collect2Start = new Pose(88, 57.5, Math.toRadians(0));
     private final Pose collect2End = new Pose(127, 57.5, Math.toRadians(0));
@@ -113,8 +113,8 @@ inBetweenThing,
     private final Pose openGateStart = new Pose(115, 72, Math.toRadians(90));
     private final Pose openGateEnd = new Pose(121, 72, Math.toRadians(90));
 
-    private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(48.5));
-    private final Pose collect3start=new Pose(98, 35, Math.toRadians(0));
+    private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(52));
+    private final Pose collect3start=new Pose(89, 35, Math.toRadians(0));
 
 
     private final Pose collect3end = new Pose(127, 35, Math.toRadians(0));
@@ -124,7 +124,7 @@ inBetweenThing,
 
 
     private final Pose collect4end = new Pose(128, 15, Math.toRadians(-90));
-    private final Pose shootBall5 = new Pose(85, 110, Math.toRadians(42));
+    private final Pose shootBall5 = new Pose(85, 110, Math.toRadians(41));
 
     private final Pose park = new Pose(103, 84, Math.toRadians(46));
 
@@ -264,7 +264,7 @@ inBetweenThing,
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    hood.setPosition(0.315);
+                    hood.setPosition(0.312);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -361,7 +361,7 @@ inBetweenThing,
                 launcher.setVelocity(1750);
                 if (!follower.isBusy()  && !shoot4Started) {
                     follower.followPath(shoot4);
-                    hood.setPosition(0.315);
+                    hood.setPosition(0.312);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
@@ -402,10 +402,10 @@ inBetweenThing,
                 break;
             case shootAgainAgainAgain:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1750);
+                launcher.setVelocity(1755);
                 if (!follower.isBusy()  && !shoot5Started) {
                     follower.followPath(shoot5);
-                    hood.setPosition(0.315);
+                    hood.setPosition(0.309);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
