@@ -20,8 +20,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class TesterinoBlue extends LinearOpMode {
     double newTime;
     double time;
-    double F = 200;
-    double P = 12.8;
+    double F = 12.35;
+    double P = 132.5000;
 
 
     //282

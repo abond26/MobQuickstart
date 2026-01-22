@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.teleOps;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -28,11 +28,19 @@ public class TestingNewAdjustment extends LinearOpMode {
     boolean aLast =false;
     boolean xLast = false;
     boolean rightBumperLast = false;
+    boolean dpadUpLast = false;
+    boolean dpadDownLast = false;
     ElapsedTime rightBumperTimer = new ElapsedTime();
     boolean rightBumperTimerStarted = false;
-    private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
+    boolean localizationAdjustmentActive = false;
     int motor180Range = 630;
-    private static final int DEGREES_270_TICKS = 945; 
+    private static final int DEGREES_180_TICKS = 630; // 180 degrees = motor180Range
+    private static final int HALFWAY_POSITIVE = 250; // 225 degrees (positive side)
+    private static final int HALFWAY_NEGATIVE = -157; // 225 degrees (negative side)
+
+    // Hard limits for rotation motor - if exceeded, reverse direction
+    private static final int HARD_LIMIT_POSITIVE = 250; // Maximum positive position
+    private static final int HARD_LIMIT_NEGATIVE = -157; // Maximum negative position
 
     private double targetVelocity = 0;
     private boolean hasRumbledForVelocity = false;
@@ -53,8 +61,12 @@ public class TestingNewAdjustment extends LinearOpMode {
     private static final double MID_HOOD_POSITION = 0.203+0.0167;
     private static final double FAR_HOOD_POSITION = 0.25+.0129; // Hood position for far shots
 
-    private static final double APRILTAG_X = 15.0; // AprilTag X position on field (inches) - UPDATE THIS
-    private static final double APRILTAG_Y = 128.0; // AprilTag Y position on field (inches) - UPDATE THIS
+    // AprilTag position in reset coordinate system (bot starts at 0,0 with heading 180)
+    private static final double APRILTAG_X = -20.0; // AprilTag X position (was 15, now -20 after reset)
+    private static final double APRILTAG_Y = 44.0; // AprilTag Y position (was 128, now 44 after reset)
+    
+    // Heading offset: if bot resets heading from 141° to 180°, offset is 39°
+
 
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
@@ -63,7 +75,9 @@ public class TestingNewAdjustment extends LinearOpMode {
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
     public void runOpMode() throws InterruptedException{
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
+        double desiredHeadingRad = Math.toRadians(141); // or whatever heading you want
+        Pose startPoseWithHeading = new Pose(0, 0, desiredHeadingRad);
+        follower.setStartingPose(startPoseWithHeading);
 
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(0,0.0328);
@@ -119,6 +133,12 @@ public class TestingNewAdjustment extends LinearOpMode {
 
             boolean aPressed = gamepad1.dpad_up && !aLast;
             aLast = gamepad1.a;
+            
+            boolean dpadUpPressed = gamepad1.dpad_up && !dpadUpLast;
+            dpadUpLast = gamepad1.dpad_up;
+            
+            boolean dpadDownPressed = gamepad1.dpad_down && !dpadDownLast;
+            dpadDownLast = gamepad1.dpad_down;
             boolean xPressed = gamepad2.x && !xLast;
             xLast = gamepad2.x;
             boolean rightBumperPressed = gamepad1.right_bumper && !rightBumperLast;
@@ -180,12 +200,7 @@ public class TestingNewAdjustment extends LinearOpMode {
 
 
             //rotator
-            int currentRotatorPos = rotator.getCurrentPosition();
-            // If rotator reaches 270 degrees, return to zero position
-            if (Math.abs(currentRotatorPos) >= DEGREES_270_TICKS) {
-                rotator.setTargetPosition(0);
-            }
-            else if (gamepad1.dpad_left){
+            if (gamepad1.dpad_left){
                 rotator.setTargetPosition(rotator.getCurrentPosition()-50);
             }
             else if (gamepad1.dpad_right){
@@ -193,6 +208,37 @@ public class TestingNewAdjustment extends LinearOpMode {
             }
             else{
                 rotator.setTargetPosition(rotator.getCurrentPosition());
+            }
+
+            // Localization adjustment with dpad_up/down (single press)
+            if (dpadUpPressed || dpadDownPressed) {
+                double localizationAngle = calculateAngleToAprilTag();
+                
+                // Limit localization angle to reasonable range (±180 degrees)
+                if (localizationAngle > 180) localizationAngle -= 360;
+                if (localizationAngle < -180) localizationAngle += 360;
+                
+                // Apply adjustment - use the actual angle to rotate towards the tag
+                // dpad_up uses positive direction, dpad_down uses negative direction
+                if (dpadUpPressed) {
+                    // Rotate towards tag using positive adjustment
+                    adjustRotatorWithLocalization(localizationAngle);
+                } else if (dpadDownPressed) {
+                    // Rotate towards tag using negative adjustment (reverse direction)
+                    adjustRotatorWithLocalization(-localizationAngle);
+                }
+                
+                localizationAdjustmentActive = true; // Flag to prevent limelight override
+                
+                telemetry.addData("Localization Angle", localizationAngle);
+                telemetry.addData("Robot X", follower.getPose().getX());
+                telemetry.addData("Robot Y", follower.getPose().getY());
+                telemetry.addData("Robot Heading", Math.toDegrees(follower.getPose().getHeading()));
+            }
+            
+            // Clear flag when manual controls are used
+            if (gamepad1.dpad_left || gamepad1.dpad_right) {
+                localizationAdjustmentActive = false;
             }
 
             //Limelight calibration
@@ -213,29 +259,15 @@ public class TestingNewAdjustment extends LinearOpMode {
                         telemetry.addData("Ta", ta);
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
-                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                        // Don't adjust with limelight if using dpad_up/down for localization or manual controls
+                        if (!gamepad1.dpad_right && !gamepad1.dpad_left && !localizationAdjustmentActive) {
                             double currentDistance = getDist(tyDeg);
-                            // Use ONLY limelight when it's detecting
-                            adjustRotatorWithLimelight(txDeg, currentDistance);
+                            // Use old adjustRotator function
+                            adjustRotator(txDeg, currentDistance);
                         }
                     } else {
                         telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
-                        // Use ONLY localization when limelight isn't detecting
-                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
-                            double localizationAngle = calculateAngleToAprilTag();
-                            
-                            // Limit localization angle to reasonable range (±180 degrees)
-                            if (localizationAngle > 180) localizationAngle -= 360;
-                            if (localizationAngle < -180) localizationAngle += 360;
-                            
-                            adjustRotatorWithLocalization(localizationAngle);
-                            
-                            telemetry.addData("Localization Angle", localizationAngle);
-                            telemetry.addData("Robot X", follower.getPose().getX());
-                            telemetry.addData("Robot Y", follower.getPose().getY());
-                            telemetry.addData("Robot Heading", Math.toDegrees(follower.getPose().getHeading()));
-                        }
                     }
                 }
                 double currentDistance = getDist(tyDeg);
@@ -255,9 +287,14 @@ public class TestingNewAdjustment extends LinearOpMode {
                         hasRumbledForVelocity = true; // Only rumble once per target
                         telemetry.addLine("Velocity Reached!");
                     }
+                }   
+
+
+            } else {
+                // Limelight is null - set rotator to zero if dpad_up/down not just pressed
+                if (!dpadUpPressed && !dpadDownPressed) {
+                    rotator.setTargetPosition(0);
                 }
-
-
             }
             if (gamepad1.left_stick_button){
                 jollyCrusader.setVelocity(0);
@@ -310,12 +347,23 @@ public class TestingNewAdjustment extends LinearOpMode {
      * Calculate the angle from robot to AprilTag using localization
      * @return angle in degrees (relative to robot's front)
      */
+    public void adjustRotator(double tx, double distance) {
+        double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
+        int adjustment = (int) (fracOfFullCircum * motor180Range);
+        int offset = 14;
+        if (distance > 200) {
+            offset = 4;
+        }
+        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
+        rotator.setTargetPosition(newPosition);
+    }
     public double calculateAngleToAprilTag() {
         Pose robotPose = follower.getPose();
         double robotX = robotPose.getX();
         double robotY = robotPose.getY();
         double robotHeading = robotPose.getHeading();
-
+        
+        // Account for heading reset: if heading was reset from 141° to 180°, add offset
         double deltaX = APRILTAG_X - robotX;
         double deltaY = APRILTAG_Y - robotY;
 
@@ -325,6 +373,7 @@ public class TestingNewAdjustment extends LinearOpMode {
 
         // Calculate relative angle (how much to rotate from robot's current heading)
         // This is the angle the turret needs to point relative to robot's front
+        // Use adjusted heading to account for the reset
         double relativeAngle = angleToTag - robotHeading;
 
         // Normalize to [-PI, PI]
@@ -348,96 +397,48 @@ public class TestingNewAdjustment extends LinearOpMode {
     }
 
 
-    /**
-     * Adjust rotator using ONLY limelight (when limelight is detecting)
-     */
-    public void adjustRotatorWithLimelight(double limelightTxDeg, double distance) {
-        // Check if rotator has reached 270 degrees, return to zero position
-        int currentPos = rotator.getCurrentPosition();
-        if (Math.abs(currentPos) >= DEGREES_270_TICKS) {
-            rotator.setTargetPosition(0);
-            return;
-        }
-        
-        // Use limelight tx directly (semicircle: 180 degrees = motor180Range)
-        double fracOfSemiCircum = Math.toRadians(limelightTxDeg) / Math.PI;
-        int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        
-        // Rate limiting: prevent large jumps (max 50 ticks per cycle)
-        int maxAdjustmentPerCycle = 50;
-        if (Math.abs(adjustment) > maxAdjustmentPerCycle) {
-            adjustment = adjustment > 0 ? maxAdjustmentPerCycle : -maxAdjustmentPerCycle;
-        }
-        
-        // Check if adjustment would exceed 270 degrees
-        if (Math.abs(currentPos + adjustment) >= DEGREES_270_TICKS) {
-            rotator.setTargetPosition(0);
-            return;
-        }
 
-        int offset = 14;
-        if (distance > 200) {
-            offset = 4;
-        }
-
-        int newPosition = currentPos + adjustment - offset;
-        rotator.setTargetPosition(newPosition);
-        
-        telemetry.addData("Using", "Limelight Only");
-        telemetry.addData("Limelight tx", limelightTxDeg);
-        telemetry.addData("Adjustment Ticks", adjustment);
-        telemetry.addData("New Pos", newPosition);
-    }
-    
-    /**
-     * Adjust rotator using ONLY localization (when limelight is NOT detecting)
-     */
     public void adjustRotatorWithLocalization(double localizationAngleDeg) {
-        // Check if rotator has reached 270 degrees, return to zero position
-        int currentPos = rotator.getCurrentPosition();
-        if (Math.abs(currentPos) >= DEGREES_270_TICKS) {
-            rotator.setTargetPosition(0);
-            return;
-        }
-        
+        int currentPos = rotator.getTargetPosition();
+
+        // Check if rotator has reached 225 degree limits on either side (encoder-based)
+        boolean atPositiveHalfway = currentPos >= HALFWAY_POSITIVE;
+        boolean atNegativeHalfway = currentPos <= HALFWAY_NEGATIVE;
+
         // Apply deadband - don't adjust if angle is very small
         if (Math.abs(localizationAngleDeg) < 2.0) {
-            // Already close, maintain current position
             rotator.setTargetPosition(currentPos);
             return;
         }
-        
-        // Use localization angle (semicircle: 180 degrees = motor180Range)
-        // Convert angle to fraction of semicircle
+
+
         double fracOfSemiCircum = Math.toRadians(localizationAngleDeg) / Math.PI;
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        
-        // If direction is wrong, try negating the adjustment
-        // The sign might be inverted depending on your coordinate system
-        adjustment = -adjustment; // Negate to fix direction (remove this line if it makes it worse)
-        
-        // Rate limiting: prevent large jumps (max 30 ticks per cycle for localization)
-        int maxAdjustmentPerCycle = 30;
-        if (Math.abs(adjustment) > maxAdjustmentPerCycle) {
-            adjustment = adjustment > 0 ? maxAdjustmentPerCycle : -maxAdjustmentPerCycle;
-        }
-        
-        // Check if adjustment would exceed 270 degrees
-        if (Math.abs(currentPos + adjustment) >= DEGREES_270_TICKS) {
-            rotator.setTargetPosition(0);
-            return;
+
+        // Determine adjustment direction based on encoder position
+        if (atPositiveHalfway) {
+            // Hit positive 225 degree limit (+787 ticks), reverse direction (use negative adjustment)
+            adjustment = -Math.abs(adjustment);
+            telemetry.addData("Status", "+");
+        } else if (atNegativeHalfway) {
+            // Hit negative 225 degree limit (-787 ticks), reverse direction (use positive adjustment)
+            adjustment = Math.abs(adjustment);
+            telemetry.addData("Status", "-");
+        } else {
+            adjustment = -adjustment;
         }
 
-        int offset = 14; // Default offset
+        // Rate limiting removed - adjustment now uses full calculated value
+
+        int offset = 14;
 
         int newPosition = currentPos + adjustment - offset;
-        rotator.setTargetPosition(newPosition);
-        
+        rotator.setTargetPosition(applyHardLimiter(newPosition));
+
         telemetry.addData("Using", "Localization Only");
-        telemetry.addData("Loc Angle Deg", localizationAngleDeg);
-        telemetry.addData("Frac of SemiCircum", fracOfSemiCircum);
-        telemetry.addData("Adjustment Ticks", adjustment);
         telemetry.addData("Current Pos", currentPos);
+        telemetry.addData("Loc Angle Deg", localizationAngleDeg);
+        telemetry.addData("Adjustment Ticks", adjustment);
         telemetry.addData("New Pos", newPosition);
     }
 
@@ -480,6 +481,47 @@ public class TestingNewAdjustment extends LinearOpMode {
         else{
             hood.setPosition(FAR_HOOD_POSITION);
         }
+    }
+
+    /**
+     * Applies hard limiter to rotator target position.
+     * If target exceeds limits, calculates position going the other way instead.
+     * @param targetPosition The desired target position
+     * @return The clamped position that respects hard limits (reversed if needed)
+     */
+    private int applyHardLimiter(int targetPosition) {
+        int currentPos = rotator.getCurrentPosition();
+        
+        // Check if target would exceed positive limit
+        if (targetPosition > HARD_LIMIT_POSITIVE) {
+            // Calculate how far past the limit we would go
+            int excess = targetPosition - HARD_LIMIT_POSITIVE;
+            // Reverse direction: go from positive limit towards negative
+            int reversedPosition = HARD_LIMIT_POSITIVE - excess;
+            // Make sure we don't go past negative limit either
+            if (reversedPosition < HARD_LIMIT_NEGATIVE) {
+                reversedPosition = HARD_LIMIT_NEGATIVE;
+            }
+            telemetry.addData("Hard Limiter", "Positive limit hit, reversing");
+            return reversedPosition;
+        }
+        
+        // Check if target would exceed negative limit
+        if (targetPosition < HARD_LIMIT_NEGATIVE) {
+            // Calculate how far past the limit we would go
+            int excess = HARD_LIMIT_NEGATIVE - targetPosition;
+            // Reverse direction: go from negative limit towards positive
+            int reversedPosition = HARD_LIMIT_NEGATIVE + excess;
+            // Make sure we don't go past positive limit either
+            if (reversedPosition > HARD_LIMIT_POSITIVE) {
+                reversedPosition = HARD_LIMIT_POSITIVE;
+            }
+            telemetry.addData("Hard Limiter", "Negative limit hit, reversing");
+            return reversedPosition;
+        }
+        
+        // Target is within limits, return as-is
+        return targetPosition;
     }
 
 }

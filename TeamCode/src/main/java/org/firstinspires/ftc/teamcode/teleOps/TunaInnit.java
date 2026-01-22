@@ -10,10 +10,10 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 public class TunaInnit extends OpMode {
     public DcMotorEx flywheelMotor;
     public double highVelocity = 1500;
-    public double lowVelocity = 900;
+    public double lowVelocity = 901;
     double curTargetVelocity = highVelocity;
-    double F = 200;
-    double P = 12.8;
+    double F = 12.35;
+    double P = 132.5000;
     double[] stepSizes = {10.0, 1.0, 0.1, 0.001, 0.0001};
     int stepIndex = 1;
 

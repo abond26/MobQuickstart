@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Kishen;
 
-import static android.os.SystemClock.sleep;
-
 import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -19,7 +17,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.pedroPathing.WORKPLS;
 
 @Autonomous(name = "Gate movement", group = "zzzzz")
 public class AutonRedOpenGateAutonM extends OpMode {

@@ -196,17 +196,17 @@ public class far9red extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(2300);
-                hood.setPosition(0.425);
+                launcher.setVelocity(2185);
+                hood.setPosition(0.45);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
                 // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5){
-                    tree.setPower(1);
-                    theWheelOfTheOx.setPower(-0.9);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>4){
+                    tree.setPower(0.8);
+                    theWheelOfTheOx.setPower(-0.6);
                     if (pathTimer.getElapsedTimeSeconds()>6.5) {
                         setPathState(far9red.PathState.collection);
                     }
@@ -226,7 +226,7 @@ public class far9red extends OpMode {
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     theWheelOfTheOx.setPower(1);
-                    tree.setPower(1);
+                    tree.setPower(0.8);
                     follower.followPath(collect1);
                     setPathState((far9red.PathState.shoot));
                 }
@@ -235,15 +235,15 @@ public class far9red extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(2200);
-                    hood.setPosition(0.4);
+                    launcher.setVelocity(2225);
+                    hood.setPosition(.38);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    tree.setPower(1);
+                    tree.setPower(0.8);
                     shoot2Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot2Started) {
                     if(pathTimer.getElapsedTimeSeconds()>5) {
-                        theWheelOfTheOx.setPower(-0.9);
+                        theWheelOfTheOx.setPower(-0.5);
                     }
                     if(pathTimer.getElapsedTimeSeconds()>7) {
                         setPathState((PathState.collectAgain));
@@ -279,10 +279,10 @@ public class far9red extends OpMode {
                 break;
             case collectAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(2200);
+                    launcher.setVelocity(2225);
                     follower.followPath(collect2Again);
                     tree.setPower(1);
-                    hood.setPosition(0.45);
+                    hood.setPosition(.4);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -298,10 +298,10 @@ public class far9red extends OpMode {
                 break;
             case collectAgainAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(2200);
+                    launcher.setVelocity(2225);
                     follower.followPath(collect2AgainAgain);
                     tree.setPower(1);
-                    hood.setPosition(0.4);
+                    hood.setPosition(0.41);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -317,8 +317,8 @@ public class far9red extends OpMode {
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot3Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>5) {
-                        theWheelOfTheOx.setPower(-0.9);
+                    if(pathTimer.getElapsedTimeSeconds()>4) {
+                        theWheelOfTheOx.setPower(-0.6);
                         setPathState((PathState.parklol));
                     }
                 }
