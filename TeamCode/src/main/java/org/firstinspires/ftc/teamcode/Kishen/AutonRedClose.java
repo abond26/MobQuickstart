@@ -17,7 +17,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.pedroPathing.WORKPLS;
 
 @Autonomous(name = "Haolin was here red no lime", group = "zzzzz")
 public class AutonRedClose extends OpMode {

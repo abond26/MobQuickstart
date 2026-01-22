@@ -14,6 +14,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -111,12 +112,12 @@ public class red15far extends OpMode {
 
     PathState pathState;
     private final Pose startPose = new Pose(87, 9, Math.toRadians(90));
-    private final Pose shootPose1 = new Pose(89, 17, Math.toRadians(71.5));
+    private final Pose shootPose1 = new Pose(89, 17, Math.toRadians(71));
     private final Pose collect1thingstart=new Pose(98, 33, Math.toRadians(0));
 
 
     private final Pose collect1thing = new Pose(127, 33, Math.toRadians(0));
-    private final Pose shootPose2 = new Pose( 89, 17, Math.toRadians(71.5));
+    private final Pose shootPose2 = new Pose( 89, 17, Math.toRadians(73));
     private final Pose collect2Start = new Pose(88, 57.5, Math.toRadians(0));
     private final Pose collect2End = new Pose(128, 57.5, Math.toRadians(0));
 
@@ -238,7 +239,7 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
                 launcher.setVelocity(2100);
-                hood.setPosition(0.397);
+                hood.setPosition(0.41);
                 rotator.setTargetPosition(rotatorStartPosition);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
@@ -281,8 +282,8 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(2050);
-                    hood.setPosition(0.397);
+                    launcher.setVelocity(2000);
+                    hood.setPosition(0.4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -302,7 +303,7 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(2175);
+                    launcher.setVelocity(2000);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     setPathState((PathState.collectAgainEnd));
                 }
@@ -312,7 +313,7 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     follower.followPath(collect2);
                     tree.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    hood.setPosition(0.397);
+                    hood.setPosition(0.41);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -342,8 +343,8 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy()  && !shoot3Started) {
                     follower.followPath(shoot3);
-                    launcher.setVelocity(2175);
-                    hood.setPosition(0.397);
+                    launcher.setVelocity(2000);
+                    hood.setPosition(0.41);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
@@ -496,6 +497,14 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
         tree.setDirection(DcMotorSimple.Direction.REVERSE);
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Set PIDF coefficients from TunaInnit for consistent velocity control
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double P = 132.5;
+        double I = 0;
+        double D = 0;
+        double F = 12.35;
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 
     @Override
