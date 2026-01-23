@@ -14,13 +14,13 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Reliable 15 red far", group = "auton red")
-public class red15far extends OpMode {
+@Autonomous(name = "Reliable 15 red far limelight", group = "limelight")
+public class red15farlimelight extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
@@ -59,6 +59,21 @@ public class red15far extends OpMode {
     private double lastValidDistance = 0.0;
     private boolean hasValidLimelightData = false;
 
+    // Rotator adjustment safeguards to prevent wrong-direction rotations
+    private static final double TX_DEADBAND = 1.0; // Don't adjust if tx is less than 1 degree
+    private static final int MIN_MOVEMENT_THRESHOLD = 10; // Don't adjust if movement is less than 10 ticks
+    private static final int MAX_ADJUSTMENT_PER_CALL = 100; // Clamp adjustment to max 100 ticks per call
+    private static final int ROTATOR_SETTLE_THRESHOLD = 20; // Only adjust when within 20 ticks of target
+    private int desiredRotatorPosition = 0; // Track desired position separately to prevent cumulative errors
+    private int adjustmentLoopCounter = 0;
+    private static final int ADJUSTMENT_RATE_LIMIT = 3; // Only adjust every 3 loops (rate limiting)
+    private ElapsedTime lastAdjustmentTimer = new ElapsedTime();
+    
+    // Rotator physical limits to prevent 360-degree rotations
+    private static final int DEGREES_270_TICKS = 1365; // 270 degrees in ticks (assuming same as AutonRedCloseLime)
+    private static final int MIN_ROTATOR_POSITION = -DEGREES_270_TICKS;
+    private static final int MAX_ROTATOR_POSITION = DEGREES_270_TICKS;
+
     private DcMotor leftFront, leftRear, rightFront, rightRear;
 
 
@@ -90,7 +105,7 @@ public class red15far extends OpMode {
         collectAgainAgainAgainEnd,
 
         shootAgainAgainAgain,
-        goTowardsGate, 
+        goTowardsGate,
         opengate,
         parklol,
 
@@ -112,24 +127,24 @@ public class red15far extends OpMode {
 
     PathState pathState;
     private final Pose startPose = new Pose(87, 9, Math.toRadians(90));
-    private final Pose shootPose1 = new Pose(89, 17, Math.toRadians(71));
+    private final Pose shootPose1 = new Pose(89, 17, Math.toRadians(71.5));
     private final Pose collect1thingstart=new Pose(98, 33, Math.toRadians(0));
 
 
     private final Pose collect1thing = new Pose(127, 33, Math.toRadians(0));
-    private final Pose shootPose2 = new Pose( 89, 17, Math.toRadians(73));
+    private final Pose shootPose2 = new Pose( 89, 17, Math.toRadians(71.5));
     private final Pose collect2Start = new Pose(88, 57.5, Math.toRadians(0));
     private final Pose collect2End = new Pose(128, 57.5, Math.toRadians(0));
 
 
-//    private final Pose collect2Start = new Pose(130, 12, Math.toRadians(0));
+    //    private final Pose collect2Start = new Pose(130, 12, Math.toRadians(0));
 //    private final Pose collect2End = new Pose(135, 12, Math.toRadians(0));
 //    private final Pose collect2StartAgain = new Pose(125, 9, Math.toRadians(0));
 //    private final Pose collect2EndAgain = new Pose(135, 9, Math.toRadians(0));
 //    private final Pose collect2StartAgainAgain = new Pose(125, 10, Math.toRadians(0));
 //    private final Pose collect2EndAgainAgain = new Pose(135, 10, Math.toRadians(0));
-private final Pose openGateControlPoint = new Pose(113.89650349650348, 56.87412587412589);
-private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
+    private final Pose openGateControlPoint = new Pose(113.89650349650348, 56.87412587412589);
+    private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
     private final Pose openGateEnd = new Pose(125, 72, Math.toRadians(90));
     private final Pose shootBall3 = new Pose(89, 17, Math.toRadians(72));
     private final Pose collect3Start = new Pose(100, 9, Math.toRadians(0));
@@ -239,7 +254,7 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
                 launcher.setVelocity(2100);
-                hood.setPosition(0.41);
+                hood.setPosition(0.397);
                 rotator.setTargetPosition(rotatorStartPosition);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
@@ -247,12 +262,12 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                 break;
             case actuallyshoot1:
                 // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>3.5){
                     tree.setPower(1);
-                    rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
                     if (pathTimer.getElapsedTimeSeconds()>4.5) {
-                        setPathState(red15far.PathState.collection);
+                        setPathState(red15farlimelight.PathState.collection);
                     }
                 }
                 break;
@@ -274,16 +289,14 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
-                    setPathState((red15far.PathState.shoot));
+                    setPathState((red15farlimelight.PathState.shoot));
                 }
                 break;
             case shoot:
                 // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(2000);
-                    hood.setPosition(0.4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -303,7 +316,7 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(2000);
+                    launcher.setVelocity(2175);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     setPathState((PathState.collectAgainEnd));
                 }
@@ -313,7 +326,7 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     follower.followPath(collect2);
                     tree.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    hood.setPosition(0.41);
+                    hood.setPosition(0.397);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -327,7 +340,7 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     goTowardsGateStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && goTowardsGateStarted) {
-                    setPathState(red15far.PathState.opengate);
+                    setPathState(red15farlimelight.PathState.opengate);
                 }
                 break;
             case opengate:
@@ -336,16 +349,14 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     opengateStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && opengateStarted && pathTimer.getElapsedTimeSeconds() > 1.5) {
-                    setPathState(red15far.PathState.shootAgain);
+                    setPathState(red15farlimelight.PathState.shootAgain);
                 }
                 break;
             case shootAgain:
                 // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy()  && !shoot3Started) {
                     follower.followPath(shoot3);
-                    launcher.setVelocity(2000);
-                    hood.setPosition(0.41);
-                    rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot3Started = true; // Mark as started to prevent calling again
@@ -378,19 +389,16 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                 break;
             case shootAgainAgain:
                 // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy()  && !shoot4Started) {
                     follower.followPath(shoot4);
-                    launcher.setVelocity(2075);
-                    hood.setPosition(0.397);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
                     if(pathTimer.getElapsedTimeSeconds()>4) {
                         theWheelOfTheOx.setPower(-1);
-                        rotator.setTargetPosition(rotatorStartPosition);
                     }
                     if(pathTimer.getElapsedTimeSeconds()>5)
                     {
@@ -416,11 +424,9 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                 break;
             case shootAgainAgainAgain:
                 // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy()  && !shoot5Started) {
                     follower.followPath(shoot5);
-                    launcher.setVelocity(2075);
-                    hood.setPosition(0.397);
-                    rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot5Started = true; // Mark as started to prevent calling again
@@ -497,14 +503,16 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
         tree.setDirection(DcMotorSimple.Direction.REVERSE);
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        // Set PIDF coefficients from TunaInnit for consistent velocity control
-        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        double P = 132.5;
-        double I = 0;
-        double D = 0;
-        double F = 12.35;
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        
+        // Initialize Limelight (pipeline 0 for red side)
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        if (limelight != null) {
+            limelight.pipelineSwitch(0);
+            limelight.start();
+            telemetry.addData("LL", "initialized");
+        } else {
+            telemetry.addData("LL", "not found");
+        }
     }
 
     @Override
@@ -517,6 +525,25 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
         telemetry.addData("Heading", follower.getPose().getHeading());
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("jolly crusader velocity", launcher.getVelocity());
+        telemetry.addData("Rotator Target", rotator.getTargetPosition());
+        telemetry.addData("Rotator Current", rotator.getCurrentPosition());
+        // Limelight telemetry
+        if (limelight != null) {
+            LLResult ll = limelight.getLatestResult();
+            if (ll != null && ll.isValid()) {
+                telemetry.addLine("Limelight: DETECTING");
+                telemetry.addData("LL tx", String.format("%.2f", ll.getTx()));
+                telemetry.addData("LL ty", String.format("%.2f", ll.getTy()));
+                telemetry.addData("LL Distance", String.format("%.1f", getDist(ll.getTy())));
+            } else {
+                telemetry.addLine("Limelight: NOT DETECTING");
+                if (hasValidLimelightData) {
+                    telemetry.addData("Using Fallback", "YES");
+                } else {
+                    telemetry.addData("Using Fallback", "NO - No valid data");
+                }
+            }
+        }
     }
 
     public double getDist(double tyDeg) {
@@ -538,11 +565,69 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
             theWheelOfTheOx.setPower(-0.3);
         }
     }
-    //comment
     public void adjustRotator(double tx) {
+        // CRITICAL SAFEGUARDS: Prevent wrong-direction rotations and drift
+        // These are necessary in autonomous when Limelight flickers or loses detection
+        
+        // 1. Deadband - don't adjust if tx is too small
+        if (Math.abs(tx) < TX_DEADBAND) {
+            return; // Already aligned, don't adjust
+        }
+        
+        // 2. Rate limiting - only adjust every N loops or every 150ms
+        adjustmentLoopCounter++;
+        boolean shouldAdjustNow = false;
+        if (adjustmentLoopCounter >= ADJUSTMENT_RATE_LIMIT || 
+            lastAdjustmentTimer.seconds() > 0.15) {
+            shouldAdjustNow = true;
+            adjustmentLoopCounter = 0;
+            lastAdjustmentTimer.reset();
+        }
+        if (!shouldAdjustNow) {
+            return; // Skip this adjustment cycle
+        }
+        
+        // 3. Only adjust when rotator is settled (close to target) to prevent cumulative errors
+        int currentPos = rotator.getCurrentPosition();
+        int currentTarget = rotator.getTargetPosition();
+        if (Math.abs(currentPos - currentTarget) > ROTATOR_SETTLE_THRESHOLD) {
+            return; // Rotator still moving, wait for it to settle
+        }
+        
+        // 4. When rotator settles, sync desired position to actual position
+        // This prevents offset accumulation that causes drift
+        desiredRotatorPosition = currentPos;
+        
+        // 5. Calculate adjustment
         double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
+        
+        // 6. Clamp adjustment per call to prevent large jumps
+        if (adjustment > MAX_ADJUSTMENT_PER_CALL) {
+            adjustment = MAX_ADJUSTMENT_PER_CALL;
+        }
+        if (adjustment < -MAX_ADJUSTMENT_PER_CALL) {
+            adjustment = -MAX_ADJUSTMENT_PER_CALL;
+        }
+        
+        // 7. Minimum movement threshold - don't adjust if movement is too small
+        if (Math.abs(adjustment) < MIN_MOVEMENT_THRESHOLD) {
+            return; // Movement too small, skip adjustment
+        }
+        
+        // 8. Calculate from CURRENT position (like TesterinoRed) to prevent offset accumulation
+        int newPosition = currentPos + adjustment - offset;
+        
+        // 9. CRITICAL: Clamp final position to physical limits to prevent 360-degree rotations
+        if (newPosition > MAX_ROTATOR_POSITION) {
+            newPosition = MAX_ROTATOR_POSITION;
+        }
+        if (newPosition < MIN_ROTATOR_POSITION) {
+            newPosition = MIN_ROTATOR_POSITION;
+        }
+        
+        // 10. Update desired position and set target
+        desiredRotatorPosition = newPosition;
         rotator.setTargetPosition(newPosition);
     }
 
@@ -579,7 +664,8 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     lastValidDistance = currentDistance;
                     hasValidLimelightData = true;
 
-                    // Adjust rotator based on horizontal offset
+                    // CRITICAL: Only adjust rotator when we have valid detection
+                    // This prevents drift when Limelight loses sight
                     adjustRotator(txDeg);
 
                     // Update velocity and hood based on distance
@@ -587,14 +673,14 @@ private final Pose openGateStart = new Pose(120, 72, Math.toRadians(90));
                     adjustHoodBasedOnDistance(currentDistance);
                 }
             } else {
-                // Limelight doesn't see target - use last valid values if available
-                if (hasValidLimelightData) {
-                    // Use last known good values (from previous successful detection)
-                    adjustRotator(lastValidTx);
-                    if (lastValidDistance > 0) {
-                        launcher.setVelocity(calcVelocity(lastValidDistance));
-                        adjustHoodBasedOnDistance(lastValidDistance);
-                    }
+                // Limelight doesn't see target
+                // CRITICAL FIX: Don't adjust rotator with fallback values - this causes drift
+                // Only use fallback for velocity and hood (less critical for alignment)
+                if (hasValidLimelightData && lastValidDistance > 0) {
+                    // Use last known good values for velocity and hood only
+                    launcher.setVelocity(calcVelocity(lastValidDistance));
+                    adjustHoodBasedOnDistance(lastValidDistance);
+                    // Do NOT adjust rotator - keep it at current position to prevent drift
                 }
                 // If no valid data ever, do nothing (keep current settings from state initialization)
             }

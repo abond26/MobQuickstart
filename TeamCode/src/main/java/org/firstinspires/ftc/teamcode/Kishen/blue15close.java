@@ -17,8 +17,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Reliable 15 red close", group = "auton red")
-public class red15close extends OpMode {
+@Autonomous(name = "Reliable 15 blue close", group = "auton blue")
+public class blue15close extends OpMode {
     private int rotatorStartPosition=0;
     private Follower follower;
 
@@ -86,7 +86,7 @@ public class red15close extends OpMode {
         done,
 
         VERYYYY_THIRD_INTAKE,
-inBetweenThing,
+        inBetweenThing,
         THIRD_SHOT_PREP,
 
         PAUSE3,
@@ -99,34 +99,35 @@ inBetweenThing,
 
 
     PathState pathState;
-    private final Pose startPose = new Pose(117.6, 130, Math.toRadians(36.5));
-    private final Pose shootPose1 = new Pose(85, 88, Math.toRadians(48));
-    private final Pose collect1thingstart=new Pose(85, 84, Math.toRadians(0));
+    private final Pose startPose = new Pose(24.4, 126.7, Math.toRadians(143));
+    private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(143));
+    private final Pose collect1thingstart=new Pose(52, 82, Math.toRadians(180));
 
 
-    private final Pose collect1thing = new Pose(118, 84, Math.toRadians(0));
-    private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(52));
-
-    private final Pose collect2Start = new Pose(88, 56.5, Math.toRadians(0));
-    private final Pose collect2End = new Pose(127.5, 56.5, Math.toRadians(0));
-    private final Pose openGateControlPoint = new Pose(102.61818181818181, 66.13846153846157);
-    private final Pose openGateStart = new Pose(115, 72, Math.toRadians(90));
-    private final Pose openGateEnd = new Pose(121, 72, Math.toRadians(90));
-
-    private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(52));
-    private final Pose collect3start=new Pose(89, 36, Math.toRadians(0));
+    private final Pose collect1thing = new Pose(16, 82, Math.toRadians(180));
+    private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(141));
 
 
-    private final Pose collect3end = new Pose(126.5, 36, Math.toRadians(0));
-    private final Pose shootBall4 = new Pose(87, 84, Math.toRadians(54));
-    private final Pose collect4inbetween=new Pose(115, 55.5, Math.toRadians(-90));
-    private final Pose collect4start=new Pose(126, 55.5, Math.toRadians(-90));
+    private final Pose collect2Start = new Pose(52, 55, Math.toRadians(180));
+    private final Pose collect2End = new Pose(13, 55, Math.toRadians(180));
+    private final Pose openGateControlPoint = new Pose(34.60626702997275, 66.72752043596729);
+    private final Pose openGateStart = new Pose(20, 73, Math.toRadians(90));
+    private final Pose openGateEnd = new Pose(18.5, 73, Math.toRadians(90));
+
+    private final Pose shootBall3 = new Pose(52, 84, Math.toRadians(141));
+    private final Pose collect3start=new Pose(46, 33, Math.toRadians(180));
 
 
-    private final Pose collect4end = new Pose(126, 15, Math.toRadians(-90));
-    private final Pose shootBall5 = new Pose(85, 110, Math.toRadians(27));
+    private final Pose collect3end = new Pose(13, 33, Math.toRadians(180));
+    private final Pose shootBall4 = new Pose(52, 84, Math.toRadians(141));
+    private final Pose collect4inbetween=new Pose(40, 55.5, Math.toRadians(270));
+    private final Pose collect4start=new Pose(10, 30, Math.toRadians(270));
 
-    private final Pose park = new Pose(103, 84, Math.toRadians(30));
+
+    private final Pose collect4end = new Pose(10, 10, Math.toRadians(270));
+    private final Pose shootBall5 = new Pose(75, 110, Math.toRadians(160));
+
+    private final Pose park = new Pose(103, 84, Math.toRadians(141));
 
 
     private PathChain shoot1, goToCollect1, inBetweeen, collect1, shoot2, goToCollect2, collect2, shoot3, opengatestart, opengateend, collect2Again, goToCollect2AgainAgain, collect2AgainAgain, goToCollect3, collect3, shoot4, goToCollect4, collect4, shoot5, parking;
@@ -218,7 +219,7 @@ inBetweenThing,
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                launcher.setVelocity(1650);
+                launcher.setVelocity(1700);
                 hood.setPosition(0.275);
                 rotator.setTargetPosition(rotatorStartPosition);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -227,13 +228,13 @@ inBetweenThing,
                 break;
             case actuallyshoot1:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1650);
+                launcher.setVelocity(1700);
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2.5){
                     tree.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
                     if (pathTimer.getElapsedTimeSeconds()>3.5) {
-                        setPathState(red15close.PathState.collection);
+                        setPathState(blue15close.PathState.collection);
                     }
                 }
                 break;
@@ -255,17 +256,17 @@ inBetweenThing,
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
-                    setPathState((red15close.PathState.shoot));
+                    setPathState((blue15close.PathState.shoot));
                 }
                 break;
             case shoot:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1650);
+                launcher.setVelocity(1700);
                 hood.setPosition(0.275);
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    hood.setPosition(0.275);
+                    hood.setPosition(0.3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -285,7 +286,7 @@ inBetweenThing,
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1675);
+                    launcher.setVelocity(1700);
                     hood.setPosition(0.275);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     setPathState((PathState.collectAgainEnd));
@@ -310,7 +311,7 @@ inBetweenThing,
                     goTowardsGateStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && goTowardsGateStarted) {
-                    setPathState(red15close.PathState.opengate);
+                    setPathState(blue15close.PathState.opengate);
                 }
                 break;
             case opengate:
@@ -319,12 +320,12 @@ inBetweenThing,
                     opengateStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && opengateStarted && pathTimer.getElapsedTimeSeconds() > 1) {
-                    setPathState(red15close.PathState.shootAgain);
+                    setPathState(blue15close.PathState.shootAgain);
                 }
                 break;
             case shootAgain:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1675);
+                launcher.setVelocity(1700);
                 hood.setPosition(0.275);
                 if (!follower.isBusy()  && !shoot3Started) {
                     follower.followPath(shoot3);
@@ -361,22 +362,22 @@ inBetweenThing,
                 break;
             case shootAgainAgain:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1675);
-                hood.setPosition(0.25);
+                launcher.setVelocity(1700);
+                hood.setPosition(0.275);
                 if (!follower.isBusy()  && !shoot4Started) {
                     follower.followPath(shoot4);
-                    hood.setPosition(0.25);
+                    hood.setPosition(0.275);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>5.25) {
+                    if(pathTimer.getElapsedTimeSeconds()>5) {
                         theWheelOfTheOx.setPower(-1);
                         rotator.setTargetPosition(rotatorStartPosition);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>6.25)
+                    if(pathTimer.getElapsedTimeSeconds()>6)
                     {
                         setPathState(PathState.inBetweenThing);
                     }
@@ -400,15 +401,15 @@ inBetweenThing,
                     follower.followPath(collect4);
                     tree.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1750);
-                    hood.setPosition(0.25);
+                    launcher.setVelocity(1700);
+                    hood.setPosition(0.275);
                     theWheelOfTheOx.setPower(1);
                     setPathState((PathState.shootAgainAgainAgain));
                 }
                 break;
             case shootAgainAgainAgain:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1750);
+                launcher.setVelocity(1700);
                 if (!follower.isBusy()  && !shoot5Started) {
                     follower.followPath(shoot5);
                     hood.setPosition(0.25);
