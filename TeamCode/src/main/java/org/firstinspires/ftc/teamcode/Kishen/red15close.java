@@ -117,7 +117,7 @@ inBetweenThing,
     private final Pose collect3start=new Pose(89, 35, Math.toRadians(0));
 
 
-    private final Pose collect3end = new Pose(127, 35, Math.toRadians(0));
+    private final Pose collect3end = new Pose(120, 35, Math.toRadians(0));
     private final Pose shootBall4 = new Pose(87, 84, Math.toRadians(48.5));
     private final Pose collect4inbetween=new Pose(115, 55.5, Math.toRadians(-90));
     private final Pose collect4start=new Pose(128, 55.5, Math.toRadians(-90));
@@ -322,10 +322,10 @@ inBetweenThing,
                 break;
             case shootAgain:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1750);
+                launcher.setVelocity(1759);
                 if (!follower.isBusy()  && !shoot3Started) {
                     follower.followPath(shoot3);
-                    hood.setPosition(0.315);
+                    hood.setPosition(0.312);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
