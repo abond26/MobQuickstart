@@ -105,7 +105,7 @@ inBetweenThing,
 
 
     private final Pose collect1thing = new Pose(120, 84, Math.toRadians(0));
-    private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(49.5001));
+    private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(49.5));
 
     private final Pose collect2Start = new Pose(88, 57.5, Math.toRadians(0));
     private final Pose collect2End = new Pose(127, 57.5, Math.toRadians(0));
