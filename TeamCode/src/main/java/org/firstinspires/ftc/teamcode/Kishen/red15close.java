@@ -108,7 +108,7 @@ inBetweenThing,
     private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(49.5));
 
     private final Pose collect2Start = new Pose(88, 57.5, Math.toRadians(0));
-    private final Pose collect2End = new Pose(127, 57.5, Math.toRadians(0));
+    private final Pose collect2End = new Pose(128, 57.5, Math.toRadians(0));
     private final Pose openGateControlPoint = new Pose(102.61818181818181, 66.13846153846157);
     private final Pose openGateStart = new Pose(115, 72, Math.toRadians(90));
     private final Pose openGateEnd = new Pose(121, 72, Math.toRadians(90));
@@ -117,14 +117,14 @@ inBetweenThing,
     private final Pose collect3start=new Pose(89, 35, Math.toRadians(0));
 
 //hello
-    private final Pose collect3end = new Pose(120, 35, Math.toRadians(0));
+    private final Pose collect3end = new Pose(122, 35, Math.toRadians(0));
     private final Pose shootBall4 = new Pose(87, 84, Math.toRadians(48.5));
     private final Pose collect4inbetween=new Pose(115, 55.5, Math.toRadians(-90));
     private final Pose collect4start=new Pose(128, 55.5, Math.toRadians(-90));
 
 
-    private final Pose collect4end = new Pose(128, 15, Math.toRadians(-90));
-    private final Pose shootBall5 = new Pose(85, 110, Math.toRadians(41));
+    private final Pose collect4end = new Pose(128, 12.5, Math.toRadians(-90));
+    private final Pose shootBall5 = new Pose(85, 110, Math.toRadians(35));
 
     private final Pose park = new Pose(103, 84, Math.toRadians(46));
 
@@ -218,8 +218,8 @@ inBetweenThing,
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                launcher.setVelocity(1750);
-                hood.setPosition(0.315);
+                launcher.setVelocity(1725);
+                hood.setPosition(0.285);
                 rotator.setTargetPosition(rotatorStartPosition);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
@@ -227,7 +227,7 @@ inBetweenThing,
                 break;
             case actuallyshoot1:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1750);
+                launcher.setVelocity(1725);
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2.5){
                     tree.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
@@ -260,11 +260,11 @@ inBetweenThing,
                 break;
             case shoot:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1750);
+                launcher.setVelocity(1725);
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    hood.setPosition(0.312);
+                    hood.setPosition(0.285);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -284,7 +284,7 @@ inBetweenThing,
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1750);
+                    launcher.setVelocity(1700);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     setPathState((PathState.collectAgainEnd));
                 }
@@ -294,7 +294,7 @@ inBetweenThing,
                     follower.followPath(collect2);
                     tree.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    hood.setPosition(0.315);
+                    hood.setPosition(0.3);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -322,10 +322,10 @@ inBetweenThing,
                 break;
             case shootAgain:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1759);
+                launcher.setVelocity(1725);
                 if (!follower.isBusy()  && !shoot3Started) {
                     follower.followPath(shoot3);
-                    hood.setPosition(0.312);
+                    hood.setPosition(0.285);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
@@ -351,17 +351,17 @@ inBetweenThing,
                 if (!follower.isBusy()) {
                     follower.followPath(collect3);
                     tree.setPower(1);
-                    hood.setPosition(0.315);
+                    hood.setPosition(0.285);
                     theWheelOfTheOx.setPower(1);
                     setPathState((PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1750);
+                launcher.setVelocity(1725);
                 if (!follower.isBusy()  && !shoot4Started) {
                     follower.followPath(shoot4);
-                    hood.setPosition(0.312);
+                    hood.setPosition(0.285);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
@@ -372,7 +372,7 @@ inBetweenThing,
                         theWheelOfTheOx.setPower(-1);
                         rotator.setTargetPosition(rotatorStartPosition);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>5.5)
+                    if(pathTimer.getElapsedTimeSeconds()>6)
                     {
                         setPathState(PathState.inBetweenThing);
                     }
@@ -395,17 +395,17 @@ inBetweenThing,
                     follower.followPath(collect4);
                     tree.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    hood.setPosition(0.315);
+                    hood.setPosition(0.285);
                     theWheelOfTheOx.setPower(1);
                     setPathState((PathState.shootAgainAgainAgain));
                 }
                 break;
             case shootAgainAgainAgain:
                 // Continuously set velocity to prevent override
-                launcher.setVelocity(1755);
+                launcher.setVelocity(1750);
                 if (!follower.isBusy()  && !shoot5Started) {
                     follower.followPath(shoot5);
-                    hood.setPosition(0.309);
+                    hood.setPosition(0.3);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);

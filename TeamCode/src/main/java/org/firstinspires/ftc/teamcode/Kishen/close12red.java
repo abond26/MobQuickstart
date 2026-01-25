@@ -216,7 +216,7 @@ public class close12red extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1700);
+                launcher.setVelocity(1650);
                 hood.setPosition(0.3);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
@@ -245,7 +245,7 @@ public class close12red extends OpMode {
 
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    launcher.setVelocity(1700);
+                    launcher.setVelocity(1650);
                     hood.setPosition(0.3);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
@@ -284,17 +284,17 @@ public class close12red extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1700);
+                    launcher.setVelocity(1650);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot2Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>3.5) {
+                    if(pathTimer.getElapsedTimeSeconds()>2.5) {
                         tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>5) {
+                    if(pathTimer.getElapsedTimeSeconds()>4) {
                         setPathState((close12red.PathState.collectAgain));
                     }
                 }
@@ -309,7 +309,7 @@ public class close12red extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(1700);
+                    launcher.setVelocity(1650);
                     follower.followPath(collect2);
                     tree.setPower(1);
                     hood.setPosition(0.3);
@@ -346,7 +346,7 @@ public class close12red extends OpMode {
                 break;
             case collectAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    launcher.setVelocity(1700);
+                    launcher.setVelocity(1650);
                     follower.followPath(collect3);
                     tree.setPower(1);
                     hood.setPosition(0.3);
