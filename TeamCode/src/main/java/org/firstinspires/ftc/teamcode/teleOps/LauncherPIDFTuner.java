@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 @TeleOp
-public class TunaInnit extends OpMode {
+public class LauncherPIDFTuner extends OpMode {
     public DcMotorEx flywheelMotor;
     public double highVelocity = 1500;
     public double lowVelocity = 901;
@@ -20,7 +20,7 @@ public class TunaInnit extends OpMode {
     @Override
     public void init(){
         flywheelMotor = hardwareMap.get(DcMotorEx.class, "launcher");
-        flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //changed to Ex
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         flywheelMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         telemetry.addLine("Init complete");

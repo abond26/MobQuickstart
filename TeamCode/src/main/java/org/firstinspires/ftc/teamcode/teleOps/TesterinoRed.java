@@ -136,10 +136,10 @@ public class TesterinoRed extends LinearOpMode {
 
             //launcha
             if (aPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+20);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+2);
             }
             if (yPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-20);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-2);
             }
 
 
