@@ -13,6 +13,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -115,10 +116,10 @@ public class close12blue extends OpMode {
     private final Pose shootPose1 = new Pose(52, 82, Math.toRadians(137));
     private final Pose collect1thingstart=new Pose(52, 80, Math.toRadians(180)); //has to do two so 52 55 180
 
-    private final Pose collect1thing = new Pose(16, 80, Math.toRadians(180));// should be 13 55 180
+    private final Pose collect1thing = new Pose(23, 80, Math.toRadians(180));// should be 13 55 180
     //private final Pose awayFromGate = new Pose(35, 70, Math.toRadians(90));
-    private final Pose openGateStart = new Pose(20, 73, Math.toRadians(90));
-    private final Pose openGateEnd = new Pose(18.5, 73, Math.toRadians(90));
+    private final Pose openGateStart = new Pose(30, 73, Math.toRadians(90));
+    private final Pose openGateEnd = new Pose(22, 73, Math.toRadians(90));
     private final Pose shootPose2 = new Pose( 52, 84, Math.toRadians(143));
 
 //test
@@ -438,6 +439,13 @@ public class close12blue extends OpMode {
         tree.setDirection(DcMotorSimple.Direction.REVERSE);
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double P = 132.5;
+        double I = 0;
+        double D = 0;
+        double F = 12.35;
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 
     @Override

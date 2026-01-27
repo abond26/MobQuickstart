@@ -13,6 +13,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -112,24 +113,24 @@ public class close12red extends OpMode {
 
     PathState pathState;
     private final Pose startPose = new Pose(117.6, 130, Math.toRadians(36.5));
-    private final Pose shootPose1 = new Pose(85, 88, Math.toRadians(46));
+    private final Pose shootPose1 = new Pose(85, 88, Math.toRadians(47));
     private final Pose collect1thingstart=new Pose(85, 84, Math.toRadians(0));
 
 
     private final Pose collect1thing = new Pose(120, 84, Math.toRadians(0));
     private final Pose openGateStart = new Pose(120, 77, Math.toRadians(90));
     private final Pose openGateEnd = new Pose(122, 77, Math.toRadians(90));
-    private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(46));
+    private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(47));
 
 
     private final Pose collect2Start = new Pose(88, 57.5, Math.toRadians(0));
     private final Pose collect2End = new Pose(127, 57.5, Math.toRadians(0));
-    private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(46));
+    private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(47));
     private final Pose collect3start=new Pose(95, 35, Math.toRadians(0));
 
 
     private final Pose collect3end = new Pose(127, 35, Math.toRadians(0));
-    private final Pose shootBall4 = new Pose(87, 84, Math.toRadians(46));
+    private final Pose shootBall4 = new Pose(87, 84, Math.toRadians(47));
     private final Pose park = new Pose(103, 84, Math.toRadians(46));
 
 
@@ -216,8 +217,8 @@ public class close12red extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1650);
-                hood.setPosition(0.3);
+                launcher.setVelocity(1850); //1725
+                hood.setPosition(0.25); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(close12red.PathState.actuallyshoot1);
@@ -245,8 +246,8 @@ public class close12red extends OpMode {
 
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    launcher.setVelocity(1650);
-                    hood.setPosition(0.3);
+                    launcher.setVelocity(1850);
+                    hood.setPosition(0.25);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
@@ -267,7 +268,7 @@ public class close12red extends OpMode {
                     follower.followPath(goToGate);
                     goTowardsGateStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && goTowardsGateStarted && pathTimer.getElapsedTimeSeconds() > 1.5) {
+                if (!follower.isBusy() && goTowardsGateStarted && pathTimer.getElapsedTimeSeconds() > .5) {
                     setPathState(close12red.PathState.opengate);
                 }
                 break;
@@ -276,7 +277,7 @@ public class close12red extends OpMode {
                     follower.followPath(openGate);
                     opengateStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && opengateStarted && pathTimer.getElapsedTimeSeconds() > 2) {
+                if (!follower.isBusy() && opengateStarted && pathTimer.getElapsedTimeSeconds() > 1) {
                     setPathState(close12red.PathState.shoot);
                 }
                 break;
@@ -284,7 +285,7 @@ public class close12red extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1650);
+                    launcher.setVelocity(1850);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -309,10 +310,10 @@ public class close12red extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(1650);
+                    launcher.setVelocity(1800);
                     follower.followPath(collect2);
                     tree.setPower(1);
-                    hood.setPosition(0.3);
+                    hood.setPosition(0.25);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -328,10 +329,10 @@ public class close12red extends OpMode {
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot3Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>4) {
+                    if(pathTimer.getElapsedTimeSeconds()>4.5) {
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>5)
+                    if(pathTimer.getElapsedTimeSeconds()>5.5)
                     {
                         setPathState((close12red.PathState.collectAgainAgain));
                     }
@@ -346,10 +347,10 @@ public class close12red extends OpMode {
                 break;
             case collectAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    launcher.setVelocity(1650);
+                    launcher.setVelocity(1800);
                     follower.followPath(collect3);
                     tree.setPower(1);
-                    hood.setPosition(0.3);
+                    hood.setPosition(0.25);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -360,22 +361,24 @@ public class close12red extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5 && !shoot4Started) {
                     follower.followPath(shoot4);
+                    launcher.setVelocity(1800);
+                    hood.setPosition(0.25);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>4) {
+                    if(pathTimer.getElapsedTimeSeconds()>5) {
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>5)
+                    if(pathTimer.getElapsedTimeSeconds()>6)
                     {
                         setPathState((close12red.PathState.parklol));
                     }
                 }
                 break;
             case parklol:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1 && !parkingStarted) {
+                if (!follower.isBusy() && !parkingStarted) {
                     follower.followPath(parking);
                     parkingStarted = true; // Mark as started to prevent calling again
                 }
@@ -439,6 +442,13 @@ public class close12red extends OpMode {
         tree.setDirection(DcMotorSimple.Direction.REVERSE);
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double P = 132.5;
+        double I = 0;
+        double D = 0;
+        double F = 12.35;
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 
     @Override
