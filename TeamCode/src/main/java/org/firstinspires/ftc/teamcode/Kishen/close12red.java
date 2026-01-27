@@ -223,6 +223,7 @@ public class close12red extends OpMode {
                 follower.followPath(shoot1);
                 setPathState(close12red.PathState.actuallyshoot1);
                 break;
+                //
             case actuallyshoot1:
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2){

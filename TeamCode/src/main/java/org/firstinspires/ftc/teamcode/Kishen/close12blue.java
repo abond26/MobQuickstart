@@ -217,6 +217,7 @@ public class close12blue extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
+                //
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
                 launcher.setVelocity(2050);
                 hood.setPosition(0.25);
