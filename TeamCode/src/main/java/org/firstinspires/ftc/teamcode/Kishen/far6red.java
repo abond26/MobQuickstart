@@ -112,7 +112,7 @@ public class far6red extends OpMode {
 
 
     private final Pose collect1thing = new Pose(135, 33, Math.toRadians(0));
-    private final Pose shootPose2 = new Pose( 89, 17, Math.toRadians(71));
+    private final Pose shootPose2 = new Pose( 89, 17, Math.toRadians(72.5));
 
 
     private final Pose collect2Start = new Pose(130, 12, Math.toRadians(0));
@@ -121,7 +121,7 @@ public class far6red extends OpMode {
     private final Pose collect2EndAgain = new Pose(135, 9, Math.toRadians(0));
     private final Pose collect2StartAgainAgain = new Pose(125, 10, Math.toRadians(0));
     private final Pose collect2EndAgainAgain = new Pose(135, 10, Math.toRadians(0));
-    private final Pose shootBall3 = new Pose(89, 17, Math.toRadians(71));
+    private final Pose shootBall3 = new Pose(89, 17, Math.toRadians(72));
     private final Pose park = new Pose(103, 22, Math.toRadians(72));
 
 
@@ -197,35 +197,36 @@ public class far6red extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(2075);
-                hood.setPosition(0.2654);
+                launcher.setVelocity(2120);
+                hood.setPosition(0.225);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 rotator.setTargetPosition(rotatorStartPosition);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
+                // Continuously set launcher velocity
+                launcher.setVelocity(2120);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>4){
                     tree.setPower(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
-                    launcher.setVelocity(2075);
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>4.25){
                         theWheelOfTheOx.setPower(1);
-                        launcher.setVelocity(2075);
+                        launcher.setVelocity(2120);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>4.5){
                         theWheelOfTheOx.setPower(-1);
-                        launcher.setVelocity(2075);
+                        launcher.setVelocity(2120);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>4.75){
                         theWheelOfTheOx.setPower(1);
-                        launcher.setVelocity(2075);
+                        launcher.setVelocity(2120);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5){
                         theWheelOfTheOx.setPower(-1);
-                        launcher.setVelocity(2075);
+                        launcher.setVelocity(2120);
                     }
 
                     if (pathTimer.getElapsedTimeSeconds()>6.5) {
@@ -237,7 +238,7 @@ public class far6red extends OpMode {
                 if(!follower.isBusy())
                 {
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(2075);
+                    launcher.setVelocity(2120);
                     follower.followPath(goToCollect1);
                     setPathState(PathState.collection);
                 }
@@ -247,7 +248,7 @@ public class far6red extends OpMode {
             case collection:
 
                 if (!follower.isBusy()) {
-                    launcher.setVelocity(2075);
+                    launcher.setVelocity(2120);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     theWheelOfTheOx.setPower(1);
@@ -257,36 +258,38 @@ public class far6red extends OpMode {
                 }
                 break;
             case shoot:
+                rotator.setTargetPosition(rotatorStartPosition);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(2075);
-                    hood.setPosition(0.2654);
+                    launcher.setVelocity(2120);
+                    hood.setPosition(0.225);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
                 }
+                rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && shoot2Started) {
                     if(pathTimer.getElapsedTimeSeconds()>6) {
                         theWheelOfTheOx.setPower(-1);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>6.25){
                         theWheelOfTheOx.setPower(1);
-                        launcher.setVelocity(2075);
+                        launcher.setVelocity(2120);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>6.5){
                         theWheelOfTheOx.setPower(-1);
-                        launcher.setVelocity(2075);
+                        launcher.setVelocity(2120);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>6.75){
                         theWheelOfTheOx.setPower(1);
-                        launcher.setVelocity(2075);
+                        launcher.setVelocity(2120);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>7){
                         theWheelOfTheOx.setPower(-1);
-                        launcher.setVelocity(2075);
+                        launcher.setVelocity(2120);
                     }
                     if(pathTimer.getElapsedTimeSeconds()>8) {
                         setPathState((PathState.parklol));
@@ -425,12 +428,14 @@ public class far6red extends OpMode {
         tree.setDirection(DcMotorSimple.Direction.REVERSE);
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double P = 132.5;
         double I = 0;
         double D = 0;
         double F = 12.35;
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        // Velocity will be set in the start state of the state machine
     }
 
     @Override

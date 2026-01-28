@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "Reliable 12 blue close", group = "auton blue")
 public class close12blue extends OpMode {
@@ -385,6 +386,15 @@ public class close12blue extends OpMode {
                 }
                 break;
             case done:
+                // Save final pose and calculate rotator position to face goal
+                PoseStorage.savePose(follower.getPose());
+                
+                // Calculate and set rotator to face the goal (blue side = false, motor180Range = 910, offset = 28)
+                int rotatorPosition = PoseStorage.calculateRotatorPositionToFaceGoal(false, motor180Range, offset);
+                rotator.setTargetPosition(rotatorPosition);
+                
+                // Save rotator position for teleop
+                PoseStorage.saveRotatorPosition(rotatorPosition);
                 break;
 
         }
@@ -453,6 +463,10 @@ public class close12blue extends OpMode {
     public void loop() {
         follower.update();
         statePathUpdate();
+        
+        // Continuously save pose so it's saved even if autonomous ends early
+        PoseStorage.savePose(follower.getPose());
+        
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
