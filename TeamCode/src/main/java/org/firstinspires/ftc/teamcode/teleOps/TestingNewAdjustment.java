@@ -14,6 +14,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
+
 @TeleOp
 
 public class TestingNewAdjustment extends LinearOpMode {
@@ -56,13 +58,14 @@ public class TestingNewAdjustment extends LinearOpMode {
     private static final double APRILTAG_X = 15.0; // AprilTag X position on field (inches) - UPDATE THIS
     private static final double APRILTAG_Y = 128.0; // AprilTag Y position on field (inches) - UPDATE THIS
 
-    private final Pose startPose = new Pose(0, 0, 0);
+    private Pose startPose;
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
     private Follower follower;
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
     public void runOpMode() throws InterruptedException{
         follower = Constants.createFollower(hardwareMap);
+        startPose = PoseStorage.loadPose(new Pose(0, 0, 0));
         follower.setStartingPose(startPose);
 
         hood = hardwareMap.get(Servo.class, "hood");
@@ -225,11 +228,7 @@ public class TestingNewAdjustment extends LinearOpMode {
                         if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
                             double localizationAngle = calculateAngleToAprilTag();
 
-                            // Limit localization angle to reasonable range (±180 degrees)
-                            if (localizationAngle > 180) localizationAngle -= 360;
-                            if (localizationAngle < -180) localizationAngle += 360;
-
-                            adjustRotatorWithLocalization(localizationAngle);
+                            adjustRotatorL(localizationAngle);
 
                             telemetry.addData("Localization Angle", localizationAngle);
                             telemetry.addData("Robot X", follower.getPose().getX());
@@ -328,8 +327,8 @@ public class TestingNewAdjustment extends LinearOpMode {
         double relativeAngle = angleToTag + robotHeading;
 
         // Normalize to [-PI, PI]
-//        while (relativeAngle > Math.PI) relativeAngle -= 2 * Math.PI;
-//        while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
+        while (relativeAngle > Math.PI) relativeAngle -= 2 * Math.PI;
+        while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
 
         // Convert to degrees
         double angleDeg = Math.toDegrees(relativeAngle);
@@ -345,6 +344,12 @@ public class TestingNewAdjustment extends LinearOpMode {
         telemetry.addData("Relative Angle Deg", angleDeg);
 
         return angleDeg;
+    }
+    public void adjustRotatorL(double localizationAngleDeg) {
+        double fracOfFullCircum = Math.toRadians(localizationAngleDeg) / (Math.PI);
+        int adjustment = (int) (fracOfFullCircum * motor180Range);
+        int newPosition = rotator.getCurrentPosition() + adjustment ;
+        rotator.setTargetPosition(newPosition);
     }
 
 
@@ -381,7 +386,7 @@ public class TestingNewAdjustment extends LinearOpMode {
 
         // If direction is wrong, try negating the adjustment
         // The sign might be inverted depending on your coordinate system
-        adjustment = -adjustment; // Negate to fix direction (remove this line if it makes it worse)
+        adjustment = adjustment; // Negate to fix direction (remove this line if it makes it worse)
 
 
         if (Math.abs(currentPos + adjustment) >= DEGREES_270_TICKS) {
