@@ -196,7 +196,7 @@ public class far9blue extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(2350);
+                launcher.setVelocity(2550);
                 hood.setPosition(0.4);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
@@ -235,7 +235,7 @@ public class far9blue extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(2200);
+                    launcher.setVelocity(2550);
                     hood.setPosition(0.4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
@@ -259,7 +259,7 @@ public class far9blue extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(2200);
+                    launcher.setVelocity(2550);
                     follower.followPath(collect2);
                     tree.setPower(1);
                     hood.setPosition(0.4);
