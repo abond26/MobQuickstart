@@ -285,11 +285,11 @@ public class far6red extends OpMode {
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>6.75){
                         theWheelOfTheOx.setPower(1);
-                        launcher.setVelocity(2120);
+                        launcher.setVelocity(2140);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>7){
                         theWheelOfTheOx.setPower(-1);
-                        launcher.setVelocity(2120);
+                        launcher.setVelocity(2140);
                     }
                     if(pathTimer.getElapsedTimeSeconds()>8) {
                         setPathState((PathState.parklol));

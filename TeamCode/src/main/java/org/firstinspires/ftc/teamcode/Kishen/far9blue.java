@@ -198,7 +198,7 @@ public class far9blue extends OpMode {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
                 launcher.setVelocity(2120);
-                hood.setPosition(0.2);
+                hood.setPosition(0.225);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
@@ -255,7 +255,7 @@ public class far9blue extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(2080);
+                    launcher.setVelocity(2120);
                     hood.setPosition(0.225);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
@@ -267,19 +267,19 @@ public class far9blue extends OpMode {
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.25){
                         theWheelOfTheOx.setPower(1);
-                        launcher.setVelocity(2080);
+                        launcher.setVelocity(2120);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.5){
                         theWheelOfTheOx.setPower(-1);
-                        launcher.setVelocity(2080);
+                        launcher.setVelocity(2120);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.75){
                         theWheelOfTheOx.setPower(1);
-                        launcher.setVelocity(2080);
+                        launcher.setVelocity(2120);
                     }
                     if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>6){
                         theWheelOfTheOx.setPower(-1);
-                        launcher.setVelocity(2080);
+                        launcher.setVelocity(2120);
                     }
 
                     if (pathTimer.getElapsedTimeSeconds()>6.5) {
