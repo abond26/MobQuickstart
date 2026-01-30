@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "Reliable 9 red close", group = "auton red")
 public class close9red extends OpMode {
@@ -388,6 +389,7 @@ public class close9red extends OpMode {
     @Override
     public void loop() {
         follower.update();
+        PoseStorage.savePose(follower.getPose());
         statePathUpdate();
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());

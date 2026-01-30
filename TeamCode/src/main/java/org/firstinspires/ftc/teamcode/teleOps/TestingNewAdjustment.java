@@ -55,8 +55,8 @@ public class TestingNewAdjustment extends LinearOpMode {
     private static final double MID_HOOD_POSITION = 0.203+0.0167;
     private static final double FAR_HOOD_POSITION = 0.25+.0129; // Hood position for far shots
 
-    private static final double APRILTAG_X = 15.0; // AprilTag X position on field (inches) - UPDATE THIS
-    private static final double APRILTAG_Y = 128.0; // AprilTag Y position on field (inches) - UPDATE THIS
+    private static final double APRILTAG_X = 0.0; // AprilTag X position on field (inches) - UPDATE THIS
+    private static final double APRILTAG_Y = 145.0; // AprilTag Y position on field (inches) - UPDATE THIS
 
     private Pose startPose;
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;

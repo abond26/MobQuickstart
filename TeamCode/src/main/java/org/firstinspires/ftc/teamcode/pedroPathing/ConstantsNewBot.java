@@ -24,11 +24,11 @@ public class ConstantsNewBot {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
 //            .centripetalScaling(0.00035)
-//            .headingPIDFCoefficients(new PIDFCoefficients(1, 0.0001, 0.03, 0))
-//            .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0.0001, 0.0075, 0))
-//            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.025, 0, 0.00001, 0.01, 0.6)))
-//            .forwardZeroPowerAcceleration(-46.14914399311541)
-//            .lateralZeroPowerAcceleration(-66.34057178113703)
+            .headingPIDFCoefficients(new PIDFCoefficients(1.08, 0.0001, 0.032, 0))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.18, 0.00001, 0.0134, 0))
+            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.025, 0, 0.00001, 0.01, 0.01)))
+           .forwardZeroPowerAcceleration(-44.4019822807)
+            .lateralZeroPowerAcceleration(-60.34057178113703)
             .mass(12.06556);
 
 
@@ -38,8 +38,8 @@ public class ConstantsNewBot {
 //            1.2,
 //            1);;
     public static MecanumConstants driveConstants = new MecanumConstants()
-//            .xVelocity(74.74229851670154)
-//            .yVelocity(61.22060748723548)
+            .xVelocity(79.4311860736)
+            .yVelocity(63.8537607268056)
 
 
 
