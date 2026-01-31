@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "limelight blue", group = "LimeLight")
+//@Autonomous(name = "limelight blue", group = "LimeLight")
 public class AutonBlueCloseLime extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg

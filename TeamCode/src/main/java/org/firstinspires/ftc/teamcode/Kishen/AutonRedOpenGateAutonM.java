@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Gate movement", group = "zzzzz")
+//@Autonomous(name = "Gate movement", group = "zzzzz")
 public class AutonRedOpenGateAutonM extends OpMode {
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
