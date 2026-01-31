@@ -53,6 +53,7 @@ public class SetTo1500 extends LinearOpMode {
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
+    //adfad
     private Follower follower;
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
     public void runOpMode() throws InterruptedException{
