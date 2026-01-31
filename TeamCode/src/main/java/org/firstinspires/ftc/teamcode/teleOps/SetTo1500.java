@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp
 
-public class NewBotBlue extends LinearOpMode {
+public class SetTo1500 extends LinearOpMode {
     double newTime;
     double time;
     double F = 12.35;
@@ -75,8 +75,6 @@ public class NewBotBlue extends LinearOpMode {
         jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
         jollyCrusader.setVelocity(0);
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
-        jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         //jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
@@ -140,8 +138,8 @@ public class NewBotBlue extends LinearOpMode {
 
 
             //launcha
-            if (aPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+30);
+            if (gamepad1.right_trigger > 0.1){
+                jollyCrusader.setVelocity(110);
             }
             if (yPressed){
                 jollyCrusader.setVelocity(jollyCrusader.getVelocity()-30);
@@ -166,7 +164,6 @@ public class NewBotBlue extends LinearOpMode {
             }
 
             //intake
-            sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
             if (sumOfTrigs!=0){
                 intake(sumOfTrigs);
             } else if (!gamepad1.right_bumper) {
@@ -217,12 +214,13 @@ public class NewBotBlue extends LinearOpMode {
 
                 if (gamepad1.right_stick_button && currentDistance > 0){
                     jollyCrusader.setVelocity(2300);
+
                 }
 
 
             }
             if (gamepad1.left_stick_button){
-                jollyCrusader.setVelocity(1800);
+                jollyCrusader.setVelocity(0);
             }
 //cool
 
