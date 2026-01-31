@@ -11,26 +11,38 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @TeleOp
 public class Localizerino extends LinearOpMode {
     private Limelight3A limelight;
     int motor180Range = 630;
+    private static final int DEGREES_270_TICKS = 630;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
     private int y = tagHeight - limeHeight;
     private Follower follower;
     private DcMotor rotator;
-    private final Pose startPose = new Pose(72, 8, 0);
+    private Pose startPose;
+
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
-    private static final double APRILTAG_X = 15.0; // AprilTag X position on field (inches) - UPDATE THIS
-    private static final double APRILTAG_Y = 128.0; // AprilTag Y position on field (inches) - UPDATE THIS
+    Pose bluePos = new Pose(11, 137, 0);
+    Pose redPos = new Pose(133, 137, 0);
+    Pose target = bluePos;
+
+
 
     public void runOpMode() throws InterruptedException {
         follower = Constants.createFollower(hardwareMap);
+        startPose = PoseStorage.loadPose(new Pose(72, 8, 0));
         follower.setStartingPose(startPose);
+
         follower.update();
+
+        telemetry.addData("x", follower.getPose().getX());
+        telemetry.addData("y", follower.getPose().getY());
+        telemetry.update();
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -52,11 +64,11 @@ public class Localizerino extends LinearOpMode {
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rotator.setTargetPosition(0);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setPower(1);
-        rotator.setTargetPosition(0);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setDirection(DcMotorSimple.Direction.REVERSE);
+        rotator.setDirection(DcMotorSimple.Direction.FORWARD);
 
         waitForStart();
         follower.startTeleopDrive();
@@ -66,12 +78,26 @@ public class Localizerino extends LinearOpMode {
 
 
 
-        while (opModeIsActive()){
+
+
+
+
+
+
+
+        while (opModeIsActive()) {
             follower.update();
-            calculateAngleToAprilTag();
+
+            Pose robotPose = follower.getPose();
+            double x = robotPose.getX();
+            double y = robotPose.getY();
+            double headingDeg = Math.toDegrees(robotPose.getHeading());
+
+            double turretAngleDeg = alignTurret(x, y, headingDeg, target);
+
             drive();
-
-
+            setRotatorToTurretAngle(turretAngleDeg);
+            telemetry.addData("turret angle", turretAngleDeg);
             telemetry.addData("x", follower.getPose().getX());
             telemetry.addData("y", follower.getPose().getY());
             telemetry.update();
@@ -83,42 +109,78 @@ public class Localizerino extends LinearOpMode {
 
 
 
-    public double calculateAngleToAprilTag() {
-        Pose robotPose = follower.getPose();
-        double robotX = robotPose.getX();
-        double robotY = robotPose.getY();
-        double robotHeading = robotPose.getHeading();
 
-        double deltaX = APRILTAG_X - robotX;
-        double deltaY = APRILTAG_Y - robotY;
 
-        // Calculate absolute angle to AprilTag (in radians)
-        // atan2(y, x) gives angle from positive x-axis
-        double angleToTag = Math.atan2(deltaX, deltaY);
-
-        // Calculate relative angle (how much to rotate from robot's current heading)
-        // This is the angle the turret needs to point relative to robot's front
-        double relativeAngle = angleToTag + robotHeading;
-
-        // Normalize to [-PI, PI]
-//        while (relativeAngle > Math.PI) relativeAngle -= 2 * Math.PI;
-//        while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
-
-        // Convert to degrees
-        double angleDeg = Math.toDegrees(relativeAngle);
-
-        // Debug telemetry
-        telemetry.addData("Robot X", robotX);
-        telemetry.addData("Robot Y", robotY);
-        telemetry.addData("Robot Heading Deg", Math.toDegrees(robotHeading));
-        telemetry.addData("Delta X", deltaX);
-        telemetry.addData("Delta Y", deltaY);
-        telemetry.addData("Angle to Tag Rad", angleToTag);
-        telemetry.addData("Angle to Tag Deg", Math.toDegrees(angleToTag));
-        telemetry.addData("Relative Angle Deg", angleDeg);
-
-        return angleDeg;
+    private double alignTurret(double x, double y, double headingDeg, Pose target) {
+        double dx = target.getX() - x;
+        double dy = target.getY() - y;
+        double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
+        double turretAngle = angleToGoal - headingDeg;
+        return turretAngle;
     }
+
+
+    private final int ROTATOR_ZERO_TICKS = 0;  // tick position when t8[888[urret faces forward; calibrate if needed
+
+    public void setRotatorToTurretAngle(double turretAngleDeg) {
+        double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
+        int targetTicks = ROTATOR_ZERO_TICKS + (int) (fracOf180 * motor180Range);
+        // Optional: clamp to physical limits (e.g. ±270°)
+        int clamped = (int) Math.max(-DEGREES_270_TICKS, Math.min(DEGREES_270_TICKS, targetTicks));
+        rotator.setTargetPosition(clamped);
+    }
+
+
+    public void adjustRotatorWithLocalization(double localizationAngleDeg) {
+        // Check if rotator has reached 270 degrees, return to zero position
+        int currentPos = rotator.getCurrentPosition();
+        if (Math.abs(currentPos) >= DEGREES_270_TICKS) {
+            rotator.setTargetPosition(0);
+            return;
+        }
+
+        if (Math.abs(localizationAngleDeg) < 2.0) {
+            rotator.setTargetPosition(currentPos);
+            return;
+        }
+
+
+        double fracOfSemiCircum = Math.toRadians(localizationAngleDeg) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+
+        // If direction is wrong, try negating the adjustment
+        // The sign might be inverted depending on your coordinate system
+        adjustment = adjustment; // Negate to fix direction (remove this line if it makes it worse)
+
+
+        if (Math.abs(currentPos + adjustment) >= DEGREES_270_TICKS) {
+            rotator.setTargetPosition(0);
+            return;
+        }
+
+        int offset = 14;
+
+        int newPosition = currentPos + adjustment - offset;
+        rotator.setTargetPosition(newPosition);
+
+        telemetry.addData("Using", "Localization Only");
+        telemetry.addData("Loc Angle Deg", localizationAngleDeg);
+        telemetry.addData("Frac of SemiCircum", fracOfSemiCircum);
+        telemetry.addData("Adjustment Ticks", adjustment);
+        telemetry.addData("Current Pos", currentPos);
+        telemetry.addData("New Pos", newPosition);
+    }
+    public void adjustRotator(double turretAngle) {
+        double fracOfSemiCircum = Math.toRadians(turretAngle) / Math.PI;
+        int adjustment = (int) (fracOfSemiCircum * motor180Range);
+        int newPosition = rotator.getCurrentPosition() + adjustment ;
+        rotator.setTargetPosition(newPosition);
+    }
+
+
+
+
+
 
     public void drive(){
         double y = -gamepad1.left_stick_y; //forward/backward

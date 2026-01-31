@@ -20,32 +20,32 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public class Constants {
+public class ConstantsNewBot {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .centripetalScaling(0.00035)
-          .headingPIDFCoefficients(new PIDFCoefficients(1, 0.0001, 0.03, 0))
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0.0001, 0.0075, 0))
-                .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.025, 0, 0.00001, 0.01, 0.6)))
-            .forwardZeroPowerAcceleration(-46.14914399311541)
-            .lateralZeroPowerAcceleration(-66.34057178113703)
-            .mass(11.4);
+//            .centripetalScaling(0.00035)
+            .headingPIDFCoefficients(new PIDFCoefficients(1.08, 0.0001, 0.032, 0))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.18, 0.00001, 0.0134, 0))
+            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.025, 0, 0.00001, 0.01, 0.01)))
+           .forwardZeroPowerAcceleration(-44.4019822807)
+            .lateralZeroPowerAcceleration(-60.34057178113703)
+            .mass(12.06556);
 
 
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99,
-            100,
-            1.2,
-            1);;
+//    public static PathConstraints pathConstraints = new PathConstraints(0.99,
+//            100,
+//            1.2,
+//            1);;
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .xVelocity(74.74229851670154)
-            .yVelocity(61.22060748723548)
+            .xVelocity(79.4311860736)
+            .yVelocity(63.8537607268056)
 
 
 
 
 
-            .maxPower(1)
+//            .maxPower(1)
             .rightFrontMotorName("rightFront")
             .rightRearMotorName("rightRear")
             .leftRearMotorName("leftRear")
@@ -59,8 +59,8 @@ public class Constants {
     //right front changed right front
     //right rear
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-4.0)
-            .strafePodX(-2.25)
+            .forwardPodY(-2.25)
+            .strafePodX(-7.875)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
@@ -71,7 +71,7 @@ public class Constants {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(localizerConstants)
                 .mecanumDrivetrain(driveConstants)
-                .pathConstraints(pathConstraints)
+//                .pathConstraints(pathConstraints)
                 .build();
     }
 }

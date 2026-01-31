@@ -80,10 +80,10 @@ public class Tuning extends SelectableOpMode {
     @Override
     public void onSelect() {
         if (follower == null) {
-            follower = Constants.createFollower(hardwareMap);
+            follower = ConstantsNewBot.createFollower(hardwareMap);
             PanelsConfigurables.INSTANCE.refreshClass(this);
         } else {
-            follower = Constants.createFollower(hardwareMap);
+            follower = ConstantsNewBot.createFollower(hardwareMap);
         }
 
         follower.setStartingPose(new Pose());
@@ -318,7 +318,7 @@ class TurnTuner extends OpMode {
  * power until it reaches some specified distance. It records the most recent velocities, and on
  * reaching the end of the distance, it averages them and prints out the velocity obtained. It is
  * recommended to run this multiple times on a full battery to get the best results. What this does
- * is, when paired with StrafeVelocityTuner, allows FollowerConstants to create a Vector that
+ * is, when paired with StrafeVelocityTuner, allows FollowerConstantsNewBot to create a Vector that
  * empirically represents the direction your mecanum wheels actually prefer to go in, allowing for
  * more accurate following.
  *
@@ -424,7 +424,7 @@ class ForwardVelocityTuner extends OpMode {
  * power until it reaches some specified distance. It records the most recent velocities, and on
  * reaching the end of the distance, it averages them and prints out the velocity obtained. It is
  * recommended to run this multiple times on a full battery to get the best results. What this does
- * is, when paired with ForwardVelocityTuner, allows FollowerConstants to create a Vector that
+ * is, when paired with ForwardVelocityTuner, allows FollowerConstantsNewBot to create a Vector that
  * empirically represents the direction your mecanum wheels actually prefer to go in, allowing for
  * more accurate following.
  *

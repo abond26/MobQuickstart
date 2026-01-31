@@ -13,6 +13,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -196,17 +197,36 @@ public class far9blue extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(2550);
-                hood.setPosition(0.4);
+                launcher.setVelocity(2120);
+                hood.setPosition(0.225);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
+                // Continuously set launcher velocity
+                launcher.setVelocity(2120);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5){
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(-1);
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.25){
+                        theWheelOfTheOx.setPower(1);
+                        launcher.setVelocity(2120);
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.5){
+                        theWheelOfTheOx.setPower(-1);
+                        launcher.setVelocity(2120);
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.75){
+                        theWheelOfTheOx.setPower(1);
+                        launcher.setVelocity(2120);
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>6){
+                        theWheelOfTheOx.setPower(-1);
+                        launcher.setVelocity(2120);
+                    }
+
                     if (pathTimer.getElapsedTimeSeconds()>6.5) {
                         setPathState(far9blue.PathState.collection);
                     }
@@ -235,8 +255,8 @@ public class far9blue extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(2550);
-                    hood.setPosition(0.4);
+                    launcher.setVelocity(2120);
+                    hood.setPosition(0.225);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -245,8 +265,25 @@ public class far9blue extends OpMode {
                     if(pathTimer.getElapsedTimeSeconds()>5) {
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>7) {
-                        setPathState((PathState.collectAgain));
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.25){
+                        theWheelOfTheOx.setPower(1);
+                        launcher.setVelocity(2120);
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.5){
+                        theWheelOfTheOx.setPower(-1);
+                        launcher.setVelocity(2120);
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.75){
+                        theWheelOfTheOx.setPower(1);
+                        launcher.setVelocity(2120);
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>6){
+                        theWheelOfTheOx.setPower(-1);
+                        launcher.setVelocity(2120);
+                    }
+
+                    if (pathTimer.getElapsedTimeSeconds()>6.5) {
+                        setPathState(far9blue.PathState.collectAgain);
                     }
                 }
                 break;
@@ -259,10 +296,10 @@ public class far9blue extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(2550);
+                    launcher.setVelocity(2120);
                     follower.followPath(collect2);
                     tree.setPower(1);
-                    hood.setPosition(0.4);
+                    hood.setPosition(0.225);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -278,10 +315,10 @@ public class far9blue extends OpMode {
                 break;
             case collectAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(2200);
+                    launcher.setVelocity(2120);
                     follower.followPath(collect2Again);
                     tree.setPower(1);
-                    hood.setPosition(0.575);
+                    hood.setPosition(0.225);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -297,10 +334,10 @@ public class far9blue extends OpMode {
                 break;
             case collectAgainAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(2200);
+                    launcher.setVelocity(2120);
                     follower.followPath(collect2AgainAgain);
                     tree.setPower(1);
-                    hood.setPosition(0.575);
+                    hood.setPosition(0.225);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -318,7 +355,26 @@ public class far9blue extends OpMode {
                 if (!follower.isBusy() && shoot3Started) {
                     if(pathTimer.getElapsedTimeSeconds()>5) {
                         theWheelOfTheOx.setPower(-1);
-                        setPathState((PathState.parklol));
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.25){
+                        theWheelOfTheOx.setPower(1);
+                        launcher.setVelocity(2120);
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.5){
+                        theWheelOfTheOx.setPower(-1);
+                        launcher.setVelocity(2120);
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>5.75){
+                        theWheelOfTheOx.setPower(1);
+                        launcher.setVelocity(2120);
+                    }
+                    if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>6){
+                        theWheelOfTheOx.setPower(-1);
+                        launcher.setVelocity(2120);
+                    }
+
+                    if (pathTimer.getElapsedTimeSeconds()>6.5) {
+                        setPathState(far9blue.PathState.parklol);
                     }
                 }
                 break;
@@ -381,6 +437,15 @@ public class far9blue extends OpMode {
         tree.setDirection(DcMotorSimple.Direction.REVERSE);
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        // Set PIDF coefficients for velocity control
+        double P = 132.5;
+        double I = 0;
+        double D = 0;
+        double F = 12.35;
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        // Velocity will be set in the start state of the state machine
     }
 
     @Override

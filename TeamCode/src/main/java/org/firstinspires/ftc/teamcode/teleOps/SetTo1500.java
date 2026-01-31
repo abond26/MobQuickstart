@@ -9,18 +9,19 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.util.PoseStorage;
-
 @TeleOp
 
-public class TestingNewAdjustment extends LinearOpMode {
+public class SetTo1500 extends LinearOpMode {
     double newTime;
     double time;
+    double F = 12.35;
+    double P = 132.5000;
 
 
     //282
@@ -33,12 +34,7 @@ public class TestingNewAdjustment extends LinearOpMode {
     ElapsedTime rightBumperTimer = new ElapsedTime();
     boolean rightBumperTimerStarted = false;
     private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
-    int motor180Range = 630;
-    private static final int DEGREES_270_TICKS = 945;
-
-    private double targetVelocity = 0;
-    private boolean hasRumbledForVelocity = false;
-    private static final double VELOCITY_LENIANCE = 20.0;
+    int motor180Range = 3000;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
@@ -54,22 +50,18 @@ public class TestingNewAdjustment extends LinearOpMode {
     private static final double CLOSE_HOOD_POSITION = 0.0339; // Hood position for close shots
     private static final double MID_HOOD_POSITION = 0.203+0.0167;
     private static final double FAR_HOOD_POSITION = 0.25+.0129; // Hood position for far shots
-
-    private static final double APRILTAG_X = 0.0; // AprilTag X position on field (inches) - UPDATE THIS
-    private static final double APRILTAG_Y = 145.0; // AprilTag Y position on field (inches) - UPDATE THIS
-
-    private Pose startPose;
+    private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
+    //adfad
     private Follower follower;
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
     public void runOpMode() throws InterruptedException{
         follower = Constants.createFollower(hardwareMap);
-        startPose = PoseStorage.loadPose(new Pose(0, 0, 0));
         follower.setStartingPose(startPose);
 
         hood = hardwareMap.get(Servo.class, "hood");
-        hood.scaleRange(0,0.0328);
+        hood.scaleRange(0,0.025);
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
@@ -81,7 +73,8 @@ public class TestingNewAdjustment extends LinearOpMode {
 
         jollyCrusader = hardwareMap.get(DcMotorEx.class, "launcher");
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        jollyCrusader.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
         jollyCrusader.setVelocity(0);
         //jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -90,7 +83,6 @@ public class TestingNewAdjustment extends LinearOpMode {
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setTargetPosition(0);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setDirection(DcMotorSimple.Direction.REVERSE);
         rotator.setPower(1);
 
         intake = hardwareMap.get(DcMotor.class, "tree");
@@ -135,7 +127,7 @@ public class TestingNewAdjustment extends LinearOpMode {
             if (!gamepad1.right_bumper) {
                 rightBumperTimerStarted = false;
             }
-//            if (gamepad1.x){
+            //            if (gamepad1.x){
 //                limelight.pipelineSwitch(1);
 //            }
 //            if (gamepad1.b){
@@ -147,11 +139,11 @@ public class TestingNewAdjustment extends LinearOpMode {
 
 
             //launcha
-            if (aPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+20);
+            if (gamepad1.right_trigger > 0.1){
+                jollyCrusader.setVelocity(110);
             }
             if (yPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-20);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-30);
             }
 
 
@@ -173,7 +165,6 @@ public class TestingNewAdjustment extends LinearOpMode {
             }
 
             //intake
-            sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
             if (sumOfTrigs!=0){
                 intake(sumOfTrigs);
             } else if (!gamepad1.right_bumper) {
@@ -183,16 +174,11 @@ public class TestingNewAdjustment extends LinearOpMode {
 
 
             //rotator
-            int currentRotatorPos = rotator.getCurrentPosition();
-            // If rotator reaches 270 degrees, return to zero position
-            if (Math.abs(currentRotatorPos) >= DEGREES_270_TICKS) {
-                rotator.setTargetPosition(0);
-            }
-            else if (gamepad1.dpad_left){
-                rotator.setTargetPosition(rotator.getCurrentPosition()-50);
+            if (gamepad1.dpad_left){
+                rotator.setTargetPosition(rotator.getCurrentPosition()-100);
             }
             else if (gamepad1.dpad_right){
-                rotator.setTargetPosition(rotator.getCurrentPosition()+50);
+                rotator.setTargetPosition(rotator.getCurrentPosition()+100);
             }
             else{
                 rotator.setTargetPosition(rotator.getCurrentPosition());
@@ -217,43 +203,19 @@ public class TestingNewAdjustment extends LinearOpMode {
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
                         if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
-                            double currentDistance = getDist(tyDeg);
-                            // Use ONLY limelight when it's detecting
-                            adjustRotator(txDeg, currentDistance);
+                            adjustRotator(txDeg, getDist(txDeg));
                         }
                     } else {
                         telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
-                        // Use ONLY localization when limelight isn't detecting
-                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
-                            double localizationAngle = calculateAngleToAprilTag();
-
-                            adjustRotatorL(localizationAngle);
-
-                            telemetry.addData("Localization Angle", localizationAngle);
-                            telemetry.addData("Robot X", follower.getPose().getX());
-                            telemetry.addData("Robot Y", follower.getPose().getY());
-                            telemetry.addData("Robot Heading", Math.toDegrees(follower.getPose().getHeading()));
-                        }
                     }
                 }
                 double currentDistance = getDist(tyDeg);
                 telemetry.addData("Distance", currentDistance);
 
                 if (gamepad1.right_stick_button && currentDistance > 0){
-                    targetVelocity = calcVelocity(currentDistance);
-                    jollyCrusader.setVelocity(targetVelocity);
-                    adjustHoodBasedOnDistance(currentDistance);
-                    hasRumbledForVelocity = false;
-                }
+                    jollyCrusader.setVelocity(2300);
 
-                if (targetVelocity > 0 && !hasRumbledForVelocity) {
-                    double currentVelocity = jollyCrusader.getVelocity();
-                    if (Math.abs(currentVelocity - targetVelocity) <= VELOCITY_LENIANCE) {
-                        gamepad1.rumble(200); // Rumble for 200ms
-                        hasRumbledForVelocity = true; // Only rumble once per target
-                        telemetry.addLine("Velocity Reached!");
-                    }
                 }
 
 
@@ -263,15 +225,12 @@ public class TestingNewAdjustment extends LinearOpMode {
             }
 //cool
 
-            if (gamepad1.a){
-                jollyCrusader.setVelocity(1400);
-                hood.setPosition(0.0339);
-            }
+
             if (gamepad1.x){
-                hood.setPosition(hood.getPosition()-0.005);
+                hood.setPosition(hood.getPosition()-0.0005);
             }
             if (gamepad1.b){
-                hood.setPosition(hood.getPosition()+0.005);
+                hood.setPosition(hood.getPosition()+0.0005);
             }
 
 
@@ -305,106 +264,15 @@ public class TestingNewAdjustment extends LinearOpMode {
         rightFront.setPower(rightFrontPower);
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
-    /**
-     * Calculate the angle from robot to AprilTag using localization
-     * @return angle in degrees (relative to robot's front)
-     */
-    public double calculateAngleToAprilTag() {
-        Pose robotPose = follower.getPose();
-        double robotX = robotPose.getX();
-        double robotY = robotPose.getY();
-        double robotHeading = robotPose.getHeading();
-
-        double deltaX = APRILTAG_X - robotX;
-        double deltaY = APRILTAG_Y - robotY;
-
-        // Calculate absolute angle to AprilTag (in radians)
-        // atan2(y, x) gives angle from positive x-axis
-        double angleToTag = Math.atan2(deltaX, deltaY);
-
-        // Calculate relative angle (how much to rotate from robot's current heading)
-        // This is the angle the turret needs to point relative to robot's front
-        double relativeAngle = angleToTag + robotHeading;
-
-        // Normalize to [-PI, PI]
-        while (relativeAngle > Math.PI) relativeAngle -= 2 * Math.PI;
-        while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
-
-        // Convert to degrees
-        double angleDeg = Math.toDegrees(relativeAngle);
-
-        // Debug telemetry
-        telemetry.addData("Robot X", robotX);
-        telemetry.addData("Robot Y", robotY);
-        telemetry.addData("Robot Heading Deg", Math.toDegrees(robotHeading));
-        telemetry.addData("Delta X", deltaX);
-        telemetry.addData("Delta Y", deltaY);
-        telemetry.addData("Angle to Tag Rad", angleToTag);
-        telemetry.addData("Angle to Tag Deg", Math.toDegrees(angleToTag));
-        telemetry.addData("Relative Angle Deg", angleDeg);
-
-        return angleDeg;
-    }
-    public void adjustRotatorL(double localizationAngleDeg) {
-        double fracOfFullCircum = Math.toRadians(localizationAngleDeg) / (Math.PI);
-        int adjustment = (int) (fracOfFullCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment ;
-        rotator.setTargetPosition(newPosition);
-    }
-
-
-    /**
-     * Adjust rotator using ONLY limelight (when limelight is detecting)
-     */
     public void adjustRotator(double tx, double distance) {
         double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range);
-        int offset = 14;
+        int offset = 0;
         if (distance > 200) {
-            offset = 4;
+            offset = 0;
         }
         int newPosition = rotator.getCurrentPosition() + adjustment - offset;
         rotator.setTargetPosition(newPosition);
-    }
-
-    public void adjustRotatorWithLocalization(double localizationAngleDeg) {
-        // Check if rotator has reached 270 degrees, return to zero position
-        int currentPos = rotator.getCurrentPosition();
-        if (Math.abs(currentPos) >= DEGREES_270_TICKS) {
-            rotator.setTargetPosition(0);
-            return;
-        }
-
-        if (Math.abs(localizationAngleDeg) < 2.0) {
-            rotator.setTargetPosition(currentPos);
-            return;
-        }
-
-
-        double fracOfSemiCircum = Math.toRadians(localizationAngleDeg) / Math.PI;
-        int adjustment = (int) (fracOfSemiCircum * motor180Range);
-
-        // If direction is wrong, try negating the adjustment
-        // The sign might be inverted depending on your coordinate system
-        adjustment = adjustment; // Negate to fix direction (remove this line if it makes it worse)
-
-
-        if (Math.abs(currentPos + adjustment) >= DEGREES_270_TICKS) {
-            rotator.setTargetPosition(0);
-            return;
-        }
-
-        int offset = 14;
-
-        int newPosition = currentPos + adjustment - offset;
-        rotator.setTargetPosition(newPosition);
-
-        telemetry.addData("Using", "Localization Only");
-        telemetry.addData("Loc Angle Deg", localizationAngleDeg);
-        telemetry.addData("Frac of SemiCircum", fracOfSemiCircum);
-        telemetry.addData("Adjustment Ticks", adjustment);
-        telemetry.addData("Current Pos", currentPos);
-        telemetry.addData("New Pos", newPosition);
     }
 
     public double getDist(double tyDeg) {
@@ -434,7 +302,6 @@ public class TestingNewAdjustment extends LinearOpMode {
             theWheelOfTheOx.setPower(-0.4);
         }
     }
-
 
 
     public void adjustHoodBasedOnDistance(double dist) {

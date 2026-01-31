@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -19,10 +20,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class TesterinoRed extends LinearOpMode {
     double newTime;
     double time;
+    double F = 12.35;
+    double P = 282.0;
 
 
     //282
-    //-301
+    //-301double sumOfTrigs;
     double sumOfTrigs;
     boolean yLast = false;
     boolean aLast =false;
@@ -44,9 +47,9 @@ public class TesterinoRed extends LinearOpMode {
     // Distance threshold for hood adjustment (tune this value)
     private static final double FIRST_DISTANCE_THRESHOLD = 140.0;
     private static final double SECOND_DISTANCE_THRESHOLD = 200;
-    private static final double CLOSE_HOOD_POSITION = 0.0339; // Hood position for close shots
-    private static final double MID_HOOD_POSITION = 0.203+0.0167;
-    private static final double FAR_HOOD_POSITION = 0.25+.0129; // Hood position for far shots
+    private static final double CLOSE_HOOD_POSITION = 0.0309; // Hood position for close shots
+    private static final double MID_HOOD_POSITION = 0.18+0.0167;
+    private static final double FAR_HOOD_POSITION = 0.16+.0129; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -71,6 +74,8 @@ public class TesterinoRed extends LinearOpMode {
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         jollyCrusader.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         jollyCrusader.setVelocity(0);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+        jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         //jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
@@ -136,10 +141,10 @@ public class TesterinoRed extends LinearOpMode {
 
             //launcha
             if (aPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+2);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+30);
             }
             if (yPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-2);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-30);
             }
 
 
@@ -266,9 +271,12 @@ public class TesterinoRed extends LinearOpMode {
     public void adjustRotator(double tx, double distance) {
         double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range);
-        int offset = 14;
-        if (distance > 200) {
-            offset = 15;
+        int offset = -24;
+        if (distance < 120 ) {
+            offset = -24;
+        } else if (distance > 180) {
+            offset = -28;
+
         }
         int newPosition = rotator.getCurrentPosition() + adjustment + offset;
         rotator.setTargetPosition(newPosition);

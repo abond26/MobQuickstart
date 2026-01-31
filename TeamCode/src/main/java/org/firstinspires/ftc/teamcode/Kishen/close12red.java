@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "Reliable 12 red close", group = "auton red")
 public class close12red extends OpMode {
@@ -217,19 +218,18 @@ public class close12red extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1850); //1725
-                hood.setPosition(0.28); //0.285
+                launcher.setVelocity(1720); //1725
+                hood.setPosition(0.225); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(close12red.PathState.actuallyshoot1);
                 break;
-                //
             case actuallyshoot1:
                 // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2){
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>3){
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(-1);
-                    if (pathTimer.getElapsedTimeSeconds()>3.5) {
+                    if (pathTimer.getElapsedTimeSeconds()>4.5) {
                         setPathState(close12red.PathState.collection);
                     }
                 }
@@ -247,8 +247,8 @@ public class close12red extends OpMode {
 
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    launcher.setVelocity(1850);
-                    hood.setPosition(0.29);
+                    launcher.setVelocity(1700);
+                    hood.setPosition(0.235);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
@@ -286,7 +286,7 @@ public class close12red extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1850);
+                    launcher.setVelocity(1700);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -311,10 +311,10 @@ public class close12red extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(1800);
+                    launcher.setVelocity(1700);
                     follower.followPath(collect2);
                     tree.setPower(1);
-                    hood.setPosition(0.275);
+                    hood.setPosition(0.235);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -348,10 +348,10 @@ public class close12red extends OpMode {
                 break;
             case collectAgainAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2) {
-                    launcher.setVelocity(1800);
+                    launcher.setVelocity(1700);
                     follower.followPath(collect3);
                     tree.setPower(1);
-                    hood.setPosition(0.29);
+                    hood.setPosition(0.235);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.225);
@@ -362,8 +362,8 @@ public class close12red extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1.5 && !shoot4Started) {
                     follower.followPath(shoot4);
-                    launcher.setVelocity(1800);
-                    hood.setPosition(0.28);
+                    launcher.setVelocity(1700);
+                    hood.setPosition(0.235);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot4Started = true; // Mark as started to prevent calling again
@@ -388,6 +388,11 @@ public class close12red extends OpMode {
                 }
                 break;
             case done:
+                // Save final pose and calculate rotator position to face goal
+
+                // Calculate and set rotator to face the goal (red side = true, motor180Range = 910, offset = 28)
+
+                // Save rotator position for teleop
                 break;
 
         }
@@ -456,6 +461,10 @@ public class close12red extends OpMode {
     public void loop() {
         follower.update();
         statePathUpdate();
+
+        // Continuously save pose so it's saved even if autonomous ends early
+        PoseStorage.savePose(follower.getPose());
+
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
