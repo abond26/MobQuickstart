@@ -17,15 +17,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp
 
-public class TesterinoRed extends LinearOpMode {
+public class NewBotBlue extends LinearOpMode {
     double newTime;
     double time;
     double F = 12.35;
-    double P = 282.0;
+    double P = 132.5000;
 
 
     //282
-    //-301double sumOfTrigs;
+    //-301
     double sumOfTrigs;
     boolean yLast = false;
     boolean aLast =false;
@@ -34,7 +34,7 @@ public class TesterinoRed extends LinearOpMode {
     ElapsedTime rightBumperTimer = new ElapsedTime();
     boolean rightBumperTimerStarted = false;
     private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
-    int motor180Range = 630;
+    int motor180Range = 3000;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
@@ -47,9 +47,9 @@ public class TesterinoRed extends LinearOpMode {
     // Distance threshold for hood adjustment (tune this value)
     private static final double FIRST_DISTANCE_THRESHOLD = 140.0;
     private static final double SECOND_DISTANCE_THRESHOLD = 200;
-    private static final double CLOSE_HOOD_POSITION = 0.0309; // Hood position for close shots
-    private static final double MID_HOOD_POSITION = 0.18+0.0167;
-    private static final double FAR_HOOD_POSITION = 0.16+.0129; // Hood position for far shots
+    private static final double CLOSE_HOOD_POSITION = 0.0339; // Hood position for close shots
+    private static final double MID_HOOD_POSITION = 0.203+0.0167;
+    private static final double FAR_HOOD_POSITION = 0.25+.0129; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -60,7 +60,7 @@ public class TesterinoRed extends LinearOpMode {
         follower.setStartingPose(startPose);
 
         hood = hardwareMap.get(Servo.class, "hood");
-        hood.scaleRange(0,0.0328);
+        hood.scaleRange(0,0.025);
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
@@ -72,7 +72,8 @@ public class TesterinoRed extends LinearOpMode {
 
         jollyCrusader = hardwareMap.get(DcMotorEx.class, "launcher");
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        jollyCrusader.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
         jollyCrusader.setVelocity(0);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
@@ -83,7 +84,6 @@ public class TesterinoRed extends LinearOpMode {
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setTargetPosition(0);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setDirection(DcMotorSimple.Direction.REVERSE);
         rotator.setPower(1);
 
         intake = hardwareMap.get(DcMotor.class, "tree");
@@ -97,7 +97,7 @@ public class TesterinoRed extends LinearOpMode {
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         if (limelight != null) {
-            limelight.pipelineSwitch(0);
+            limelight.pipelineSwitch(1);
             limelight.start();
             telemetry.addData("LL", "initialized");
         } else {
@@ -128,7 +128,7 @@ public class TesterinoRed extends LinearOpMode {
             if (!gamepad1.right_bumper) {
                 rightBumperTimerStarted = false;
             }
-//            if (gamepad1.x){
+            //            if (gamepad1.x){
 //                limelight.pipelineSwitch(1);
 //            }
 //            if (gamepad1.b){
@@ -177,10 +177,10 @@ public class TesterinoRed extends LinearOpMode {
 
             //rotator
             if (gamepad1.dpad_left){
-                rotator.setTargetPosition(rotator.getCurrentPosition()-50);
+                rotator.setTargetPosition(rotator.getCurrentPosition()-100);
             }
             else if (gamepad1.dpad_right){
-                rotator.setTargetPosition(rotator.getCurrentPosition()+50);
+                rotator.setTargetPosition(rotator.getCurrentPosition()+100);
             }
             else{
                 rotator.setTargetPosition(rotator.getCurrentPosition());
@@ -220,21 +220,22 @@ public class TesterinoRed extends LinearOpMode {
                     adjustHoodBasedOnDistance(currentDistance);
                 }
 
-//cool
+
             }
             if (gamepad1.left_stick_button){
                 jollyCrusader.setVelocity(0);
             }
+//cool
 
             if (gamepad1.a){
                 jollyCrusader.setVelocity(1400);
-                hood.setPosition(0.0339);
+                hood.setPosition(0);
             }
             if (gamepad1.x){
-                hood.setPosition(hood.getPosition()-0.005);
+                hood.setPosition(hood.getPosition()-0.0005);
             }
             if (gamepad1.b){
-                hood.setPosition(hood.getPosition()+0.005);
+                hood.setPosition(hood.getPosition()+0.0005);
             }
 
 
@@ -271,14 +272,11 @@ public class TesterinoRed extends LinearOpMode {
     public void adjustRotator(double tx, double distance) {
         double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range);
-        int offset = -24;
-        if (distance < 120 ) {
-            offset = -24;
-        } else if (distance > 180) {
-            offset = -28;
-
+        int offset = 0;
+        if (distance > 200) {
+            offset = 0;
         }
-        int newPosition = rotator.getCurrentPosition() + adjustment + offset;
+        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
         rotator.setTargetPosition(newPosition);
     }
 
@@ -309,7 +307,6 @@ public class TesterinoRed extends LinearOpMode {
             theWheelOfTheOx.setPower(-0.4);
         }
     }
-
 
 
     public void adjustHoodBasedOnDistance(double dist) {
