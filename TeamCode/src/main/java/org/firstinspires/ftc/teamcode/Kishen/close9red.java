@@ -225,7 +225,7 @@ public class close9red extends OpMode {
 
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    launcher.setVelocity(1850);
+                    launcher.setVelocity(1800);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
@@ -236,7 +236,7 @@ public class close9red extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1850);
+                    launcher.setVelocity(1800);
                     hood.setPosition(0.3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
@@ -261,7 +261,7 @@ public class close9red extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(1850);
+                    launcher.setVelocity(1800);
                     follower.followPath(collect2);
                     tree.setPower(1);
                     hood.setPosition(0.3);
@@ -297,7 +297,7 @@ public class close9red extends OpMode {
 //                break;
 //            case collectAgainAgainEnd:
 //                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-//                    launcher.setVelocity(1850);
+//                    launcher.setVelocity(1800);
 //                    follower.followPath(collect3);
 //                    tree.setPower(1);
 //                    hood.setPosition(0.45);

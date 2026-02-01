@@ -271,12 +271,11 @@ public class TesterinoRed extends LinearOpMode {
     public void adjustRotator(double tx, double distance) {
         double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range);
-        int offset = -24;
+        int offset = -10;
         if (distance < 120 ) {
-            offset = -24;
+            offset = -10;
         } else if (distance > 180) {
-            offset = -28;
-
+            offset = -15;
         }
         int newPosition = rotator.getCurrentPosition() + adjustment + offset;
         rotator.setTargetPosition(newPosition);
