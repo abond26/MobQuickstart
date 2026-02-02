@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-//@Autonomous(name = "Reliable 9 blue close new bot", group = "new bot")
+@Autonomous(name = "Reliable 9 blue close new bot", group = "new bot")
 public class blue9closenewbot extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
@@ -37,7 +37,7 @@ public class blue9closenewbot extends OpMode {
     private int offset = 28;
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 1;
-    private static final double INTAKE_DRIVE_POWER = 0.6; // tune this
+    private static final double INTAKE_DRIVE_POWER = 1; // tune this
 
     // Hood adjustment constants (from TesterinoBlue)
     private static final double DISTANCE_THRESHOLD = 180.0;

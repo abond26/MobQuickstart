@@ -216,13 +216,13 @@ public class NewBotBlue extends LinearOpMode {
                 telemetry.addData("Distance", currentDistance);
 
                 if (gamepad1.right_stick_button && currentDistance > 0){
-                    jollyCrusader.setVelocity(2300);
+                    jollyCrusader.setVelocity(-2300);
                 }
 //fasd
 
             }
             if (gamepad1.left_stick_button){
-                jollyCrusader.setVelocity(1800);
+                jollyCrusader.setVelocity(-1800);
             }
 //cool
 

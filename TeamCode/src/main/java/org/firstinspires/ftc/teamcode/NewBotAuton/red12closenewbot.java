@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-//@Autonomous(name = "Reliable 12 red close new bot", group = "new bot")
+@Autonomous(name = "Reliable 12 red close new bot", group = "new bot")
 public class red12closenewbot extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg

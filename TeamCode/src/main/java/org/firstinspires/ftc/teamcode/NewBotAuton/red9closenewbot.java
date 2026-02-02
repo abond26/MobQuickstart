@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-//@Autonomous(name = "Reliable 9 red close new bot", group = "new bot")
+@Autonomous(name = "Reliable 9 red close new bot", group = "new bot")
 public class red9closenewbot extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
@@ -198,8 +198,8 @@ public class red9closenewbot extends OpMode {
             case start:
                 tree.setPower(1);
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(-2300);
-                hood.setPosition(0.0222);
+                launcher.setVelocity(1560);
+                hood.setPosition(0.0111);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 setPathState(PathState.actuallyshoot1);
@@ -208,7 +208,7 @@ public class red9closenewbot extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>4.5){
                     tree.setPower(1);
-                    launcher.setVelocity(-2300);
+                    launcher.setVelocity(1560);
                     theWheelOfTheOx.setPower(-1);
 //                    if(pathTimer.getElapsedTimeSeconds()>4.75)
 //                    {
@@ -244,7 +244,7 @@ public class red9closenewbot extends OpMode {
 
                 if (!follower.isBusy()) {
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    launcher.setVelocity(-2300);
+                    launcher.setVelocity(1560);
                     theWheelOfTheOx.setPower(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
@@ -256,8 +256,8 @@ public class red9closenewbot extends OpMode {
                 if (!follower.isBusy() && !shoot2Started) {
                     follower.followPath(shoot2);
                     tree.setPower(1);
-                    launcher.setVelocity(-2300);
-                    hood.setPosition(0.0222);
+                    launcher.setVelocity(1560);
+                    hood.setPosition(0.0111);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -298,10 +298,10 @@ public class red9closenewbot extends OpMode {
                 break;
             case collectAgainEnd:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 1) {
-                    launcher.setVelocity(-2300);
+                    launcher.setVelocity(1560);
                     follower.followPath(collect2);
                     tree.setPower(1);
-                    hood.setPosition(0.0222);
+                    hood.setPosition(0.0111);
                     theWheelOfTheOx.setPower(1);
                     //theWheelOfTheOx.setPower(0.005);
                     //hood.setPosition(0.0222);
@@ -314,7 +314,7 @@ public class red9closenewbot extends OpMode {
                     follower.followPath(shoot3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
-                    launcher.setVelocity(-2300);
+                    launcher.setVelocity(1560);
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot3Started) {
