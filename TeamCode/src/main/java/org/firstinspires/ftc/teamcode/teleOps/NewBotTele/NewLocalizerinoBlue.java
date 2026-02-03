@@ -115,6 +115,9 @@ public class NewLocalizerinoBlue extends LinearOpMode {
         double dy = target.getY() - y;
         double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
         double turretAngle = angleToGoal - headingDeg;
+        // Normalize to [-180, 180] so turret takes shortest rotation
+        while (turretAngle > 180) turretAngle -= 360;
+        while (turretAngle < -180) turretAngle += 360;
         return turretAngle;
     }
 
