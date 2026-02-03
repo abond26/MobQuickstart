@@ -218,7 +218,7 @@ public class close12red extends OpMode {
         switch (pathState) {
             case start:
                 // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1720); //1725
+                launcher.setVelocity(1740); //1725
                 hood.setPosition(0.225); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);

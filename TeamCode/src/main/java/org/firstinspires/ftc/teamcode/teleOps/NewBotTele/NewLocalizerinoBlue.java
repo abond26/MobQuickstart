@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.teleOps;
+package org.firstinspires.ftc.teamcode.teleOps.NewBotTele;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -14,9 +13,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @TeleOp
-public class Localizerino extends LinearOpMode {
+public class NewLocalizerinoBlue extends LinearOpMode {
     private Limelight3A limelight;
-    int motor180Range = 590;
+    int motor180Range = 2985;
     private static final int DEGREES_270_TICKS = 630;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
@@ -27,8 +26,8 @@ public class Localizerino extends LinearOpMode {
     private Pose startPose;
 
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
-    Pose bluePos = new Pose(11, 137, 0);
-    Pose redPos = new Pose(133, 137, 0);
+    Pose bluePos = new Pose(0, 144, 0);
+    Pose redPos = new Pose(144, 144, 0);
     Pose target = bluePos;
 
 
@@ -100,7 +99,6 @@ public class Localizerino extends LinearOpMode {
             telemetry.addData("turret angle", turretAngleDeg);
             telemetry.addData("x", follower.getPose().getX());
             telemetry.addData("y", follower.getPose().getY());
-            telemetry.addData("heading", headingDeg);
             telemetry.update();
         }
     }
@@ -117,7 +115,7 @@ public class Localizerino extends LinearOpMode {
         double dy = target.getY() - y;
         double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
         double turretAngle = angleToGoal - headingDeg;
-        return turretAngle; //It readjusts when it is + or - 360 of its initial heading
+        return turretAngle;
     }
 
 

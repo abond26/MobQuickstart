@@ -1093,8 +1093,47 @@ class Line extends OpMode {
             }
         }
 
+        // Calculate and send error telemetry for graphing
+        double totalPathError = 0.0;
+        double lateralError = 0.0;
+        double driveError = 0.0;
+        double headingError = 0.0;
+        
+        if (follower.getCurrentPath() != null) {
+            Pose currentPose = follower.getPose();
+            Pose targetPose = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
+            double pathHeading = follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue());
+            
+            // Calculate total path error (straight-line distance from target)
+            double errorX = targetPose.getX() - currentPose.getX();
+            double errorY = targetPose.getY() - currentPose.getY();
+            totalPathError = Math.sqrt(errorX * errorX + errorY * errorY);
+            
+            // Calculate lateral error (perpendicular to path)
+            double errorAngle = Math.atan2(errorY, errorX);
+            lateralError = totalPathError * Math.sin(errorAngle - pathHeading);
+            
+            // Calculate drive error (along path direction)
+            driveError = totalPathError * Math.cos(errorAngle - pathHeading);
+            
+            // Calculate heading error
+            double currentHeading = currentPose.getHeading();
+            double targetHeading = pathHeading;
+            headingError = targetHeading - currentHeading;
+            // Normalize to [-π, π]
+            while (headingError > Math.PI) headingError -= 2 * Math.PI;
+            while (headingError < -Math.PI) headingError += 2 * Math.PI;
+        }
+        
+        // Always send graph-able telemetry
+        telemetry.addData("Total Path Error", totalPathError);
+        telemetry.addData("Lateral Error", lateralError);
+        telemetry.addData("Drive Error", driveError);
+        telemetry.addData("Heading Error", headingError);
+
         telemetryM.debug("Driving Forward?: " + forward);
         telemetryM.update(telemetry);
+        telemetry.update();
     }
 }
 
@@ -1239,6 +1278,47 @@ class Triangle extends OpMode {
         if (follower.atParametricEnd()) {
             follower.followPath(triangle, true);
         }
+
+        // Calculate and send error telemetry for graphing
+        double totalPathError = 0.0;
+        double lateralError = 0.0;
+        double driveError = 0.0;
+        double headingError = 0.0;
+        
+        if (follower.getCurrentPath() != null) {
+            Pose currentPose = follower.getPose();
+            Pose targetPose = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
+            double pathHeading = follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue());
+            
+            // Calculate total path error (straight-line distance from target)
+            double errorX = targetPose.getX() - currentPose.getX();
+            double errorY = targetPose.getY() - currentPose.getY();
+            totalPathError = Math.sqrt(errorX * errorX + errorY * errorY);
+            
+            // Calculate lateral error (perpendicular to path)
+            double errorAngle = Math.atan2(errorY, errorX);
+            lateralError = totalPathError * Math.sin(errorAngle - pathHeading);
+            
+            // Calculate drive error (along path direction)
+            driveError = totalPathError * Math.cos(errorAngle - pathHeading);
+            
+            // Calculate heading error
+            double currentHeading = currentPose.getHeading();
+            double targetHeading = pathHeading;
+            headingError = targetHeading - currentHeading;
+            // Normalize to [-π, π]
+            while (headingError > Math.PI) headingError -= 2 * Math.PI;
+            while (headingError < -Math.PI) headingError += 2 * Math.PI;
+        }
+        
+        // Always send graph-able telemetry
+        telemetry.addData("Total Path Error", totalPathError);
+        telemetry.addData("Lateral Error", lateralError);
+        telemetry.addData("Drive Error", driveError);
+        telemetry.addData("Heading Error", headingError);
+        
+        telemetryM.update(telemetry);
+        telemetry.update();
     }
 
     @Override
@@ -1329,6 +1409,47 @@ class Circle extends OpMode {
         if (follower.atParametricEnd()) {
             follower.followPath(circle);
         }
+
+        // Calculate and send error telemetry for graphing
+        double totalPathError = 0.0;
+        double lateralError = 0.0;
+        double driveError = 0.0;
+        double headingError = 0.0;
+        
+        if (follower.getCurrentPath() != null) {
+            Pose currentPose = follower.getPose();
+            Pose targetPose = follower.getPointFromPath(follower.getCurrentPath().getClosestPointTValue());
+            double pathHeading = follower.getCurrentPath().getHeadingGoal(follower.getCurrentPath().getClosestPointTValue());
+            
+            // Calculate total path error (straight-line distance from target)
+            double errorX = targetPose.getX() - currentPose.getX();
+            double errorY = targetPose.getY() - currentPose.getY();
+            totalPathError = Math.sqrt(errorX * errorX + errorY * errorY);
+            
+            // Calculate lateral error (perpendicular to path)
+            double errorAngle = Math.atan2(errorY, errorX);
+            lateralError = totalPathError * Math.sin(errorAngle - pathHeading);
+            
+            // Calculate drive error (along path direction)
+            driveError = totalPathError * Math.cos(errorAngle - pathHeading);
+            
+            // Calculate heading error
+            double currentHeading = currentPose.getHeading();
+            double targetHeading = pathHeading;
+            headingError = targetHeading - currentHeading;
+            // Normalize to [-π, π]
+            while (headingError > Math.PI) headingError -= 2 * Math.PI;
+            while (headingError < -Math.PI) headingError += 2 * Math.PI;
+        }
+        
+        // Always send graph-able telemetry
+        telemetry.addData("Total Path Error", totalPathError);
+        telemetry.addData("Lateral Error", lateralError);
+        telemetry.addData("Drive Error", driveError);
+        telemetry.addData("Heading Error", headingError);
+        
+        telemetryM.update(telemetry);
+        telemetry.update();
     }
 }
 

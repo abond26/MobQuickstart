@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Reliable 15 red far", group = "auton red")
+//@Autonomous(name = "Reliable 15 red far", group = "auton red")
 public class red15far extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg

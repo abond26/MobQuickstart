@@ -139,12 +139,11 @@ public class SetTo1500 extends LinearOpMode {
 
 
             //launcha
-            if (gamepad1.right_trigger > 0.1){
-                jollyCrusader.setVelocity(110);
+            if (gamepad1.a){
+                jollyCrusader.setVelocity(1600);
+
             }
-            if (yPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-30);
-            }
+
 
 
 
@@ -221,7 +220,7 @@ public class SetTo1500 extends LinearOpMode {
 
             }
             if (gamepad1.left_stick_button){
-                jollyCrusader.setVelocity(0);
+                jollyCrusader.setVelocity(1800);
             }
 //cool
 

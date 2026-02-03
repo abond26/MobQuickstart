@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Reliable 15 blue close", group = "auton blue")
+//@Autonomous(name = "Reliable 15 blue close", group = "auton blue")
 public class blue15close extends OpMode {
     private int rotatorStartPosition=0;
     private Follower follower;

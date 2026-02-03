@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Gate Blue", group = "zzzzz")
+//@Autonomous(name = "Gate Blue", group = "zzzzz")
 public class GateBlue extends OpMode {
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg

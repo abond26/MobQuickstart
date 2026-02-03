@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Reliable 15 red far limelight", group = "limelight")
+//@Autonomous(name = "Reliable 15 red far limelight", group = "limelight")
 public class red15farlimelight extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
