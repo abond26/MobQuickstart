@@ -20,8 +20,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "Reliable red gate", group = "new bot")
-public class redgatenewbot extends OpMode {
+@Autonomous(name = "Reliable red gate limelight?", group = "limelight new bot")
+public class redgatewithlimelight extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
@@ -49,17 +49,34 @@ public class redgatenewbot extends OpMode {
     private static final double NORMAL_DRIVE_POWER = 1;
     private static final double INTAKE_DRIVE_POWER = 1; // tune this
 
-    // Hood adjustment constants (from TesterinoBlue)
-    private static final double DISTANCE_THRESHOLD = 180.0;
-    private static final double CLOSE_HOOD_POSITION = .2541; // Hood position for close shots
-    private static final double FAR_HOOD_POSITION = 0.36; // Hood position for far shots
+    // Hood adjustment constants (from TesterinoRed)
+    private static final double FIRST_DISTANCE_THRESHOLD = 140.0;
+    private static final double SECOND_DISTANCE_THRESHOLD = 200.0;
+    private static final double CLOSE_HOOD_POSITION = 0.0309; // Hood position for close shots
+    private static final double MID_HOOD_POSITION = 0.18 + 0.0167;
+    private static final double FAR_HOOD_POSITION = 0.16 + 0.0129; // Hood position for far shots
 
     private int y = tagHeight - limeHeight;
     //Rotator var
-    int motor180Range = 910;
-    int limelightUpAngle = 25;
+    int motor180Range = 630; // Match TesterinoRed
+    int limelightUpAngle = 20; // Match TesterinoRed
     private int vMultiplier = 9;
     private Limelight3A limelight;
+    
+    // Rotator safeguards to prevent erratic movement
+    private static final double TX_DEADBAND = 0.3; // Don't adjust if tx is less than 0.3 degrees (more sensitive)
+    private static final int MIN_MOVEMENT_THRESHOLD = 10; // Don't adjust if movement is less than 10 ticks
+    private static final int MAX_ADJUSTMENT_PER_CALL = 100; // Clamp adjustment to max 100 ticks per call
+    private static final int ROTATOR_SETTLE_THRESHOLD = 20; // Only adjust when within 20 ticks of target
+    private int desiredRotatorPosition = 0; // Track desired position separately to prevent cumulative errors
+    private int adjustmentLoopCounter = 0;
+    private static final int ADJUSTMENT_RATE_LIMIT = 3; // Only adjust every 3 loops (rate limiting)
+    private com.qualcomm.robotcore.util.ElapsedTime lastAdjustmentTimer = new com.qualcomm.robotcore.util.ElapsedTime();
+    
+    // Rotator physical limits to prevent 360-degree rotations and damage
+    private static final int DEGREES_270_TICKS = 945; // 270 degrees in ticks (630 * 1.5)
+    private static final int MAX_ROTATOR_POSITION = DEGREES_270_TICKS; // Physical limit
+    private static final int MIN_ROTATOR_POSITION = -DEGREES_270_TICKS; // Physical limit
 
     // Store last valid limelight values for fallback
     private double lastValidTx = 0.0;
@@ -128,13 +145,13 @@ public class redgatenewbot extends OpMode {
     private final Pose collect1thingstart = new Pose(88, 57.5, Math.toRadians(0));
     private final Pose collect1thing = new Pose(125, 57.5, Math.toRadians(0));
     private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(48.5));
-    private final Pose gateCollect1 = new Pose( 129.5, 61, Math.toRadians(25));
+    private final Pose gateCollect1 = new Pose( 130, 61, Math.toRadians(25));
     private final Pose inBetween1 = new Pose(100, 61, Math.toRadians(25));
-    private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(48.5));
+    private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(51));
     private final Pose inBetween2 = new Pose(100, 61, Math.toRadians(25));
 
-    private final Pose gateCollect2 = new Pose( 129.5, 61, Math.toRadians(25));
-    private final Pose shootBall4 = new Pose(87, 84, Math.toRadians(48.5));
+    private final Pose gateCollect2 = new Pose( 130, 61, Math.toRadians(25));
+    private final Pose shootBall4 = new Pose(87, 84, Math.toRadians(51));
     private final Pose collect3start=new Pose(95, 35, Math.toRadians(0));
 
     //
@@ -219,47 +236,42 @@ public class redgatenewbot extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                tree.setPower(0.25);
-                theWheelOfTheOx.setPower(1);
-                rotator.setTargetPosition(rotatorStartPosition);
-                // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1340); //1725
-                //hood.setPosition(0.2); //0.285
+                tree.setPower(0.125);
+                // Limelight will set velocity and hood in actuallyshoot1 state
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
-                setPathState(redgatenewbot.PathState.actuallyshoot1);
+                setPathState(redgatewithlimelight.PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
-                rotator.setTargetPosition(rotatorStartPosition);
+                // Sync desired position with current position when entering shooting state
+                if (!shoot2Started) {
+                    desiredRotatorPosition = rotator.getCurrentPosition();
+                }
                 // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1){
+                updateLimelightAdjustments();
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>4){
                     tree.setPower(1);
-                    rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
-                    if (pathTimer.getElapsedTimeSeconds()>3) {
-                        setPathState(redgatenewbot.PathState.collection);
+                    if (pathTimer.getElapsedTimeSeconds()>5) {
+                        setPathState(redgatewithlimelight.PathState.collection);
                     }
                 }
                 break;
             case gotocollect:
-                rotator.setTargetPosition(rotatorStartPosition);
+                //rotator.setTargetPosition(rotatorStartPosition);
                 if(!follower.isBusy())
                 {
-                    rotator.setTargetPosition(rotatorStartPosition);
+                    //rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
                     follower.followPath(goToCollect1);
-                    setPathState(redgatenewbot.PathState.collection);
+                    setPathState(redgatewithlimelight.PathState.collection);
                 }
                 break;
 
 
             case collection:
-                rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && !collectionStarted) {
-                    //rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1340);
-                    //hood.setPosition(0.2);
                     theWheelOfTheOx.setPower(0.8);
                     tree.setPower(1);
                     follower.followPath(collect1);
@@ -270,12 +282,14 @@ public class redgatenewbot extends OpMode {
                 }
                 break;
             case shoot:
-                rotator.setTargetPosition(rotatorStartPosition);
+                // Sync desired position with current position when entering shooting state
+                if (!shoot2Started) {
+                    desiredRotatorPosition = rotator.getCurrentPosition();
+                }
                 // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy() && !shoot2Started) {
-                    rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1340);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -285,16 +299,16 @@ public class redgatenewbot extends OpMode {
                         tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>3.5) {
+                    if(pathTimer.getElapsedTimeSeconds()>5) {
                         setPathState((PathState.beginGateCollection));
                     }
                 }
                 break;
 
             case beginGateCollection:
-                rotator.setTargetPosition(rotatorStartPosition);
+                //rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && !beginGateCollectionStarted) {
-                    rotator.setTargetPosition(rotatorStartPosition);
+                    //rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
                     follower.followPath(InBetween1);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
@@ -305,27 +319,24 @@ public class redgatenewbot extends OpMode {
                 }
                 break;
             case GateCollection:
-                rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && !gateCollectionStarted) {
                     follower.followPath(GateCollect1);
-                    rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1340);
                     tree.setPower(1);
-                    //hood.setPosition(0.2);
                     theWheelOfTheOx.setPower(0.8);
-                    //theWheelOfTheOx.setPower(0.005);
-                    //hood.setPosition(0.225);
                     gateCollectionStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3.5) {
-                    setPathState((redgatenewbot.PathState.shootAgain));
+                    setPathState((redgatewithlimelight.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
-                rotator.setTargetPosition(rotatorStartPosition);
+                // Sync desired position with current position when entering shooting state
+                if (!shoot3Started) {
+                    desiredRotatorPosition = rotator.getCurrentPosition();
+                }
                 // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy() && !shoot3Started) {
-                    rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
@@ -343,12 +354,12 @@ public class redgatenewbot extends OpMode {
                 break;
             case beginGateCollectionAgain:
                 if (!follower.isBusy() && !beginGateCollectionAgainStarted) {
-                    rotator.setTargetPosition(rotatorStartPosition);
+                    //rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
                     follower.followPath(InBetween2);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     beginGateCollectionAgainStarted = true; // Mark as started to prevent calling again
-                    rotator.setTargetPosition(rotatorStartPosition);
+                    //rotator.setTargetPosition(rotatorStartPosition);
                 }
                 if (!follower.isBusy() && beginGateCollectionAgainStarted) {
                     setPathState((PathState.GateCollectionAgain));
@@ -357,24 +368,22 @@ public class redgatenewbot extends OpMode {
             case GateCollectionAgain:
                 if (!follower.isBusy() && !gateCollectionAgainStarted) {
                     follower.followPath(GateCollect2);
-                    rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1340);
                     tree.setPower(1);
-                    //hood.setPosition(0.2);
-                    theWheelOfTheOx.setPower(1);
-                    //theWheelOfTheOx.setPower(0.005);
-                    //hood.setPosition(0.225);
+                    theWheelOfTheOx.setPower(0.8);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.5) {
-                    setPathState((redgatenewbot.PathState.shootAgainAgain));
+                    setPathState((redgatewithlimelight.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
-                rotator.setTargetPosition(rotatorStartPosition);
+                // Sync desired position with current position when entering shooting state
+                if (!shoot4Started) {
+                    desiredRotatorPosition = rotator.getCurrentPosition();
+                }
                 // Continuously adjust based on limelight during shooting
+                updateLimelightAdjustments();
                 if (!follower.isBusy() && !shoot4Started) {
-                    rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
@@ -386,7 +395,7 @@ public class redgatenewbot extends OpMode {
                     }
                     if(pathTimer.getElapsedTimeSeconds()>4.5)
                     {
-                        setPathState((redgatenewbot.PathState.done));
+                        setPathState((redgatewithlimelight.PathState.done));
                     }
                 }
                 break;
@@ -397,6 +406,7 @@ public class redgatenewbot extends OpMode {
 
                 // Save rotator position for teleop
                 break;
+
         }
     }
     public void setPathState(PathState newState) {
@@ -438,14 +448,14 @@ public class redgatenewbot extends OpMode {
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         hood = hardwareMap.get(Servo.class, "hood");
-        //hood.setPosition(0.0119);
+        hood.setPosition(0.0119);
         hood.scaleRange(0,0.025);
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotatorStartPosition=0;
-        rotator.setTargetPosition(rotatorStartPosition);
+        desiredRotatorPosition = rotatorStartPosition; // Initialize desired position
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setPower(1);
 
@@ -462,6 +472,13 @@ public class redgatenewbot extends OpMode {
         double F = 12.35;
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        
+        // Initialize Limelight (red side uses pipeline 0)
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        if (limelight != null) {
+            limelight.pipelineSwitch(0);
+            limelight.start();
+        }
     }
 
     @Override
@@ -481,15 +498,22 @@ public class redgatenewbot extends OpMode {
     }
 
     public double getDist(double tyDeg) {
-        // Use corrected distance formula from TesterinoBlue
+        // Use corrected distance formula from TesterinoRed
         double tyRad = Math.abs(Math.toRadians(tyDeg + limelightUpAngle));
         double dist = y / Math.tan(tyRad);
-        double realDist = 0.55 * dist + 40.3; // Correction formula from TesterinoBlue
+        double realDist = 0.55 * dist + 40.3; // Correction formula from TesterinoRed
         return realDist;
     }
     public double calcVelocity(double dist) {
-        // Use simpler linear formula from TesterinoBlue
-        double velocity = 3.30933 * dist + 1507.01002;
+        // Use piecewise linear formula from TesterinoRed
+        double velocity;
+        if (dist < FIRST_DISTANCE_THRESHOLD) {
+            velocity = 4.94 * dist + 1008;
+        } else if (dist < SECOND_DISTANCE_THRESHOLD) {
+            velocity = 4.22 * dist + 1129;
+        } else {
+            velocity = 16.66 * dist - 1420;
+        }
         return velocity;
     }
 
@@ -499,26 +523,95 @@ public class redgatenewbot extends OpMode {
             theWheelOfTheOx.setPower(-0.3);
         }
     }
-    //comment
-    public void adjustRotator(double tx) {
-        double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
-        int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
+    // Rotator adjustment from TesterinoRed - uses distance-based offset with safeguards
+    public void adjustRotator(double tx, double distance) {
+        // CRITICAL SAFEGUARDS: Prevent 180-degree wrong-direction rotations and erratic movement
+        
+        // 1. Deadband - don't adjust if tx is too small
+        if (Math.abs(tx) < TX_DEADBAND) {
+            return; // Already aligned, don't adjust
+        }
+        
+        // 2. Rate limiting - only adjust every N loops or every 150ms
+        adjustmentLoopCounter++;
+        boolean shouldAdjustNow = false;
+        if (adjustmentLoopCounter >= ADJUSTMENT_RATE_LIMIT || 
+            lastAdjustmentTimer.seconds() > 0.15) {
+            shouldAdjustNow = true;
+            adjustmentLoopCounter = 0;
+            lastAdjustmentTimer.reset();
+        }
+        if (!shouldAdjustNow) {
+            return; // Skip this adjustment cycle
+        }
+        
+        // 3. Only adjust when rotator is settled (close to target) to prevent cumulative errors
+        int currentPos = rotator.getCurrentPosition();
+        int currentTarget = rotator.getTargetPosition();
+        if (Math.abs(currentPos - currentTarget) > ROTATOR_SETTLE_THRESHOLD) {
+            return; // Rotator still moving, wait for it to settle
+        }
+        
+        // 4. When rotator settles, sync desired position to actual position
+        // This prevents offset accumulation that causes drift
+        desiredRotatorPosition = currentPos;
+        
+        // 5. Match TesterinoRed.java calculation exactly
+        double fracOfFullCircum = Math.toRadians(tx) / Math.PI;
+        int adjustment = (int) (fracOfFullCircum * motor180Range);
+        
+        // 6. Clamp adjustment per call to prevent large jumps
+        if (adjustment > MAX_ADJUSTMENT_PER_CALL) {
+            adjustment = MAX_ADJUSTMENT_PER_CALL;
+        }
+        if (adjustment < -MAX_ADJUSTMENT_PER_CALL) {
+            adjustment = -MAX_ADJUSTMENT_PER_CALL;
+        }
+        
+        // 7. Minimum movement threshold - don't adjust if movement is too small
+        if (Math.abs(adjustment) < MIN_MOVEMENT_THRESHOLD) {
+            return; // Movement too small, skip adjustment
+        }
+        
+        // 8. Distance-based offset (from TesterinoRed)
+        int offset = -10;
+        if (distance < 120) {
+            offset = -10;
+        } else if (distance > 180) {
+            offset = -15;
+        }
+        
+        // 9. Calculate from CURRENT position (like TesterinoRed) to prevent offset accumulation
+        int newPosition = currentPos + adjustment + offset;
+        
+        // 10. CRITICAL: Clamp final position to physical limits to prevent 360-degree rotations
+        // This ensures the rotator never goes beyond ±270 degrees
+        if (newPosition > MAX_ROTATOR_POSITION) {
+            newPosition = MAX_ROTATOR_POSITION;
+        }
+        if (newPosition < MIN_ROTATOR_POSITION) {
+            newPosition = MIN_ROTATOR_POSITION;
+        }
+        
+        // 11. Update desired position and set target
+        desiredRotatorPosition = newPosition;
         rotator.setTargetPosition(newPosition);
     }
 
-    public void adjustHoodBasedOnDistance(double distance) {
+    public void adjustHoodBasedOnDistance(double dist) {
         if (hood != null) {
-            if (distance > DISTANCE_THRESHOLD) {
-                hood.setPosition(FAR_HOOD_POSITION);
-            } else {
+            if (dist < FIRST_DISTANCE_THRESHOLD) {
                 hood.setPosition(CLOSE_HOOD_POSITION);
+            } else if (dist < SECOND_DISTANCE_THRESHOLD) {
+                hood.setPosition(MID_HOOD_POSITION);
+            } else {
+                hood.setPosition(FAR_HOOD_POSITION);
             }
         }
     }
 
     /**
-     * Updates limelight-based adjustments (rotator, velocity, hood) during shooting states
+     * Updates limelight-based rotator adjustment during shooting states
      * Call this continuously in shooting states for auto-adjustment
      * Uses last valid values as fallback when limelight doesn't see target
      */
@@ -534,30 +627,22 @@ public class redgatenewbot extends OpMode {
                 lastValidTx = txDeg;
                 lastValidTy = tyDeg;
 
-                // Calculate distance and store it
+                // Calculate distance for rotator offset calculation
                 double currentDistance = getDist(tyDeg);
                 if (currentDistance > 0) {
                     lastValidDistance = currentDistance;
                     hasValidLimelightData = true;
 
-                    // Adjust rotator based on horizontal offset
-                    adjustRotator(txDeg);
-
-                    // Update velocity and hood based on distance
-                    launcher.setVelocity(calcVelocity(currentDistance));
-                    adjustHoodBasedOnDistance(currentDistance);
+                    // Adjust rotator based on horizontal offset and distance (for offset calculation)
+                    adjustRotator(txDeg, currentDistance);
                 }
             } else {
                 // Limelight doesn't see target - use last valid values if available
                 if (hasValidLimelightData) {
                     // Use last known good values (from previous successful detection)
-                    adjustRotator(lastValidTx);
-                    if (lastValidDistance > 0) {
-                        launcher.setVelocity(calcVelocity(lastValidDistance));
-                        adjustHoodBasedOnDistance(lastValidDistance);
-                    }
+                    adjustRotator(lastValidTx, lastValidDistance);
                 }
-                // If no valid data ever, do nothing (keep current settings from state initialization)
+                // If no valid data ever, do nothing (keep current rotator position)
             }
         }
     }

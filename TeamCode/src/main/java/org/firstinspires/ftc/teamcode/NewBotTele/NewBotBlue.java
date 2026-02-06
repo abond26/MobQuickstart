@@ -14,7 +14,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.NewBotAuton.tangentialRed;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
+
 @TeleOp
 
 public class NewBotBlue extends LinearOpMode {
@@ -34,15 +37,17 @@ public class NewBotBlue extends LinearOpMode {
     ElapsedTime rightBumperTimer = new ElapsedTime();
     boolean rightBumperTimerStarted = false;
     private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
-    int motor180Range = 1500;
+    int motor180Range = 1250;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
     private int y = tagHeight - limeHeight;
     public static double driveMultiplier = 1;
+    private double lastTurretAngleDeg = 0;
+
     private Limelight3A limelight;
     public ElapsedTime runtime = new ElapsedTime();
-    private Servo hood;
+    private Servo hood,blocker;
 
     // Distance threshold for hood adjustment (tune this value)
     private static final double FIRST_DISTANCE_THRESHOLD = 140.0;
@@ -50,17 +55,23 @@ public class NewBotBlue extends LinearOpMode {
     private static final double CLOSE_HOOD_POSITION = 0.0339; // Hood position for close shots
     private static final double MID_HOOD_POSITION = 0.203+0.0167;
     private static final double FAR_HOOD_POSITION = 0.25+.0129; // Hood position for far shots
-    private final Pose startPose = new Pose(0, 0, 0);
+    private Pose startPose = new Pose(0, 0, 0);
+    Pose bluePos = new Pose(11, 137, 0);
+    Pose redPos = new Pose(133, 137, 0);
+    Pose target = bluePos;
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
     private Follower follower;
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
     public void runOpMode() throws InterruptedException{
         follower = Constants.createFollower(hardwareMap);
+        startPose = PoseStorage.loadPose(new Pose(24.4, 126.7, Math.toRadians(143)));
         follower.setStartingPose(startPose);
 
         hood = hardwareMap.get(Servo.class, "hood");
-        hood.scaleRange(0,0.025);
+        hood.scaleRange(0,0.0761);
+        blocker = hardwareMap.get(Servo.class, "blocker");
+        blocker.scaleRange(0, 0.4);
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
@@ -73,7 +84,7 @@ public class NewBotBlue extends LinearOpMode {
         jollyCrusader = hardwareMap.get(DcMotorEx.class, "launcher");
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
+        jollyCrusader.setDirection(DcMotorSimple.Direction.FORWARD);
         jollyCrusader.setVelocity(0);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
@@ -109,6 +120,11 @@ public class NewBotBlue extends LinearOpMode {
         waitForStart();
         follower.startTeleopDrive();
         while (opModeIsActive()){
+            Pose robotPose = follower.getPose();
+            double x = robotPose.getX();
+            double y = robotPose.getY();
+            double headingDeg = Math.toDegrees(robotPose.getHeading());
+            double turretAngleDeg = alignTurret(x, y, headingDeg, target);
             time = runtime.time();
             boolean yPressed = gamepad1.dpad_down && !yLast;
             yLast = gamepad1.y;
@@ -152,6 +168,7 @@ public class NewBotBlue extends LinearOpMode {
 
             //feed the flame ._.
             if (gamepad1.right_bumper){
+                blocker.setPosition(1);
                 theWheelOfTheOx.setPower(1);
                 intake.setPower(-1);
                 gamepad1.rumble(100);
@@ -168,6 +185,7 @@ public class NewBotBlue extends LinearOpMode {
             //intake
             sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
             if (sumOfTrigs!=0){
+                blocker.setPosition(0);
                 intake(sumOfTrigs);
             } else if (!gamepad1.right_bumper) {
                 intake.setPower(0);
@@ -208,6 +226,7 @@ public class NewBotBlue extends LinearOpMode {
                             adjustRotator(txDeg, getDist(txDeg));
                         }
                     } else {
+                        setRotatorToTurretAngle(turretAngleDeg);
                         telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
                     }
@@ -216,22 +235,22 @@ public class NewBotBlue extends LinearOpMode {
                 telemetry.addData("Distance", currentDistance);
 
                 if (gamepad1.right_stick_button && currentDistance > 0){
-                    jollyCrusader.setVelocity(-2300);
+                    jollyCrusader.setVelocity(2300);
                 }
 //fasd
 
             }
             if (gamepad1.left_stick_button){
-                jollyCrusader.setVelocity(-1800);
+                jollyCrusader.setVelocity(1800);
             }
 //cool
 
 
             if (gamepad1.x){
-                hood.setPosition(hood.getPosition()-0.005);
+                hood.setPosition(hood.getPosition()-0.25);
             }
             if (gamepad1.b){
-                hood.setPosition(hood.getPosition()+0.005);
+                hood.setPosition(hood.getPosition()+0.25);
             }
 
 
@@ -264,6 +283,33 @@ public class NewBotBlue extends LinearOpMode {
         leftRear.setPower(leftRearPower*driveMultiplier);
         rightFront.setPower(rightFrontPower);
         rightRear.setPower(rightRearPower*driveMultiplier);
+    }
+    private double alignTurret(double x, double y, double headingDeg, Pose target) {
+        double dx = target.getX() - x;
+        double dy = target.getY() - y;
+        double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
+        double turretAngle = angleToGoal - headingDeg;
+        while (turretAngle > 180) turretAngle -= 360;
+        while (turretAngle < -180) turretAngle += 360;
+        double normalized = turretAngle;
+        double diff = turretAngle - lastTurretAngleDeg;
+        if (diff > 180) turretAngle -= 360;
+        else if (diff < -180) turretAngle += 360;
+        // Reset at 360° so we don't accumulate to 720°; command 0 and keep angle in [-180,180]
+        if (turretAngle >= 360 || turretAngle <= -360) {
+            lastTurretAngleDeg = normalized;
+            return 0;
+        }
+        lastTurretAngleDeg = turretAngle;
+        return turretAngle;
+    }
+    private final int ROTATOR_ZERO_TICKS = 0;  // tick position when t8[888[urret faces forward; calibrate if needed
+
+    public void setRotatorToTurretAngle(double turretAngleDeg) {
+        double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
+        int targetTicks = ROTATOR_ZERO_TICKS + (int) (fracOf180 * motor180Range);
+        // Optional: clamp to physical limits (e.g. ±270°)
+        rotator.setTargetPosition(targetTicks);
     }
     public void adjustRotator(double tx, double distance) {
         double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
@@ -300,7 +346,7 @@ public class NewBotBlue extends LinearOpMode {
     public void intake(double intakePower){
         intake.setPower(intakePower);
         if (!gamepad1.right_bumper) {
-            theWheelOfTheOx.setPower(-0.4);
+            theWheelOfTheOx.setPower(-1);
         }
     }
 
