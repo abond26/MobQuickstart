@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teleOps;
+package org.firstinspires.ftc.teamcode.OldBotTeleops;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -193,7 +193,15 @@ public class Localizerino extends LinearOpMode {
     }
 
 
-
+    public double getDist(double tyDeg) {
+        double tyRad = Math.abs(Math.toRadians(tyDeg+limelightUpAngle));
+        double dist = y / Math.tan(tyRad);
+        double realDist = 0.55*dist+40.3;
+        telemetry.addData("angle", Math.toDegrees(tyRad));
+        telemetry.addData("fakeDist", dist);
+        telemetry.addData("realDist", realDist);
+        return realDist;
+    }
 
 
 

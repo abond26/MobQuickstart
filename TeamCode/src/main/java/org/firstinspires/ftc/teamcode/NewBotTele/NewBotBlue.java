@@ -34,7 +34,7 @@ public class NewBotBlue extends LinearOpMode {
     ElapsedTime rightBumperTimer = new ElapsedTime();
     boolean rightBumperTimerStarted = false;
     private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
-    int motor180Range = 3000;
+    int motor180Range = 1500;
     int limelightUpAngle = 20;
     private int limeHeight = 35;
     private int tagHeight = 75;
@@ -73,7 +73,7 @@ public class NewBotBlue extends LinearOpMode {
         jollyCrusader = hardwareMap.get(DcMotorEx.class, "launcher");
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        jollyCrusader.setDirection(DcMotorSimple.Direction.FORWARD);
+        jollyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
         jollyCrusader.setVelocity(0);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
@@ -228,10 +228,10 @@ public class NewBotBlue extends LinearOpMode {
 
 
             if (gamepad1.x){
-                hood.setPosition(hood.getPosition()-0.0005);
+                hood.setPosition(hood.getPosition()-0.005);
             }
             if (gamepad1.b){
-                hood.setPosition(hood.getPosition()+0.0005);
+                hood.setPosition(hood.getPosition()+0.005);
             }
 
 
