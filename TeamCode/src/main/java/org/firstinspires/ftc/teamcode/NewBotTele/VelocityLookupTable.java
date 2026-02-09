@@ -13,11 +13,11 @@ package org.firstinspires.ftc.teamcode.NewBotTele;
  * Tune the VELOCITIES array by testing actual distances - no formulas needed!
  */
 public class VelocityLookupTable {
-    
+
     // Distance thresholds matching hood zones
     private static final double CLOSE_THRESHOLD = 145;  // Zone 1: Close hood
     private static final double MID_THRESHOLD = 200.0;      // Zone 2: Mid hood, Zone 3: Far hood
-    //highway to the danger zone (danger zone)
+
     // Distance entries (in inches) - must be in ascending order
     // More entries around thresholds for smoother transitions
     private static final double[] DISTANCES = {
