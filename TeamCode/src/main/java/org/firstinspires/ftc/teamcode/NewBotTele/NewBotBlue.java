@@ -358,6 +358,7 @@ public class NewBotBlue extends LinearOpMode {
      * eliminating formula calculation errors and providing more predictable behavior.
      *
      */
+    //adjklfajflkaj
     public void intake(double intakePower){
         intake.setPower(intakePower);
         if (!gamepad1.right_bumper) {
