@@ -245,7 +245,7 @@ public class red18closenewbot extends OpMode {
                 tree.setPower(1);
                 blocker.setPosition(0);
                 launcher.setVelocity(1340); //1725
-                hood.setPosition(0.7); //0.285
+                hood.setPosition(0.85); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 if (pathTimer.getElapsedTimeSeconds()>0.5) {
@@ -267,12 +267,12 @@ public class red18closenewbot extends OpMode {
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.6){
                     tree.setPower(1);
                     launcher.setVelocity(1340);
-                    hood.setPosition(0.7);
+                    hood.setPosition(0.85);
                     rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
                     if(pathTimer.getElapsedTimeSeconds()>1.8)
                     {
-                        launcher.setVelocity(1300);
+                        launcher.setVelocity(1340);
                     }
                     if (pathTimer.getElapsedTimeSeconds()>2.2) {
                         setPathState(red18closenewbot.PathState.collection);
