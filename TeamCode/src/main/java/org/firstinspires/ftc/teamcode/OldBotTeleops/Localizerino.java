@@ -124,10 +124,10 @@ public class Localizerino extends LinearOpMode {
         while (turretAngle < -180) turretAngle += 360;
         double normalized = turretAngle;
         double diff = turretAngle - lastTurretAngleDeg;
-        if (diff > 180) turretAngle -= 360;
-        else if (diff < -180) turretAngle += 360;
+        if (diff > 90) turretAngle -= 360;
+        else if (diff < -90) turretAngle += 360;
         // Reset at 360° so we don't accumulate to 720°; command 0 and keep angle in [-180,180]
-        if (turretAngle >= 360 || turretAngle <= -360) {
+        if (turretAngle >= 180 || turretAngle <= -180) {
             lastTurretAngleDeg = normalized;
             return 0;
         }

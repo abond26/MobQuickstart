@@ -19,8 +19,7 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @TeleOp
 
-public class NewBotBlue extends LinearOpMode {
-
+public class NewBotRed extends LinearOpMode {
     double newTime;
     double time;
     double F = 12.35;
@@ -36,8 +35,6 @@ public class NewBotBlue extends LinearOpMode {
     boolean rightBumperLast = false;
     ElapsedTime rightBumperTimer = new ElapsedTime();
     boolean rightBumperTimerStarted = false;
-    public static final int ROTATOR_MIN_TICKS = -1096;
-    public static final int ROTATOR_MAX_TICKS = 1096;
     private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
     int motor180Range = 1250;
     int limelightUpAngle = 20;
@@ -48,7 +45,7 @@ public class NewBotBlue extends LinearOpMode {
     private double lastTurretAngleDeg = 0;
 
     private Limelight3A limelight;
-    public ElapsedTime runtime = new ElapsedTime();
+    public ElapsedTime run v vftime = new ElapsedTime();
     private Servo hood,blocker;
 
     // Distance threshold for hood adjustment (matching lookup table zones)
@@ -110,7 +107,7 @@ public class NewBotBlue extends LinearOpMode {
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         if (limelight != null) {
-            limelight.pipelineSwitch(1);
+            limelight.pipelineSwitch(0);
             limelight.start();
             telemetry.addData("LL", "initialized");
         } else {
@@ -122,12 +119,11 @@ public class NewBotBlue extends LinearOpMode {
         waitForStart();
         follower.startTeleopDrive();
         while (opModeIsActive()){
-            follower.update();
             Pose robotPose = follower.getPose();
             double x = robotPose.getX();
             double y = robotPose.getY();
             double headingDeg = Math.toDegrees(robotPose.getHeading());
-            double turretAngleDeg = alignTurret(x, y, headingDeg, target);
+            //double turretAngleDeg = alignTurret(x, y, headingDeg, target);
             time = runtime.time();
             boolean yPressed = gamepad1.dpad_down && !yLast;
             yLast = gamepad1.y;
@@ -230,7 +226,7 @@ public class NewBotBlue extends LinearOpMode {
                             adjustRotator(txDeg, getDist(txDeg));
                         }
                     } else {
-                        setRotatorToTurretAngle(turretAngleDeg);
+                        //setRotatorToTurretAngle(turretAngleDeg);
                         telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
                     }
@@ -318,10 +314,10 @@ public class NewBotBlue extends LinearOpMode {
         while (turretAngle < -180) turretAngle += 360;
         double normalized = turretAngle;
         double diff = turretAngle - lastTurretAngleDeg;
-        if (diff > 180) turretAngle -= 360;
-        else if (diff < -180) turretAngle += 360;
+        if (diff > 90) turretAngle -= 360;
+        else if (diff < -90) turretAngle += 360;
         // Reset at 360° so we don't accumulate to 720°; command 0 and keep angle in [-180,180]
-        if (turretAngle >= 360 || turretAngle <= -360) {
+        if (turretAngle >= 180 || turretAngle <= -180) {
             lastTurretAngleDeg = normalized;
             return 0;
         }
@@ -329,8 +325,6 @@ public class NewBotBlue extends LinearOpMode {
         return turretAngle;
     }
     private final int ROTATOR_ZERO_TICKS = 0;  // tick position when t8[888[urret faces forward; calibrate if needed
-
-    /** Use -1 if turret turns the wrong way for setRotatorToTurretAngle; use 1 if it's correct. */
 
     public void setRotatorToTurretAngle(double turretAngleDeg) {
         double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
