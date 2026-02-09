@@ -26,7 +26,7 @@ public class ConstantsNewBot {
             .centripetalScaling(0.00035)
             .headingPIDFCoefficients(new PIDFCoefficients(1.08, 0.0001, 0.032, 0))
             .translationalPIDFCoefficients(new PIDFCoefficients(0.5, 0.00001, 0.06, 0))
-            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.02, 0, 0.000001, 0.01, 0.03)))
+            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.01, 0, 0.001, 0.01, 0.03)))
            .forwardZeroPowerAcceleration(-44.4019822807)
             .lateralZeroPowerAcceleration(-60.34057178113703)
             .mass(12.06556);

@@ -30,6 +30,9 @@ public class NewLocalizerinoRed extends LinearOpMode {
     Pose bluePos = new Pose(0, 144, 0);
     Pose redPos = new Pose(144, 144, 0);
     Pose target = redPos;
+    
+    // Velocity-based aiming offset
+    private VelocityBasedAimingOffset velocityOffset;
 
 
 
@@ -70,6 +73,9 @@ public class NewLocalizerinoRed extends LinearOpMode {
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setDirection(DcMotorSimple.Direction.FORWARD);
 
+        // Initialize velocity-based aiming offset
+        velocityOffset = new VelocityBasedAimingOffset(follower);
+        
         waitForStart();
         follower.startTeleopDrive();
 
@@ -93,11 +99,17 @@ public class NewLocalizerinoRed extends LinearOpMode {
             double y = robotPose.getY();
             double headingDeg = Math.toDegrees(robotPose.getHeading());
 
-            double turretAngleDeg = alignTurret(x, y, headingDeg, target);
+            double baseTurretAngleDeg = alignTurret(x, y, headingDeg, target);
+            
+            // Apply velocity-based offset when moving
+            double turretAngleDeg = velocityOffset.calculateAdjustedAngle(baseTurretAngleDeg, robotPose, target);
 
             drive();
             setRotatorToTurretAngle(turretAngleDeg);
-            telemetry.addData("turret angle", turretAngleDeg);
+            telemetry.addData("base turret angle", baseTurretAngleDeg);
+            telemetry.addData("adjusted turret angle", turretAngleDeg);
+            telemetry.addData("velocity", velocityOffset.getCurrentVelocity());
+            telemetry.addData("is moving", velocityOffset.isMoving());
             telemetry.addData("x", follower.getPose().getX());
             telemetry.addData("y", follower.getPose().getY());
             telemetry.update();

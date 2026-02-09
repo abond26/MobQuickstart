@@ -7,6 +7,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
+import com.pedropathing.paths.Path;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -20,8 +21,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "tangential Blue 158 close ", group = "new bot")
-public class tangentialBlue extends OpMode {
+@Autonomous(name = "test red18", group = "test")
+public class test extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
@@ -125,38 +126,39 @@ public class tangentialBlue extends OpMode {
     }
 
     PathState pathState;
-    // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
-    private final Pose startPose = new Pose(26, 132.2, Math.toRadians(143.5));
-    private final Pose shootPose1 = new Pose(41, 107, Math.toRadians(134));
-    //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
-    private final Pose collect1thing = new Pose(19, 59, Math.toRadians(180));
-    private final Pose goToCollect1ControlPoint = new Pose(58.51709696726672, 62.06708214374335, Math.toRadians(180));
-    private final Pose shootPose2 = new Pose( 46, 95, Math.toRadians(131.5));
-    
-    // Control points for shoot2 path
-    private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 74.66485013623976, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 14, 61, Math.toRadians(150));
-    //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose shootPose2ToGateControlPoint = new Pose(42.91008174386921, 55.801430517711175, Math.toRadians(180));
-    private final Pose shootBall3 = new Pose(46, 95, Math.toRadians(135));
-    private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 14, 61, Math.toRadians(150));
-    private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(135));
-    private final Pose gateCollect3 = new Pose( 14, 61, Math.toRadians(150));
-    private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(135));
+    private final Pose startPose = new Pose(128, 112.8, Math.toRadians(90));
+    private final Pose shootPose1 = new Pose(103, 107, Math.toRadians(46));
+    //private final Pose collect1thingstart = new Pose(88, 59, Math.toRadians(0));
+    private final Pose collect1thing = new Pose(130, 59, Math.toRadians(0));
+    private final Pose goToCollect1ControlPoint = new Pose(85.48290303273328, 62.06708214374335, 0);
+    private final Pose shootPose2 = new Pose( 98, 95, Math.toRadians(48.5));
 
-    //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
-    private final Pose shoot4ToCollect3ControlPoint = new Pose(41.25340599455039, 82.36784741144412, Math.toRadians(180));
+    // Control points for shoot2 path
+    private final Pose shoot2ControlPoint1 = new Pose(94.84332425068118, 74.66485013623976, 0);
+    private final Pose gateCollect1 = new Pose( 132, 61, Math.toRadians(30));
+    //private final Pose gateCollec1ControlPoint = new Pose(111.1267029972752, 53.35694822888285, 0);
+    private final Pose inBetween1 = new Pose(100, 62, Math.toRadians(22.5));
+    private final Pose shootPose2ToGateControlPoint = new Pose(113.70000000000002, 50.806539509536805, 0);
+    private final Pose shootBall3 = new Pose(98, 95, Math.toRadians(45));
+    private final Pose inBetween2 = new Pose(100, 62, Math.toRadians(27));
+    private final Pose gateCollect2 = new Pose( 132, 61, Math.toRadians(30));
+    private final Pose shootBall4 = new Pose(98, 95, Math.toRadians(45));
+    private final Pose gateCollect3 = new Pose( 132, 61, Math.toRadians(30));
+    private final Pose shootBall5 = new Pose(98, 95, Math.toRadians(45));
+
+    //private final Pose collect3start=new Pose(87, 86, Math.toRadians(0));
+    private final Pose shoot4ToCollect3ControlPoint = new Pose(102.74659400544961, 82.36784741144412, 0);
 
     //
-    private final Pose collect3end = new Pose(21, 86, Math.toRadians(180));
-    private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(152));
+    private final Pose collect3end = new Pose(123, 86, Math.toRadians(0));
+    private final Pose shootBall6 = new Pose(95, 115, Math.toRadians(24));
 
-    private final Pose park = new Pose(41, 84, Math.toRadians(134));
+    private final Pose park = new Pose(103, 84, Math.toRadians(46));
 
 
 
-    private PathChain shoot1, goToCollect1, collect1, shoot2, GateCollect3, shoot6, InBetween1, InBetween2, GateCollect1, GateCollect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
+    private PathChain shoot1, goToCollect1, collect1, GateCollect3, InBetween1, InBetween2, GateCollect1, GateCollect2, awayfromGate, goToCollect3, collect3, goToGate, openGate, goToCollect4, collect4, parking;
+    private Path shoot2, shoot3, shoot4, shoot5, shoot6;
 
     public void buildPaths() {
         shoot1 = follower.pathBuilder()
@@ -174,14 +176,12 @@ public class tangentialBlue extends OpMode {
 //                .setLinearHeadingInterpolation(collect1thingstart.getHeading(), collect1thing.getHeading())
 //                .build();
 
-        shoot2 = follower.pathBuilder()
-                .addPath(new BezierCurve(collect1thing, shoot2ControlPoint1, shootPose2))
-
-                .setLinearHeadingInterpolation(collect1thing.getHeading(), shootPose2.getHeading())
-                .build();
+        shoot2 = new Path(new BezierCurve(collect1thing, shoot2ControlPoint1, shootPose2));
+        shoot2.setTangentHeadingInterpolation();
+        shoot2.reverseHeadingInterpolation();
         GateCollect1 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootPose2, shootPose2ToGateControlPoint, gateCollect1))
-                .setLinearHeadingInterpolation(shootPose2.getHeading(), gateCollect1.getHeading())
+                .setTangentHeadingInterpolation()
                 .build();
 
 //        GateCollect1 = follower.pathBuilder()
@@ -189,34 +189,31 @@ public class tangentialBlue extends OpMode {
 //                .setLinearHeadingInterpolation(gateCollect1.getHeading(), gateCollect1.getHeading())
 //                .build();
 
-        shoot3 = follower.pathBuilder()
-                .addPath(new BezierCurve(gateCollect1, shootPose2ToGateControlPoint, shootBall3))
-                .setLinearHeadingInterpolation(gateCollect1.getHeading(), shootBall3.getHeading())
-                .build();
+        shoot3 = new Path(new BezierCurve(gateCollect1, shootPose2ToGateControlPoint, shootBall3));
+        shoot3.setTangentHeadingInterpolation();
+        shoot3.reverseHeadingInterpolation();
         GateCollect2 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootBall3, shootPose2ToGateControlPoint, gateCollect2))
-                .setLinearHeadingInterpolation(shootBall3.getHeading(), gateCollect2.getHeading())
+                .setTangentHeadingInterpolation()
                 .build();
 //        GateCollect2 = follower.pathBuilder()
 //                .addPath(new BezierLine(gateCollect2, gateCollect2))
 //                .setLinearHeadingInterpolation(gateCollect2.getHeading(), gateCollect2.getHeading())
 //                .build();
-        shoot4 = follower.pathBuilder()
-                .addPath(new BezierCurve(gateCollect2, shootPose2ToGateControlPoint, shootBall4))
-                .setLinearHeadingInterpolation(gateCollect2.getHeading(), shootBall4.getHeading())
-                .build();
+        shoot4 = new Path(new BezierCurve(gateCollect2, shootPose2ToGateControlPoint, shootBall4));
+        shoot4.setTangentHeadingInterpolation();
+        shoot4.reverseHeadingInterpolation();
         GateCollect3 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootBall4, shootPose2ToGateControlPoint, gateCollect3))
-                .setLinearHeadingInterpolation(shootBall4.getHeading(), gateCollect3.getHeading())
+                .setTangentHeadingInterpolation()
                 .build();
-        shoot5 = follower.pathBuilder()
-                .addPath(new BezierCurve(gateCollect3, shootPose2ToGateControlPoint, shootBall5))
-                .setLinearHeadingInterpolation(gateCollect3.getHeading(), shootBall5.getHeading())
-                .build();
+        shoot5 = new Path(new BezierCurve(gateCollect3, shootPose2ToGateControlPoint, shootBall5));
+        shoot5.setTangentHeadingInterpolation();
+        shoot5.reverseHeadingInterpolation();
 
         collect3 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootBall5, shoot4ToCollect3ControlPoint, collect3end))
-                .setLinearHeadingInterpolation(shootBall5.getHeading(), collect3end.getHeading())
+                .setTangentHeadingInterpolation()
                 .build();
 
 //        collect3 = follower.pathBuilder()
@@ -225,10 +222,9 @@ public class tangentialBlue extends OpMode {
 //                .build();
 //
 //
-        shoot6 = follower.pathBuilder()
-                .addPath(new BezierLine(collect3end, shootBall6))
-                .setLinearHeadingInterpolation(collect3end.getHeading(), shootBall6.getHeading())
-                .build();
+        shoot6 = new Path(new BezierLine(collect3end, shootBall6));
+        shoot6.setTangentHeadingInterpolation();
+        shoot6.reverseHeadingInterpolation();
 //
 //        parking=follower.pathBuilder()
 //                .addPath(new BezierLine(shootBall4, park))
@@ -241,31 +237,35 @@ public class tangentialBlue extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                launcher.setVelocity(1420);
-                tree.setPower(1);
-                blocker.setPosition(0);
-                theWheelOfTheOx.setPower(-1);
-                rotator.setTargetPosition(rotatorStartPosition);
-                // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1420); //1725
-                hood.setPosition(1); //0.285
+//                theWheelOfTheOx.setPower(0);
+//                launcher.setVelocity(1240);
+//                tree.setPower(1);
+//                blocker.setPosition(0);
+//                launcher.setVelocity(1240); //1725
+//                hood.setPosition(0.5); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
-                setPathState(tangentialBlue.PathState.actuallyshoot1);
+                if (pathTimer.getElapsedTimeSeconds()>0.5) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                rotator.setTargetPosition(rotatorStartPosition);
+                // Try to use limelight for initial adjustment, fallback to hardcoded values
+
+                setPathState(test.PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
                 rotator.setTargetPosition(rotatorStartPosition);
-                launcher.setVelocity(1420);
+                launcher.setVelocity(1240);
                 // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.625){
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.4){
                     blocker.setPosition(1);
                     tree.setPower(1);
-                    launcher.setVelocity(1420);
-                    hood.setPosition(1);
+                    launcher.setVelocity(1240);
+                    hood.setPosition(0.5);
                     rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
-                    if (pathTimer.getElapsedTimeSeconds()>2.325) {
-                        setPathState(tangentialBlue.PathState.collection);
+                    if (pathTimer.getElapsedTimeSeconds()>2.15) {
+                        setPathState(test.PathState.collection);
                     }
                 }
                 break;
@@ -275,20 +275,26 @@ public class tangentialBlue extends OpMode {
                 rotator.setTargetPosition(rotatorStartPosition);
                 hood.setPosition(0.25);
                 blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
                 rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && !collectionStarted) {
                     //rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1200);
+                    launcher.setVelocity(1140);
                     hood.setPosition(0.25);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    theWheelOfTheOx.setPower(-1);
                     tree.setPower(1);
                     follower.followPath(collect1);
-                    collectionStarted = true; // Mark as started to prevent calling again
+                    collectionStarted = true;
+                    if (pathTimer.getElapsedTimeSeconds()>1.25)
+                    {
+                        theWheelOfTheOx.setPower(-1);
+                    }
                 }
                 if (!follower.isBusy() && collectionStarted) {
                     setPathState((PathState.shoot));
+
+
                 }
                 break;
             case shoot:
@@ -299,7 +305,7 @@ public class tangentialBlue extends OpMode {
                     hood.setPosition(0.25);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1200);
+                    launcher.setVelocity(1140);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -310,7 +316,7 @@ public class tangentialBlue extends OpMode {
                         tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.875) {
+                    if(pathTimer.getElapsedTimeSeconds()>2.8) {
                         setPathState((PathState.GateCollection));
                     }
                 }
@@ -319,18 +325,22 @@ public class tangentialBlue extends OpMode {
             case GateCollection:
                 rotator.setTargetPosition(rotatorStartPosition);
                 blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
                 if (!follower.isBusy() && !gateCollectionStarted) {
                     follower.followPath(GateCollect1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1200);
+                    launcher.setVelocity(1140);
                     tree.setPower(1);
                     hood.setPosition(0.25);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    theWheelOfTheOx.setPower(-1);
+
                     gateCollectionStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3.5) {
-                    setPathState((tangentialBlue.PathState.shootAgain));
+                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3) {
+                    setPathState((test.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
@@ -349,7 +359,7 @@ public class tangentialBlue extends OpMode {
                         blocker.setPosition(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>3)
+                    if(pathTimer.getElapsedTimeSeconds()>2.75)
                     {
                         setPathState((PathState.GateCollectionAgain));
                     }
@@ -358,17 +368,20 @@ public class tangentialBlue extends OpMode {
             case GateCollectionAgain:
                 if (!follower.isBusy() && !gateCollectionAgainStarted) {
                     blocker.setPosition(0);
+                    theWheelOfTheOx.setPower(0);
                     follower.followPath(GateCollect2);
                     hood.setPosition(0.25);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1200);
+                    launcher.setVelocity(1140);
                     tree.setPower(1);
                     hood.setPosition(0.25);
-                    theWheelOfTheOx.setPower(-1);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.25) {
-                    setPathState((tangentialBlue.PathState.shootAgainAgain));
+                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3) {
+                    setPathState((test.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
@@ -388,7 +401,7 @@ public class tangentialBlue extends OpMode {
                         blocker.setPosition(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.75)
+                    if(pathTimer.getElapsedTimeSeconds()>3.65)
                     {
                         setPathState((PathState.GateCollectionAgainAgain));
                     }
@@ -396,18 +409,21 @@ public class tangentialBlue extends OpMode {
                 break;
             case GateCollectionAgainAgain:
                 blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
                 if (!follower.isBusy() && !gateCollectionAgainStarted) {
                     follower.followPath(GateCollect3);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1200);
+                    launcher.setVelocity(1140);
                     tree.setPower(1);
                     hood.setPosition(0.25);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    theWheelOfTheOx.setPower(-1);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.25) {
-                    setPathState((tangentialBlue.PathState.shootAgainAgainAgain));
+                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.75) {
+                    setPathState((test.PathState.shootAgainAgainAgain));
                 }
                 break;
             case shootAgainAgainAgain:
@@ -436,19 +452,29 @@ public class tangentialBlue extends OpMode {
             case collectAgainAgainEnd:
                 rotator.setTargetPosition(rotatorStartPosition);
                 blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
+                if(pathTimer.getElapsedTimeSeconds()>1.5)
+                {
+                    theWheelOfTheOx.setPower(-1);
+                }
                 if (!follower.isBusy() && !collectionStarted) {
                     //rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1240);
+                    launcher.setVelocity(1140);
                     hood.setPosition(0.25);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    theWheelOfTheOx.setPower(-1);
+
                     tree.setPower(1);
                     follower.followPath(collect3);
                     collectionStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && collectionStarted) {
-                    setPathState((PathState.shootAgainAgainAgainAgain));
+                    theWheelOfTheOx.setPower(-1);
+                    if (pathTimer.getElapsedTimeSeconds()>0.25) {
+
+                        setPathState((PathState.shootAgainAgainAgainAgain));
+                    }
+
                 }
                 break;
             case shootAgainAgainAgainAgain:
@@ -457,7 +483,7 @@ public class tangentialBlue extends OpMode {
                 if (!follower.isBusy() && !shoot5Started) {
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot6);
-                    launcher.setVelocity(1240);
+                    launcher.setVelocity(1140);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot5Started = true; // Mark as started to prevent calling again
@@ -476,7 +502,7 @@ public class tangentialBlue extends OpMode {
             case done:
                 // Save final pose and calculate rotator position to face goal
 
-                // Calculate and set rotator to face the goal (blue side = false, motor180Range = 910, offset = 28)
+                // Calculate and set rotator to face the goal (red side = true, motor180Range = 910, offset = 28)
 
                 // Save rotator position for teleop
                 break;
@@ -509,7 +535,7 @@ public class tangentialBlue extends OpMode {
         blocker.setPosition(0);
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(0,0.0761);
-        hood.setPosition(1);
+        hood.setPosition(0.75);
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = ConstantsNewBot.createFollower(hardwareMap);
@@ -594,8 +620,7 @@ public class tangentialBlue extends OpMode {
     public void adjustRotator(double tx) {
         double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        // Blue side uses +offset instead of -offset
-        int newPosition = rotator.getCurrentPosition() + adjustment + offset;
+        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
         rotator.setTargetPosition(newPosition);
     }
 

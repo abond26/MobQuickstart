@@ -20,8 +20,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "tangential Red 158 close ", group = "new bot")
-public class tangentialRed extends OpMode {
+@Autonomous(name = "tangential Blue 158 close ", group = "new bot")
+public class blue18closenewbot extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
@@ -125,33 +125,34 @@ public class tangentialRed extends OpMode {
     }
 
     PathState pathState;
-    private final Pose startPose = new Pose(118, 132.2, Math.toRadians(36.5));
-    private final Pose shootPose1 = new Pose(103, 107, Math.toRadians(46));
-    //private final Pose collect1thingstart = new Pose(88, 59, Math.toRadians(0));
-    private final Pose collect1thing = new Pose(125, 59, Math.toRadians(0));
-    private final Pose goToCollect1ControlPoint = new Pose(85.48290303273328, 62.06708214374335, 0);
-    private final Pose shootPose2 = new Pose( 98, 95, Math.toRadians(48.5));
+    // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
+    private final Pose startPose = new Pose(26, 132.2, Math.toRadians(143.5));
+    private final Pose shootPose1 = new Pose(41, 107, Math.toRadians(134));
+    //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
+    private final Pose collect1thing = new Pose(19, 59, Math.toRadians(180));
+    private final Pose goToCollect1ControlPoint = new Pose(58.51709696726672, 62.06708214374335, Math.toRadians(180));
+    private final Pose shootPose2 = new Pose( 46, 95, Math.toRadians(131.5));
     
     // Control points for shoot2 path
-    private final Pose shoot2ControlPoint1 = new Pose(94.84332425068118, 74.66485013623976, 0);
-    private final Pose gateCollect1 = new Pose( 130, 61, Math.toRadians(30));
-    private final Pose inBetween1 = new Pose(100, 62, Math.toRadians(22.5));
-    private final Pose shootPose2ToGateControlPoint = new Pose(101.08991825613079, 55.801430517711175, 0);
-    private final Pose shootBall3 = new Pose(98, 95, Math.toRadians(45));
-    private final Pose inBetween2 = new Pose(100, 62, Math.toRadians(22.5));
-    private final Pose gateCollect2 = new Pose( 130, 61, Math.toRadians(30));
-    private final Pose shootBall4 = new Pose(89, 88, Math.toRadians(45));
-    private final Pose gateCollect3 = new Pose( 130, 61, Math.toRadians(30));
-    private final Pose shootBall5 = new Pose(89, 88, Math.toRadians(45));
+    private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 74.66485013623976, Math.toRadians(180));
+    private final Pose gateCollect1 = new Pose( 13, 61, Math.toRadians(150));
+    //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
+    private final Pose shootPose2ToGateControlPoint = new Pose(42.91008174386921, 55.801430517711175, Math.toRadians(180));
+    private final Pose shootBall3 = new Pose(46, 95, Math.toRadians(135));
+    private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
+    private final Pose gateCollect2 = new Pose( 13, 61, Math.toRadians(150));
+    private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(135));
+    private final Pose gateCollect3 = new Pose( 13, 61, Math.toRadians(150));
+    private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(135));
 
-    //private final Pose collect3start=new Pose(87, 86, Math.toRadians(0));
-    private final Pose shoot4ToCollect3ControlPoint = new Pose(102.74659400544961, 82.36784741144412, 0);
+    //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
+    private final Pose shoot4ToCollect3ControlPoint = new Pose(41.25340599455039, 82.36784741144412, Math.toRadians(180));
 
     //
-    private final Pose collect3end = new Pose(123, 86, Math.toRadians(0));
-    private final Pose shootBall6 = new Pose(95, 115, Math.toRadians(28));
+    private final Pose collect3end = new Pose(21, 86, Math.toRadians(180));
+    private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(152));
 
-    private final Pose park = new Pose(103, 84, Math.toRadians(46));
+    private final Pose park = new Pose(41, 84, Math.toRadians(134));
 
 
 
@@ -250,7 +251,7 @@ public class tangentialRed extends OpMode {
                 hood.setPosition(1); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
-                setPathState(tangentialRed.PathState.actuallyshoot1);
+                setPathState(blue18closenewbot.PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
                 rotator.setTargetPosition(rotatorStartPosition);
@@ -264,7 +265,7 @@ public class tangentialRed extends OpMode {
                     rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
                     if (pathTimer.getElapsedTimeSeconds()>2.325) {
-                        setPathState(tangentialRed.PathState.collection);
+                        setPathState(blue18closenewbot.PathState.collection);
                     }
                 }
                 break;
@@ -329,7 +330,7 @@ public class tangentialRed extends OpMode {
                     gateCollectionStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3.5) {
-                    setPathState((tangentialRed.PathState.shootAgain));
+                    setPathState((blue18closenewbot.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
@@ -367,7 +368,7 @@ public class tangentialRed extends OpMode {
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.25) {
-                    setPathState((tangentialRed.PathState.shootAgainAgain));
+                    setPathState((blue18closenewbot.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
@@ -406,7 +407,7 @@ public class tangentialRed extends OpMode {
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.25) {
-                    setPathState((tangentialRed.PathState.shootAgainAgainAgain));
+                    setPathState((blue18closenewbot.PathState.shootAgainAgainAgain));
                 }
                 break;
             case shootAgainAgainAgain:
@@ -475,7 +476,7 @@ public class tangentialRed extends OpMode {
             case done:
                 // Save final pose and calculate rotator position to face goal
 
-                // Calculate and set rotator to face the goal (red side = true, motor180Range = 910, offset = 28)
+                // Calculate and set rotator to face the goal (blue side = false, motor180Range = 910, offset = 28)
 
                 // Save rotator position for teleop
                 break;
@@ -593,7 +594,8 @@ public class tangentialRed extends OpMode {
     public void adjustRotator(double tx) {
         double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
+        // Blue side uses +offset instead of -offset
+        int newPosition = rotator.getCurrentPosition() + adjustment + offset;
         rotator.setTargetPosition(newPosition);
     }
 
