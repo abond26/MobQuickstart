@@ -134,14 +134,14 @@ public class red18closenewbot extends OpMode {
 
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(94.84332425068118, 74.66485013623976, 0);
-    private final Pose gateCollect1 = new Pose( 131, 61, Math.toRadians(30));
+    private final Pose gateCollect1 = new Pose( 130, 61, Math.toRadians(30));
     private final Pose inBetween1 = new Pose(100, 62, Math.toRadians(22.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(101.08991825613079, 55.801430517711175, 0);
     private final Pose shootBall3 = new Pose(98, 95, Math.toRadians(45));
     private final Pose inBetween2 = new Pose(100, 62, Math.toRadians(27));
-    private final Pose gateCollect2 = new Pose( 131, 61, Math.toRadians(30));
+    private final Pose gateCollect2 = new Pose( 130, 61, Math.toRadians(30));
     private final Pose shootBall4 = new Pose(98, 95, Math.toRadians(45));
-    private final Pose gateCollect3 = new Pose( 131, 61, Math.toRadians(30));
+    private final Pose gateCollect3 = new Pose( 130, 61, Math.toRadians(30));
     private final Pose shootBall5 = new Pose(98, 95, Math.toRadians(45));
 
     //private final Pose collect3start=new Pose(87, 86, Math.toRadians(0));
@@ -245,7 +245,7 @@ public class red18closenewbot extends OpMode {
                 tree.setPower(1);
                 blocker.setPosition(0);
                 launcher.setVelocity(1340); //1725
-                hood.setPosition(0.55); //0.285
+                hood.setPosition(1); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 if (pathTimer.getElapsedTimeSeconds()>0.5) {
@@ -264,10 +264,10 @@ public class red18closenewbot extends OpMode {
                     blocker.setPosition(1);
                 }
                 // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.6){
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.8){
                     tree.setPower(1);
                     launcher.setVelocity(1340);
-                    hood.setPosition(0.55);
+                    hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
                     if(pathTimer.getElapsedTimeSeconds()>1.8)
@@ -462,11 +462,11 @@ public class red18closenewbot extends OpMode {
                     {
                         blocker.setPosition(1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>1.6) {
+                    if(pathTimer.getElapsedTimeSeconds()>1.5) {
                         blocker.setPosition(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.35)
+                    if(pathTimer.getElapsedTimeSeconds()>2.55)
                     {
                         setPathState((PathState.collectAgainAgainEnd));
                     }

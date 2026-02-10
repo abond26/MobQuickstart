@@ -309,6 +309,7 @@ public class NewBotBlue extends LinearOpMode {
                         // Use localization only when Limelight not available
                     }
                 }
+
                 // Auto-adjust velocity and hood based on dist using lookup table
                 // ONLY when Limelight is valid and sees a target
                 if (llValid && tyDeg != 0) {
@@ -326,6 +327,7 @@ public class NewBotBlue extends LinearOpMode {
                         adjustHoodBasedOnDistance(dist);
                     }
                 }
+
 
                 // Manual override buttons (still work if needed - these override auto velocity)
                 if (gamepad1.right_stick_button){

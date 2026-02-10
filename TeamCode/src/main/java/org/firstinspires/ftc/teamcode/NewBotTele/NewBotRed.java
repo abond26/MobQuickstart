@@ -300,6 +300,7 @@ public class NewBotRed extends LinearOpMode {
         rightFront.setPower(rightFrontPower);
         rightRear.setPower(rightRearPower*driveMultiplier);
     }
+
     private double alignTurret(double x, double y, double headingDeg, Pose target) {
         double dx = target.getX() - x;
         double dy = target.getY() - y;
