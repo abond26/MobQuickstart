@@ -34,6 +34,7 @@ public class NewBotBlue extends LinearOpMode {
     boolean aLast =false;
     boolean xLast = false;
     boolean rightBumperLast = false;
+    boolean resetLocLast = false; // For localization reset button
     ElapsedTime rightBumperTimer = new ElapsedTime();
     boolean rightBumperTimerStarted = false;
     public static final int ROTATOR_MIN_TICKS = -1096;
@@ -61,6 +62,17 @@ public class NewBotBlue extends LinearOpMode {
     Pose bluePos = new Pose(11, 137, 0);
     Pose redPos = new Pose(133, 137, 0);
     Pose target = bluePos;
+    
+    // AprilTag positions for relocalization (from PoseStorage)
+    private static final double BLUE_APRILTAG_X = 24.4;
+    private static final double BLUE_APRILTAG_Y = 126.7;
+    private static final double RED_APRILTAG_X = 117.6;
+    private static final double RED_APRILTAG_Y = 130.0;
+    
+    // Relocalization settings
+    private static final double RELOCALIZATION_DISTANCE_THRESHOLD = 120.0; // Only relocalize if within 120 inches
+    private static final double RELOCALIZATION_ANGLE_THRESHOLD = 30.0; // Only relocalize if angle difference < 30°
+    private boolean relocalizationEnabled = true;
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
     private Follower follower;
@@ -69,6 +81,9 @@ public class NewBotBlue extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         startPose = PoseStorage.loadPose(new Pose(24.4, 126.7, Math.toRadians(143)));
         follower.setStartingPose(startPose);
+        
+        // Update follower once before waitForStart for proper initialization
+        follower.update();
 
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(0,0.0761);
@@ -97,7 +112,7 @@ public class NewBotBlue extends LinearOpMode {
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setTargetPosition(0);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setPower(1);
+        rotator.setPower(0.5); // Reduced from 1.0 to 0.5 to prevent belt skipping
 
         intake = hardwareMap.get(DcMotor.class, "tree");
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -130,10 +145,53 @@ public class NewBotBlue extends LinearOpMode {
             double turretAngleDeg = alignTurret(x, y, headingDeg, target);
             time = runtime.time();
             boolean yPressed = gamepad1.dpad_down && !yLast;
-            yLast = gamepad1.y;
+            yLast = gamepad1.dpad_down;
 
             boolean aPressed = gamepad1.dpad_up && !aLast;
-            aLast = gamepad1.a;
+            aLast = gamepad1.dpad_up;
+            
+            // Localization reset button (gamepad2.y) - reinitialize pose when localization breaks
+            // Uses Limelight relocalization if AprilTag is detected, otherwise falls back to manual reset
+            boolean resetLocPressed = gamepad2.y && !resetLocLast;
+            resetLocLast = gamepad2.y;
+            if (resetLocPressed) {
+                boolean relocalized = false;
+                
+                // Try to relocalize using Limelight if available and seeing AprilTag
+                if (limelight != null) {
+                    LLResult ll = limelight.getLatestResult();
+                    if (ll != null && ll.isValid()) {
+                        double txDeg = ll.getTx();
+                        double tyDeg = ll.getTy();
+                        double dist = getDist(tyDeg);
+                        
+                        if (dist > 0 && dist < RELOCALIZATION_DISTANCE_THRESHOLD) {
+                            // Use Limelight relocalization
+                            relocalizeFromAprilTag(txDeg, tyDeg, dist);
+                            relocalized = true;
+                            telemetry.addLine("LOCALIZATION RESET via Limelight!");
+                        }
+                    }
+                }
+                
+                // Fallback: Manual reset if Limelight not available or not seeing tag
+                if (!relocalized) {
+                    // Get current robot heading (how the bot is actually facing)
+                    Pose currentPose = follower.getPose();
+                    double currentHeading = currentPose.getHeading();
+                    
+                    // Reset X, Y to known position (from PoseStorage or default), but keep current heading
+                    Pose defaultPose = PoseStorage.loadPose(new Pose(24.4, 126.7, Math.toRadians(143)));
+                    Pose resetPose = new Pose(defaultPose.getX(), defaultPose.getY(), currentHeading);
+                    
+                    follower.setStartingPose(resetPose);
+                    follower.update(); // Update once to initialize
+                    telemetry.addLine("LOCALIZATION RESET (Manual - No Limelight)!");
+                    telemetry.addData("Reset X", resetPose.getX());
+                    telemetry.addData("Reset Y", resetPose.getY());
+                    telemetry.addData("Reset Heading (from bot)", Math.toDegrees(resetPose.getHeading()));
+                }
+            }
             boolean xPressed = gamepad2.x && !xLast;
             xLast = gamepad2.x;
             boolean rightBumperPressed = gamepad1.right_bumper && !rightBumperLast;
@@ -208,13 +266,16 @@ public class NewBotBlue extends LinearOpMode {
                 rotator.setTargetPosition(rotator.getCurrentPosition());
             }
 
+            // Rotator control: Always use localization as base, add Limelight fine-tuning when available
+            double finalTurretAngle = turretAngleDeg; // Start with localization angle
+            double tyDeg = 0.0; // For velocity/hood adjustment
+            boolean llValid = false;
+            
             //Limelight calibration
             if (limelight != null) {
                 LLResult ll = limelight.getLatestResult();
                 double txDeg = 0.0; //horizontal deg
-                double tyDeg = 0.0; //vertical deg
                 double ta = 0.0;
-                boolean llValid = false;
                 if (ll != null) {
                     txDeg = ll.getTx();
                     tyDeg = ll.getTy();
@@ -226,19 +287,35 @@ public class NewBotBlue extends LinearOpMode {
                         telemetry.addData("Ta", ta);
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
+                        
+                        // Calculate distance to AprilTag
+                        double dist = getDist(tyDeg);
+                        
+                        // Relocalization: Use AprilTag to correct pose estimate
+                        if (relocalizationEnabled && dist > 0 && dist < RELOCALIZATION_DISTANCE_THRESHOLD) {
+                            relocalizeFromAprilTag(txDeg, tyDeg, dist);
+                        }
+                        
+                        // Combine localization base angle with Limelight fine-tuning
+                        // Only adjust if not manually controlling with dpad
                         if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
-                            adjustRotator(txDeg, getDist(txDeg));
+                            // Add Limelight tx adjustment to localization angle
+                            // Negate tx for blue side to fix inverted localization
+                            finalTurretAngle = turretAngleDeg - txDeg;
+                            // Normalize to [-180, 180] - rotator can only go 180° each direction
+                            while (finalTurretAngle > 180) finalTurretAngle -= 360;
+                            while (finalTurretAngle < -180) finalTurretAngle += 360;
                         }
                     } else {
-                        setRotatorToTurretAngle(turretAngleDeg);
                         telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
+                        // Use localization only when Limelight not available
                     }
                 }
                 // Auto-adjust velocity and hood based on dist using lookup table
                 // ONLY when Limelight is valid and sees a target
                 if (llValid && tyDeg != 0) {
-                    // Use getDist() which now returns dist (fakeDist)
+                    // Use getDist() which now returns dist (fakeDist) - FIXED: use tyDeg not txDeg!
                     double dist = getDist(tyDeg);
                     telemetry.addData("Distance (dist)", dist);
 
@@ -259,6 +336,13 @@ public class NewBotBlue extends LinearOpMode {
                 }
 //fasd
 
+            }
+            
+            // Set rotator to final calculated angle (localization + Limelight adjustment)
+            if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+                setRotatorToTurretAngle(finalTurretAngle);
+                telemetry.addData("Final Turret Angle", finalTurretAngle);
+                telemetry.addData("Base Loc Angle", turretAngleDeg);
             }
             if (gamepad1.left_stick_button){
                 jollyCrusader.setVelocity(1200);
@@ -313,24 +397,29 @@ public class NewBotBlue extends LinearOpMode {
         double dx = target.getX() - x;
         double dy = target.getY() - y;
         double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
-        double turretAngle = angleToGoal - headingDeg;
+        // Fix inverted localization for blue side - negate the angle
+        double turretAngle = -(angleToGoal - headingDeg);
+        
+        // Normalize to [-180, 180]
         while (turretAngle > 180) turretAngle -= 360;
         while (turretAngle < -180) turretAngle += 360;
-        double normalized = turretAngle;
+        
+        // Handle angle wrapping to prevent 180° flips
         double diff = turretAngle - lastTurretAngleDeg;
-        if (diff > 180) turretAngle -= 360;
-        else if (diff < -180) turretAngle += 360;
-        // Reset at 360° so we don't accumulate to 720°; command 0 and keep angle in [-180,180]
-        if (turretAngle >= 360 || turretAngle <= -360) {
-            lastTurretAngleDeg = normalized;
-            return 0;
+        if (diff > 90) {
+            turretAngle -= 360;
+        } else if (diff < -90) {
+            turretAngle += 360;
         }
+        
+        // Normalize again after wrapping
+        while (turretAngle > 180) turretAngle -= 360;
+        while (turretAngle < -180) turretAngle += 360;
+        
         lastTurretAngleDeg = turretAngle;
         return turretAngle;
     }
     private final int ROTATOR_ZERO_TICKS = 0;  // tick position when t8[888[urret faces forward; calibrate if needed
-
-    /** Use -1 if turret turns the wrong way for setRotatorToTurretAngle; use 1 if it's correct. */
 
     public void setRotatorToTurretAngle(double turretAngleDeg) {
         double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
@@ -373,6 +462,7 @@ public class NewBotBlue extends LinearOpMode {
     }
 
 
+
     /**
      * Automatically adjusts hood position based on distance.
      * Uses the same 3 zones as the velocity lookup table:
@@ -391,6 +481,63 @@ public class NewBotBlue extends LinearOpMode {
         } else {
             // Zone 3: Far range (>= 200)
             hood.setPosition(FAR_HOOD_POSITION);
+        }
+    }
+
+    /**
+     * Relocalizes robot pose using AprilTag detection from Limelight.
+     * Calculates robot position based on known AprilTag position, distance, and angles.
+     * Only corrects pose if within reasonable distance and angle thresholds.
+     */
+    private void relocalizeFromAprilTag(double txDeg, double tyDeg, double distance) {
+        // Get AprilTag position (blue side for NewBotBlue)
+        double aprilTagX = BLUE_APRILTAG_X;
+        double aprilTagY = BLUE_APRILTAG_Y;
+        
+        // Calculate angle from robot to AprilTag
+        // tx is horizontal offset, so we need to account for robot heading
+        Pose currentPose = follower.getPose();
+        double currentHeading = Math.toDegrees(currentPose.getHeading());
+        
+        // Calculate angle to AprilTag from current pose estimate
+        double dx = aprilTagX - currentPose.getX();
+        double dy = aprilTagY - currentPose.getY();
+        double angleToTag = Math.toDegrees(Math.atan2(dy, dx));
+        
+        // Calculate what the angle should be based on Limelight tx
+        // tx is the horizontal offset: positive = tag is to the right, negative = tag is to the left
+        double correctedAngleToTag = currentHeading + txDeg;
+        
+        // Calculate robot position from AprilTag
+        // Robot is at: AprilTag position - (distance * direction vector)
+        double angleRad = Math.toRadians(correctedAngleToTag);
+        double robotX = aprilTagX - distance * Math.cos(angleRad);
+        double robotY = aprilTagY - distance * Math.sin(angleRad);
+        
+        // Calculate corrected heading
+        // Heading = angle to tag - tx offset (accounting for camera orientation)
+        double correctedHeading = correctedAngleToTag - txDeg;
+        
+        // Only update if the correction is reasonable (not a huge jump)
+        double poseDiff = Math.sqrt(
+            Math.pow(robotX - currentPose.getX(), 2) + 
+            Math.pow(robotY - currentPose.getY(), 2)
+        );
+        double headingDiff = Math.abs(Math.toDegrees(correctedHeading) - currentHeading);
+        
+        if (poseDiff < 24.0 && headingDiff < RELOCALIZATION_ANGLE_THRESHOLD) {
+            // Update pose estimate
+            Pose correctedPose = new Pose(robotX, robotY, Math.toRadians(correctedHeading));
+            follower.setPose(correctedPose);
+            
+            telemetry.addLine("RELOCALIZED from AprilTag!");
+            telemetry.addData("Corrected X", robotX);
+            telemetry.addData("Corrected Y", robotY);
+            telemetry.addData("Corrected Heading", Math.toDegrees(correctedHeading));
+        } else {
+            telemetry.addLine("Relocalization skipped (too large correction)");
+            telemetry.addData("Pose diff", poseDiff);
+            telemetry.addData("Heading diff", headingDiff);
         }
     }
 

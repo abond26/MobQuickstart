@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @TeleOp
 
-public class NewBotRed extends LinearOpMode {
+public class NewBotRedNoLocalization extends LinearOpMode {
     double newTime;
     double time;
     double F = 12.35;
@@ -33,7 +33,6 @@ public class NewBotRed extends LinearOpMode {
     boolean aLast =false;
     boolean xLast = false;
     boolean rightBumperLast = false;
-    boolean hoodALast = false; // Separate tracking for hood button
     ElapsedTime rightBumperTimer = new ElapsedTime();
     boolean rightBumperTimerStarted = false;
     private static final double HOOD_MOVE_DELAY_SECONDS = 0.5; // Time to hold button before hood moves
@@ -49,10 +48,12 @@ public class NewBotRed extends LinearOpMode {
     //public ElapsedTime run v vftime = new ElapsedTime();
     private Servo hood,blocker;
 
-    // Manual hood positions for cycling
-    private static final double HOOD_POSITION_0 = 0.0;
-    private static final double HOOD_POSITION_1 = 0.5;
-    private static final double HOOD_POSITION_2 = 1.0;
+    // Distance threshold for hood adjustment (matching lookup table zones)
+    private static final double FIRST_DISTANCE_THRESHOLD = 145.0;  // Zone 1: Close (< 145)
+    private static final double SECOND_DISTANCE_THRESHOLD = 200.0; // Zone 2: Mid (145-200), Zone 3: Far (>= 200)
+    private static final double CLOSE_HOOD_POSITION = 1; // Hood position for close shots
+    private static final double MID_HOOD_POSITION = 0.5;
+    private static final double FAR_HOOD_POSITION = 0; // Hood position for far shots
     private Pose startPose = new Pose(0, 0, 0);
     Pose bluePos = new Pose(11, 137, 0);
     Pose redPos = new Pose(133, 137, 0);
@@ -128,11 +129,7 @@ public class NewBotRed extends LinearOpMode {
             yLast = gamepad1.y;
 
             boolean aPressed = gamepad1.dpad_up && !aLast;
-            aLast = gamepad1.dpad_up;
-            
-            // Track hood button separately
-            boolean hoodAPressed = gamepad1.a && !hoodALast;
-            hoodALast = gamepad1.a;
+            aLast = gamepad1.a;
             boolean xPressed = gamepad2.x && !xLast;
             xLast = gamepad2.x;
             boolean rightBumperPressed = gamepad1.right_bumper && !rightBumperLast;
@@ -157,12 +154,12 @@ public class NewBotRed extends LinearOpMode {
 
 
 
-            //launcha - Manual velocity adjustment
+            //launcha
             if (aPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+20);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+30);
             }
             if (yPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-20);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-30);
             }
 
 
@@ -178,7 +175,6 @@ public class NewBotRed extends LinearOpMode {
 
             }
             else if (gamepad1.left_bumper){
-                theWheelOfTheOx.setPower(-1);
                 theWheelOfTheOx.setPower(-1);
             }
             else {
@@ -226,16 +222,32 @@ public class NewBotRed extends LinearOpMode {
                         telemetry.addData("Ta", ta);
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
-                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
-                            adjustRotator(txDeg, getDist(tyDeg)); // FIXED: use tyDeg (vertical angle) for distance, not txDeg
-                        }
+//                        if (!gamepad1.dpad_right && !gamepad1.dpad_left) {
+//                            adjustRotator(txDeg, getDist(txDeg));
+//                        }
                     } else {
                         //setRotatorToTurretAngle(turretAngleDeg);
                         telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
                     }
                 }
-                // Lookup table removed - use manual controls for velocity and hood
+                // Auto-adjust velocity and hood based on dist using lookup table
+                // ONLY when Limelight is valid and sees a target
+                if (llValid && tyDeg != 0) {
+                    // Use getDist() which now returns dist (fakeDist)
+                    double dist = getDist(tyDeg);
+                    telemetry.addData("Distance (dist)", dist);
+
+                    if (dist > 0 && !Double.isNaN(dist) && !Double.isInfinite(dist)) {
+                        // Auto-adjust velocity from lookup table using dist
+                        double autoVelocity = VelocityLookupTable.getVelocity(dist);
+                        jollyCrusader.setVelocity(autoVelocity);
+                        telemetry.addData("Auto Velocity", autoVelocity);
+
+                        // Auto-adjust hood based on zone using dist
+                        adjustHoodBasedOnDistance(dist);
+                    }
+                }
 
                 // Manual override buttons (still work if needed - these override auto velocity)
                 if (gamepad1.right_stick_button){
@@ -247,26 +259,19 @@ public class NewBotRed extends LinearOpMode {
             if (gamepad1.left_stick_button){
                 jollyCrusader.setVelocity(1200);
             }
-            
-            // Manual hood control - cycle through 0 → 0.5 → 1 → 0
-            if (hoodAPressed) {
-                double currentHood = hood.getPosition();
-                // Cycle: 0 → 0.5 → 1 → 0
-                if (currentHood < 0.25) {
-                    hood.setPosition(HOOD_POSITION_1); // 0.5
-                } else if (currentHood < 0.75) {
-                    hood.setPosition(HOOD_POSITION_2); // 1.0
-                } else {
-                    hood.setPosition(HOOD_POSITION_0); // 0.0
-                }
+//cool
+            if(gamepad1.a)
+            {
+                hood.setPosition(1);
             }
-            
-            // Fine manual hood adjustment (optional)
+
+
+
             if (gamepad1.x){
-                hood.setPosition(hood.getPosition()-0.05);
+                hood.setPosition(hood.getPosition()-0.25);
             }
             if (gamepad1.b){
-                hood.setPosition(hood.getPosition()+0.05);
+                hood.setPosition(hood.getPosition()+0.25);
             }
 
 
@@ -362,6 +367,25 @@ public class NewBotRed extends LinearOpMode {
     }
 
 
-    // Lookup table and auto-adjustment removed - use manual controls
+    /**
+     * Automatically adjusts hood position based on distance.
+     * Uses the same 3 zones as the velocity lookup table:
+     * - Zone 1 (Close): < 145 inches → CLOSE_HOOD_POSITION
+     * - Zone 2 (Mid): 145-200 inches → MID_HOOD_POSITION
+     * - Zone 3 (Far): >= 200 inches → FAR_HOOD_POSITION
+     */
+    public void adjustHoodBasedOnDistance(double dist) {
+        int zone = VelocityLookupTable.getZone(dist);
+        if (zone == 1) {
+            // Zone 1: Close range (< 140)
+            hood.setPosition(CLOSE_HOOD_POSITION);
+        } else if (zone == 2) {
+            // Zone 2: Mid range (140-200)
+            hood.setPosition(MID_HOOD_POSITION);
+        } else {
+            // Zone 3: Far range (>= 200)
+            hood.setPosition(FAR_HOOD_POSITION);
+        }
+    }
 
 }
