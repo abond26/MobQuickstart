@@ -62,6 +62,7 @@ public class NewBotBlue extends LinearOpMode {
     Pose bluePos = new Pose(11, 137, 0);
     Pose redPos = new Pose(133, 137, 0);
     Pose target = bluePos;
+    //bluePos.mirror()?
 
     // AprilTag positions for relocalization (from PoseStorage)
     private static final double BLUE_APRILTAG_X = 24.4;
@@ -111,7 +112,7 @@ public class NewBotBlue extends LinearOpMode {
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setTargetPosition(0);
-        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);ter
         rotator.setPower(0.7); // Reduced from 1.0 to 0.5 to prevent belt skipping
 
         intake = hardwareMap.get(DcMotor.class, "tree");
