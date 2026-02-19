@@ -241,30 +241,41 @@ public class blue18closenewbot extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                launcher.setVelocity(1420);
+                theWheelOfTheOx.setPower(0);
+                launcher.setVelocity(1340);
                 tree.setPower(1);
                 blocker.setPosition(0);
-                theWheelOfTheOx.setPower(-1);
-                rotator.setTargetPosition(rotatorStartPosition);
-                // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1420); //1725
+                launcher.setVelocity(1340); //1725
                 hood.setPosition(1); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
+                if (pathTimer.getElapsedTimeSeconds()>0.5) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                rotator.setTargetPosition(rotatorStartPosition);
+                // Try to use limelight for initial adjustment, fallback to hardcoded values
+
                 setPathState(blue18closenewbot.PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
                 rotator.setTargetPosition(rotatorStartPosition);
-                launcher.setVelocity(1420);
-                // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.625){
+                launcher.setVelocity(1340);
+                if(pathTimer.getElapsedTimeSeconds()>1.15)
+                {
                     blocker.setPosition(1);
+                }
+                // Continuously adjust based on limelight during shooting
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.8){
                     tree.setPower(1);
-                    launcher.setVelocity(1420);
+                    launcher.setVelocity(1340);
                     hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
-                    if (pathTimer.getElapsedTimeSeconds()>2.325) {
+                    if(pathTimer.getElapsedTimeSeconds()>1.8)
+                    {
+                        launcher.setVelocity(1340);
+                    }
+                    if (pathTimer.getElapsedTimeSeconds()>2.2) {
                         setPathState(blue18closenewbot.PathState.collection);
                     }
                 }
@@ -273,22 +284,28 @@ public class blue18closenewbot extends OpMode {
 
             case collection:
                 rotator.setTargetPosition(rotatorStartPosition);
-                hood.setPosition(0.25);
+                hood.setPosition(0.15);
                 blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
                 rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && !collectionStarted) {
                     //rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1200);
-                    hood.setPosition(0.25);
+                    launcher.setVelocity(1160);
+                    hood.setPosition(0.15);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    theWheelOfTheOx.setPower(-1);
                     tree.setPower(1);
                     follower.followPath(collect1);
-                    collectionStarted = true; // Mark as started to prevent calling again
+                    collectionStarted = true;
+                    if (pathTimer.getElapsedTimeSeconds()>1.25)
+                    {
+                        theWheelOfTheOx.setPower(-1);
+                    }
                 }
                 if (!follower.isBusy() && collectionStarted) {
-                    setPathState((PathState.shoot));
+                    setPathState((blue18closenewbot.PathState.shoot));
+
+
                 }
                 break;
             case shoot:
@@ -296,22 +313,25 @@ public class blue18closenewbot extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     rotator.setTargetPosition(rotatorStartPosition);
-                    hood.setPosition(0.25);
+                    hood.setPosition(0.15);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1200);
+                    launcher.setVelocity(1160);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot2Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>2.25) {
+                    if (pathTimer.getElapsedTimeSeconds()>2)
+                    {
                         blocker.setPosition(1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>2.25) {
                         tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.875) {
-                        setPathState((PathState.GateCollection));
+                    if(pathTimer.getElapsedTimeSeconds()>2.95) {
+                        setPathState((blue18closenewbot.PathState.GateCollection));
                     }
                 }
                 break;
@@ -319,17 +339,21 @@ public class blue18closenewbot extends OpMode {
             case GateCollection:
                 rotator.setTargetPosition(rotatorStartPosition);
                 blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
                 if (!follower.isBusy() && !gateCollectionStarted) {
                     follower.followPath(GateCollect1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1200);
+                    launcher.setVelocity(1160);
                     tree.setPower(1);
-                    hood.setPosition(0.25);
+                    hood.setPosition(0.15);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    theWheelOfTheOx.setPower(-1);
+
                     gateCollectionStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3.5) {
+                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3.15) {
                     setPathState((blue18closenewbot.PathState.shootAgain));
                 }
                 break;
@@ -337,37 +361,43 @@ public class blue18closenewbot extends OpMode {
                 rotator.setTargetPosition(rotatorStartPosition);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot3Started) {
-                    hood.setPosition(0.25);
+                    hood.setPosition(0.15);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
+                if(pathTimer.getElapsedTimeSeconds()>1.425)
+                {
+                    blocker.setPosition(1);
+                }
                 if (!follower.isBusy() && shoot3Started) {
                     if(pathTimer.getElapsedTimeSeconds()>1.675) {
-                        blocker.setPosition(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>3)
+                    if(pathTimer.getElapsedTimeSeconds()>2.65)
                     {
-                        setPathState((PathState.GateCollectionAgain));
+                        setPathState((blue18closenewbot.PathState.GateCollectionAgain));
                     }
                 }
                 break;
             case GateCollectionAgain:
                 if (!follower.isBusy() && !gateCollectionAgainStarted) {
                     blocker.setPosition(0);
+                    theWheelOfTheOx.setPower(0);
                     follower.followPath(GateCollect2);
-                    hood.setPosition(0.25);
+                    hood.setPosition(0.15);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1200);
+                    launcher.setVelocity(1160);
                     tree.setPower(1);
-                    hood.setPosition(0.25);
-                    theWheelOfTheOx.setPower(-1);
+                    hood.setPosition(0.15);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.25) {
+                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.15) {
                     setPathState((blue18closenewbot.PathState.shootAgainAgain));
                 }
                 break;
@@ -376,7 +406,7 @@ public class blue18closenewbot extends OpMode {
                 rotator.setTargetPosition(rotatorStartPosition);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot4Started) {
-                    hood.setPosition(0.25);
+                    hood.setPosition(0.15);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -384,29 +414,36 @@ public class blue18closenewbot extends OpMode {
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>2) {
+                    if(pathTimer.getElapsedTimeSeconds()>1.35)
+                    {
+                        blocker.setPosition(1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>1.6) {
                         blocker.setPosition(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.75)
+                    if(pathTimer.getElapsedTimeSeconds()>2.8)
                     {
-                        setPathState((PathState.GateCollectionAgainAgain));
+                        setPathState((blue18closenewbot.PathState.GateCollectionAgainAgain));
                     }
                 }
                 break;
             case GateCollectionAgainAgain:
                 blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
                 if (!follower.isBusy() && !gateCollectionAgainStarted) {
                     follower.followPath(GateCollect3);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1200);
+                    launcher.setVelocity(1160);
                     tree.setPower(1);
-                    hood.setPosition(0.25);
+                    hood.setPosition(0.15);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    theWheelOfTheOx.setPower(-1);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.25) {
+                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.55) {
                     setPathState((blue18closenewbot.PathState.shootAgainAgainAgain));
                 }
                 break;
@@ -422,13 +459,17 @@ public class blue18closenewbot extends OpMode {
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>2) {
+                    if (pathTimer.getElapsedTimeSeconds()>1.35)
+                    {
+                        blocker.setPosition(1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>1.5) {
                         blocker.setPosition(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.75)
+                    if(pathTimer.getElapsedTimeSeconds()>2.55)
                     {
-                        setPathState((PathState.collectAgainAgainEnd));
+                        setPathState((blue18closenewbot.PathState.collectAgainAgainEnd));
                     }
                 }
                 break;
@@ -436,19 +477,29 @@ public class blue18closenewbot extends OpMode {
             case collectAgainAgainEnd:
                 rotator.setTargetPosition(rotatorStartPosition);
                 blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
+                if(pathTimer.getElapsedTimeSeconds()>1.5)
+                {
+                    theWheelOfTheOx.setPower(-1);
+                }
                 if (!follower.isBusy() && !collectionStarted) {
                     //rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1240);
+                    launcher.setVelocity(1160);
                     hood.setPosition(0.25);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    theWheelOfTheOx.setPower(-1);
+
                     tree.setPower(1);
                     follower.followPath(collect3);
                     collectionStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && collectionStarted) {
-                    setPathState((PathState.shootAgainAgainAgainAgain));
+                    theWheelOfTheOx.setPower(-1);
+                    if (pathTimer.getElapsedTimeSeconds()>0.25) {
+
+                        setPathState((blue18closenewbot.PathState.shootAgainAgainAgainAgain));
+                    }
+
                 }
                 break;
             case shootAgainAgainAgainAgain:
@@ -457,26 +508,29 @@ public class blue18closenewbot extends OpMode {
                 if (!follower.isBusy() && !shoot5Started) {
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot6);
-                    launcher.setVelocity(1240);
+                    launcher.setVelocity(1160);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot5Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot5Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>1.75) {
+                    if(pathTimer.getElapsedTimeSeconds()>1.5)
+                    {
                         blocker.setPosition(1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>1.75) {
                         tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
                     if(pathTimer.getElapsedTimeSeconds()>2.75) {
-                        setPathState((PathState.done));
+                        setPathState((blue18closenewbot.PathState.done));
                     }
                 }
                 break;
             case done:
                 // Save final pose and calculate rotator position to face goal
 
-                // Calculate and set rotator to face the goal (blue side = false, motor180Range = 910, offset = 28)
+                // Calculate and set rotator to face the goal (red side = true, motor180Range = 910, offset = 28)
 
                 // Save rotator position for teleop
                 break;
