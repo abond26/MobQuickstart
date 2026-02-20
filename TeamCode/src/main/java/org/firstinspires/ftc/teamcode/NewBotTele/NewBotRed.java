@@ -363,6 +363,10 @@ public class NewBotRed extends LinearOpMode {
     }
 
 
+
+
+
+
     // Lookup table and auto-adjustment removed - use manual controls
 
 }

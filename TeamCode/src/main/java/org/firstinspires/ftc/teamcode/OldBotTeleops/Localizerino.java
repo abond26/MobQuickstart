@@ -121,14 +121,18 @@ public class Localizerino extends LinearOpMode {
                         telemetry.addData("ty", tyDeg);
                         telemetry.addData("angle to corner", llAngle);
                         setRotatorToTurretAngle(llAngle);
-                        getDist(tyDeg);
                     } else {
                         telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
                         //setRotatorToTurretAngle(turretAngleDeg);
                     }
                 }
+                if (gamepad1.aWasPressed()){
+                    reLocalizerinoRed(txDeg, getDist(tyDeg));
+                }
             }
+
+
 
 
             telemetry.addData("turret angle", turretAngleDeg);
@@ -140,15 +144,6 @@ public class Localizerino extends LinearOpMode {
     }
 
 
-    public double getDist(double tyDeg) {
-        double tyRad = Math.abs(Math.toRadians(tyDeg+limelightUpAngle));
-        double dist = y / Math.tan(tyRad);
-        double realDist = 0.55*dist+40.3;
-        telemetry.addData("angle", Math.toDegrees(tyRad));
-        telemetry.addData("fakeDist", dist);
-        telemetry.addData("realDist", realDist);
-        return realDist;
-    }
 
     private double LLAngleToBlueCorner(double tx, double distance){
         double x = distance*Math.sin(Math.toRadians(tx));
@@ -166,6 +161,34 @@ public class Localizerino extends LinearOpMode {
         double distance = Math.sqrt(Math.pow(x - target.getX(), 2) + Math.pow(y - target.getY(), 2));
         telemetry.addData("distance", distance);
         return distance;
+    }
+
+    public void reLocalizerinoBlue(double llAngle, double llDist){
+        double newY;
+        double newX;
+        if (llAngle < 0){
+            newX = targetPose.getX() + llDist * Math.sin(llAngle);
+            newY = targetPose.getY() - llDist * Math.cos(llAngle);
+        } else{
+            newX = targetPose.getX() + llDist * Math.cos(llAngle);
+            newY = targetPose.getY() - llDist * Math.sin(llAngle);
+        }
+        Pose newPose = new Pose(newX, newY);
+        follower.setPose(newPose);
+    }
+
+    public void reLocalizerinoRed(double llAngle, double llDist){
+        double newY;
+        double newX;
+        if (llAngle < 0){
+            newX = targetPose.getX() - llDist * Math.cos(llAngle);
+            newY = targetPose.getY() + llDist * Math.sin(llAngle);
+        } else{
+            newX = targetPose.getX() - llDist * Math.sin(llAngle);
+            newY = targetPose.getY() + llDist * Math.cos(llAngle);
+        }
+        Pose newPose = new Pose(newX, newY);
+        follower.setPose(newPose);
     }
 
 

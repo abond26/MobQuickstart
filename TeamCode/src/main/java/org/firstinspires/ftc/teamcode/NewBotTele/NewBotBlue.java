@@ -50,7 +50,7 @@ public class NewBotBlue extends LinearOpMode {
 
     private Limelight3A limelight;
     public ElapsedTime runtime = new ElapsedTime();
-    private Servo hood,blocker;
+    private Servo hood, blocker;
 
     // Distance threshold for hood adjustment (matching lookup table zones)
     private static final double FIRST_DISTANCE_THRESHOLD = 145.0;  // Zone 1: Close (< 145)
@@ -112,7 +112,7 @@ public class NewBotBlue extends LinearOpMode {
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setTargetPosition(0);
-        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);ter
+        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setPower(0.7); // Reduced from 1.0 to 0.5 to prevent belt skipping
 
         intake = hardwareMap.get(DcMotor.class, "tree");
@@ -335,7 +335,9 @@ public class NewBotBlue extends LinearOpMode {
                     jollyCrusader.setVelocity(2300);
                 }
 //fasd
-
+                if (gamepad1.yWasPressed()){
+                    reLocalizerinoRed(txDeg, getDist(tyDeg));
+                }
             }
 
             // Set rotator to final calculated angle (localization + Limelight adjustment)
@@ -538,6 +540,33 @@ public class NewBotBlue extends LinearOpMode {
             telemetry.addData("Pose diff", poseDiff);
             telemetry.addData("Heading diff", headingDiff);
         }
+    }
+    public void reLocalizerinoBlue(double llAngle, double llDist){
+        double newY;
+        double newX;
+        if (llAngle < 0){
+            newX = target.getX() + llDist * Math.sin(llAngle);
+            newY = target.getY() - llDist * Math.cos(llAngle);
+        } else{
+            newX = target.getX() + llDist * Math.cos(llAngle);
+            newY = target.getY() - llDist * Math.sin(llAngle);
+        }
+        Pose newPose = new Pose(newX, newY);
+        follower.setPose(newPose);
+    }
+
+    public void reLocalizerinoRed(double llAngle, double llDist){
+        double newY;
+        double newX;
+        if (llAngle < 0){
+            newX = target.getX() - llDist * Math.cos(llAngle);
+            newY = target.getY() + llDist * Math.sin(llAngle);
+        } else{
+            newX = target.getX() - llDist * Math.sin(llAngle);
+            newY = target.getY() + llDist * Math.cos(llAngle);
+        }
+        Pose newPose = new Pose(newX, newY);
+        follower.setPose(newPose);
     }
 
 }

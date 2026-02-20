@@ -1,0 +1,45 @@
+package org.firstinspires.ftc.teamcode.robotControl.Subsystems;
+
+import com.qualcomm.hardware.limelightvision.*;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+public class Vision {
+
+    private Limelight3A limelight;
+
+    private int limelightUpAngle = 20;
+    private int limeHeight = 35;
+    private int tagHeight = 75;
+    private int y = tagHeight - limeHeight;
+
+    public Vision(HardwareMap hardwareMap) {
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        if (limelight != null) {
+            limelight.pipelineSwitch(1);
+            limelight.start();
+        }
+    }
+
+    public boolean hasTarget() {
+        LLResult result = limelight.getLatestResult();
+        return result != null && result.isValid();
+    }
+
+    public double getTx() {
+        return limelight.getLatestResult().getTx();
+    }
+
+    public double getTy() {
+        return limelight.getLatestResult().getTy();
+    }
+
+    public double getDistance() {
+
+        double tyDeg = getTy();
+        double tyRad = Math.abs(Math.toRadians(tyDeg + limelightUpAngle));
+        double dist = y / Math.tan(tyRad);
+        return dist;
+    }
+}
