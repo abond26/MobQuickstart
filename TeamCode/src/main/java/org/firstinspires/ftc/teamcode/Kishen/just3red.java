@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "just 3 red close", group = "auton red")
+//@Autonomous(name = "just 3 red close", group = "auton red")
 public class just3red extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg

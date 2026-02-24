@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "tangential Blue 158 close ", group = "new bot")
+@Autonomous(name = "tangential Blue 18 close ", group = "new bot")
 public class blue18closenewbot extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
@@ -126,23 +126,23 @@ public class blue18closenewbot extends OpMode {
 
     PathState pathState;
     // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
-    private final Pose startPose = new Pose(26, 132.2, Math.toRadians(143.5));
+    private final Pose startPose = new Pose(27.5, 133, Math.toRadians(145));
     private final Pose shootPose1 = new Pose(41, 107, Math.toRadians(134));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 59, Math.toRadians(180));
-    private final Pose goToCollect1ControlPoint = new Pose(58.51709696726672, 62.06708214374335, Math.toRadians(180));
+    private final Pose goToCollect1ControlPoint = new Pose(58.124726395059625, 58.92811756608668, Math.toRadians(180));
     private final Pose shootPose2 = new Pose( 46, 95, Math.toRadians(131.5));
     
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 74.66485013623976, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 13, 61, Math.toRadians(150));
+    private final Pose gateCollect1 = new Pose( 13, 62, Math.toRadians(150));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(42.91008174386921, 55.801430517711175, Math.toRadians(180));
     private final Pose shootBall3 = new Pose(46, 95, Math.toRadians(135));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 13, 61, Math.toRadians(150));
+    private final Pose gateCollect2 = new Pose( 13, 62, Math.toRadians(150));
     private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(135));
-    private final Pose gateCollect3 = new Pose( 13, 61, Math.toRadians(150));
+    private final Pose gateCollect3 = new Pose( 13, 62, Math.toRadians(150));
     private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(135));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
@@ -287,6 +287,7 @@ public class blue18closenewbot extends OpMode {
                 hood.setPosition(0.15);
                 blocker.setPosition(0);
                 theWheelOfTheOx.setPower(0);
+                tree.setPower(1);
                 rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && !collectionStarted) {
                     //rotator.setTargetPosition(rotatorStartPosition);
@@ -345,7 +346,7 @@ public class blue18closenewbot extends OpMode {
                     rotator.setTargetPosition(rotatorStartPosition);
                     launcher.setVelocity(1160);
                     tree.setPower(1);
-                    hood.setPosition(0.15);
+                    hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
 
                     gateCollectionStarted = true; // Mark as started to prevent calling again
@@ -361,7 +362,7 @@ public class blue18closenewbot extends OpMode {
                 rotator.setTargetPosition(rotatorStartPosition);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot3Started) {
-                    hood.setPosition(0.15);
+                    hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -387,7 +388,7 @@ public class blue18closenewbot extends OpMode {
                     blocker.setPosition(0);
                     theWheelOfTheOx.setPower(0);
                     follower.followPath(GateCollect2);
-                    hood.setPosition(0.15);
+                    hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     launcher.setVelocity(1160);
                     tree.setPower(1);
@@ -406,7 +407,7 @@ public class blue18closenewbot extends OpMode {
                 rotator.setTargetPosition(rotatorStartPosition);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot4Started) {
-                    hood.setPosition(0.15);
+                    hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -436,7 +437,7 @@ public class blue18closenewbot extends OpMode {
                     rotator.setTargetPosition(rotatorStartPosition);
                     launcher.setVelocity(1160);
                     tree.setPower(1);
-                    hood.setPosition(0.15);
+                    hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
@@ -486,7 +487,7 @@ public class blue18closenewbot extends OpMode {
                     //rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     launcher.setVelocity(1160);
-                    hood.setPosition(0.25);
+                    hood.setPosition(0.5);
                     rotator.setTargetPosition(rotatorStartPosition);
 
                     tree.setPower(1);
@@ -601,10 +602,10 @@ public class blue18closenewbot extends OpMode {
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        double P = 409;
+        double P = 270;
         double I = 0;
         double D = 0;
-        double F = 12.35;
+        double F = 13.2965;
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }

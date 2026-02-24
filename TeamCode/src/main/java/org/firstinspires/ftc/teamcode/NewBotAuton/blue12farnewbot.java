@@ -20,8 +20,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 
-@Autonomous(name = "Reliable 9 blue far new bot", group = "new bot")
-public class blue9farnewbot extends OpMode {
+@Autonomous(name = "Reliable 12 blue far new bot", group = "new bot")
+public class blue12farnewbot extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
@@ -135,6 +135,8 @@ public class blue9farnewbot extends OpMode {
 
     private final Pose park = new Pose(41, 22, Math.PI - Math.toRadians(64));               // red (103, 22, 64)
 
+    private final Pose collect3Start = new Pose(11, 12, Math.toRadians(180));
+    private final Pose shootBall4 = new Pose(55, 15, Math.toRadians(180));         // red (89, 10, 64)
 
     private PathChain shoot1, goToCollect1, collect2StartAgain, collect2EndAgain, collect1, shoot2, goToCollect2, collect2, shoot3,goToCollect2Again, collect2Again, goToCollect2AgainAgain, collect2AgainAgain, goToCollect3, collect3, shoot4, goToCollect4, collect4, shoot5, parking;
 
@@ -171,9 +173,17 @@ public class blue9farnewbot extends OpMode {
                 .addPath(new BezierCurve(collect2End2, shoot3ControlPoint, shootBall3))
                 .setLinearHeadingInterpolation(collect2End2.getHeading(), shootBall3.getHeading())
                 .build();
+        collect4 = follower.pathBuilder()
+                .addPath(new BezierCurve(shootBall3, collect3Start))
+                .setTangentHeadingInterpolation()
+                .build();
+        shoot4 = follower.pathBuilder()
+                .addPath(new BezierLine(collect3Start, shootBall4))
+                .setLinearHeadingInterpolation(collect3Start.getHeading(), shootBall4.getHeading())
+                .build();
         parking = follower.pathBuilder()
-                .addPath(new BezierLine(shootBall3, park))
-                .setLinearHeadingInterpolation(shootBall3.getHeading(), park.getHeading())
+                .addPath(new BezierLine(shootBall4, park))
+                .setLinearHeadingInterpolation(shootBall4.getHeading(), park.getHeading())
                 .build();
     }
 
@@ -202,8 +212,8 @@ public class blue9farnewbot extends OpMode {
                     launcher.setVelocity(1500);
                 }
                 if (pathTimer.getElapsedTimeSeconds()>4.5) {
-                        setPathState((PathState.collection));
-                    }
+                    setPathState((PathState.collection));
+                }
                 break;
 
             case collection:
@@ -214,7 +224,7 @@ public class blue9farnewbot extends OpMode {
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
                     tree.setPower(1);
-                    setPathState((blue9farnewbot.PathState.shoot));
+                    setPathState((blue12farnewbot.PathState.shoot));
                 }
                 break;
             case shoot:
@@ -297,6 +307,47 @@ public class blue9farnewbot extends OpMode {
                     launcher.setVelocity(1500);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot3);
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    tree.setPower(0.6);
+                    shoot3Started = true;
+                }
+                if (!follower.isBusy() && shoot3Started) {
+                    if (pathTimer.getElapsedTimeSeconds()>2)
+                    {
+                        blocker.setPosition(1);
+                    }
+                    if (pathTimer.getElapsedTimeSeconds()>2.25)
+                    {
+                        theWheelOfTheOx.setPower(-1);
+                        launcher.setVelocity(1500);
+                    }
+                    if (pathTimer.getElapsedTimeSeconds()>4.25) {
+                        setPathState((PathState.collectAgainAgainAgain));
+                    }
+                }
+                break;
+            case collectAgainAgainAgain:
+                tree.setPower(1);
+                blocker.setPosition(0);
+                rotator.setTargetPosition(rotatorStartPosition);
+                if (!follower.isBusy() && !collectAgainEndStarted) {
+                    follower.followPath(collect4);
+                    tree.setPower(1);
+                    theWheelOfTheOx.setPower(0);
+                    rotator.setTargetPosition(rotatorStartPosition);
+                    tree.setPower(1);
+                    collectAgainEndStarted = true;
+                }
+                if (!follower.isBusy() && collectAgainEndStarted) {
+                    setPathState((PathState.shootAgainAgain));
+                }
+                break;
+            case shootAgainAgain:
+                launcher.setVelocity(1500);
+                if (!follower.isBusy() && !shoot3Started) {
+                    launcher.setVelocity(1500);
+                    rotator.setTargetPosition(-235);
+                    follower.followPath(shoot4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(0.6);
                     shoot3Started = true;

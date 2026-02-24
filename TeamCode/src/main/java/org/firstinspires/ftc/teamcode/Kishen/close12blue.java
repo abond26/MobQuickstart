@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "Reliable 12 blue close", group = "auton blue")
+//@Autonomous(name = "Reliable 12 blue close", group = "auton blue")
 public class close12blue extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
