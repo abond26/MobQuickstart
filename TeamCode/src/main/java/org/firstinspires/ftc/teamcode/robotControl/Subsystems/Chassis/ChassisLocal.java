@@ -4,7 +4,10 @@ import androidx.annotation.NonNull;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.*;
+
+import org.firstinspires.ftc.teamcode.NewBotTele.ShotTimeLookupTable;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class ChassisLocal implements DriveConstants{
@@ -46,6 +49,7 @@ public class ChassisLocal implements DriveConstants{
     public void setPose(Pose pose) {
         follower.setPose(pose);
     }
+    public Vector getVelocity() {return follower.getVelocity();}
 
     public void drive(double y, double x, double r) {
 
@@ -56,6 +60,21 @@ public class ChassisLocal implements DriveConstants{
         rightFront.setPower((y - x - r) / denominator);
         rightRear.setPower((y + x - r) / denominator * driveMultiplier);
     }
+
+    public Pose sillyTargetPose(Pose target){
+        double dist = getDistance(target);
+
+        Vector velocity = getVelocity();
+        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
+        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
+        Pose sillyTarget = new Pose(
+                target.getX() - vx * ShotTimeLookupTable.getTime(dist),
+                target.getY() - vy * ShotTimeLookupTable.getTime(dist)
+        );
+
+        return sillyTarget;
+    }
+
 
     public double getDistance(Pose target){
         double currentX = getPose().getX();

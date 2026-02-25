@@ -11,6 +11,7 @@ public interface BlueUniversalConstants {
     Pose defaultPose = new Pose(26.7, 132, Math.toRadians(145));
     Pose target = new Pose(0, 144, 0);
 
+
     double CLOSE_HOOD_POSITION = 1; // Hood position for close shots
     double MID_HOOD_POSITION = 0.5;
     double FAR_HOOD_POSITION = 0;

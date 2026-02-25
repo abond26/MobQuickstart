@@ -11,11 +11,13 @@ import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 
 @TeleOp
 public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
+    Pose sillyTarget;
     Pose startPose;
     Robot robot;
     RobotActions actions;
     private int veloSwitchNum = 1;
     boolean autoControls = false;
+    boolean sillyControls = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -92,10 +94,21 @@ public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
             if (gamepad1.touchpadWasPressed()){
                 autoControls = !autoControls;
             }
+            if (gamepad1.leftStickButtonWasPressed()) {
+                sillyControls = !sillyControls;
+            }
 
+            //Static shooting
             if (autoControls) {
                 actions.aimRotatorLocal(target, telemetry);
                 actions.adjustShootingParams(target);
+            }
+
+            //Dynamic shooting
+            sillyTarget = robot.chassisLocal.sillyTargetPose(target);
+            if (sillyControls & !autoControls) {
+                actions.aimRotatorLocal(sillyTarget, telemetry);
+                actions.adjustShootingParams(sillyTarget);
             }
 
             telemetry.addLine("Automatic Telemetry");

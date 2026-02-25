@@ -56,7 +56,7 @@ public class RobotActions implements BlueUniversalConstants{
     public void intake(double power){
         intake.simpleIntake(power);
         if (power > 0){
-            turret.setFeedPower(power);
+            turret.setFeedPower(-power);
         }
     }
 
