@@ -37,7 +37,7 @@ public class Turret implements TurretConstants {
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotator.setTargetPosition(0);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setPower(0.2);
+        rotator.setPower(rotatorPower);
 
         //This means counterclockwise is negative
         rotator.setDirection(DcMotorSimple.Direction.REVERSE);

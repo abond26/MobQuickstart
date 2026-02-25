@@ -58,12 +58,7 @@ public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
 
 
             //Hood control
-            if (gamepad1.x){
-                robot.turret.shiftHood(-hoodIncrement);
-            }
-            if (gamepad1.b){
-                robot.turret.shiftHood(hoodIncrement);
-            }
+            actions.hoodControl(gamepad1.x, gamepad1.b);
 
             //Rotator control
             if (gamepad1.dpad_left) {
@@ -100,6 +95,7 @@ public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
 
             if (autoControls) {
                 actions.aimRotatorLocal(target, telemetry);
+                actions.adjustShootingParams(target);
             }
 
             telemetry.addLine("Automatic Telemetry");

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.NewBotTele.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis.ChassisLocal;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
@@ -40,7 +41,7 @@ public class RobotActions implements BlueUniversalConstants{
         }
     }
 
-    //Hood Control
+    //Manual hood Control
     public void hoodControl(boolean xPressed, boolean bPressed){
         if (xPressed){
             turret.shiftHood(-hoodIncrement);
@@ -59,14 +60,41 @@ public class RobotActions implements BlueUniversalConstants{
         }
     }
 
-    public void aimRotatorLocal(Pose target, @NonNull Telemetry telemetry){
-        double angle = chassisLocal.calculateTurretAngle(target);
+    public void autoAdjustHood(Pose targ){
+        double dist = chassisLocal.getDistance(targ);;
+        int zone = VelocityLookupTable.getZone(dist);
+        if (zone == 1) {
+            // Zone 1: Close range (< 140)
+            turret.setHoodPos(CLOSE_HOOD_POSITION);
+        } else if (zone == 2) {
+            // Zone 2: Mid range (140-200)
+            turret.setHoodPos(MID_HOOD_POSITION);
+        } else {
+            // Zone 3: Far range (>= 200)
+            turret.setHoodPos(FAR_HOOD_POSITION);
+        }
+
+    }
+
+    public void autoVelocity(Pose targ){
+        double dist = chassisLocal.getDistance(targ);
+        double autoVelocity = VelocityLookupTable.getVelocity(dist);
+        turret.setVelocity(autoVelocity);
+    }
+
+    public void adjustShootingParams(Pose targ) {
+        autoVelocity(targ);
+        autoAdjustHood(targ);
+    }
+
+    public void aimRotatorLocal(Pose targ, @NonNull Telemetry telemetry){
+        double angle = chassisLocal.calculateTurretAngle(targ);
         telemetry.addData("Angle with localization", angle);
         turret.setRotatorToAngle(angle);
     }
 
-    public void aimRotatorLocalOld(Pose target, @NonNull Telemetry telemetry){
-        double angle = chassisLocal.getTurretAngle(target);
+    public void aimRotatorLocalOld(Pose targ, @NonNull Telemetry telemetry){
+        double angle = chassisLocal.getTurretAngle(targ);
         telemetry.addData("Angle with localization", angle);
         turret.setRotatorToAngle(angle);
     }
