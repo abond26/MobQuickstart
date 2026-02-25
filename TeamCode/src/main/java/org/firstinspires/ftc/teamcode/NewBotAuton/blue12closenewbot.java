@@ -480,7 +480,7 @@ public class blue12closenewbot extends OpMode {
         return velocity;
     }
 
-    public void intake(double intakePower){
+    public void intake(double intakePower) {
         tree.setPower(intakePower);
         if (!gamepad1.right_bumper) {
             theWheelOfTheOx.setPower(-0.3);

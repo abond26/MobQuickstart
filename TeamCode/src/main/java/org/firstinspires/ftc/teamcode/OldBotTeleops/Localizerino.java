@@ -101,6 +101,8 @@ public class Localizerino extends LinearOpMode {
             //setRotatorToTurretAngle(turretAngleDeg);
             drive();
 
+
+
             if (limelight != null) {
                 LLResult ll = limelight.getLatestResult();
                 double txDeg = 0.0; //horizontal deg
@@ -120,19 +122,18 @@ public class Localizerino extends LinearOpMode {
                         telemetry.addData("tx", txDeg);
                         telemetry.addData("ty", tyDeg);
                         telemetry.addData("angle to corner", llAngle);
-                        setRotatorToTurretAngle(llAngle);
+                        //setRotatorToTurretAngle(llAngle);
+                        setRotatorToTurretAngle(turretAngleDeg);
                     } else {
                         telemetry.addLine("Limelight Detecting No");
                         telemetry.addLine("no data");
-                        //setRotatorToTurretAngle(turretAngleDeg);
+                        setRotatorToTurretAngle(turretAngleDeg);
                     }
                 }
                 if (gamepad1.aWasPressed()){
                     reLocalizerinoRed(txDeg, getDist(tyDeg));
                 }
             }
-
-
 
 
             telemetry.addData("turret angle", turretAngleDeg);
@@ -142,6 +143,11 @@ public class Localizerino extends LinearOpMode {
             telemetry.update();
         }
     }
+
+
+
+
+
 
 
 

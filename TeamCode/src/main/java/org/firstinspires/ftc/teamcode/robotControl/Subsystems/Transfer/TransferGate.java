@@ -1,18 +1,17 @@
-package org.firstinspires.ftc.teamcode.robotControl.Subsystems;
+package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer;
+
+import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class TransferGate {
+public class TransferGate implements TransferGConstants {
 
     private Servo blocker;
 
-    private final double BLOCK_POSITION = 0;
-    private final double OPEN_POSITION = 1;
-
-    public TransferGate(HardwareMap hardwareMap) {
+    public TransferGate(@NonNull HardwareMap hardwareMap) {
         blocker = hardwareMap.get(Servo.class, "blocker");
-        blocker.scaleRange(0, 0.4);
+        blocker.scaleRange(SCALE_RANGE_LOWER, SCALE_RANGE_UPPER);
     }
 
     public void block() {

@@ -174,9 +174,8 @@ public class NewBotRed extends LinearOpMode {
                 theWheelOfTheOx.setPower(1);
                 intake.setPower(-1);
                 gamepad1.rumble(100);
-
-
             }
+
             else if (gamepad1.left_bumper){
                 theWheelOfTheOx.setPower(-1);
                 theWheelOfTheOx.setPower(-1);
@@ -361,6 +360,8 @@ public class NewBotRed extends LinearOpMode {
             //theWheelOfTheOx.setPower(0.4);
         }
     }
+
+
 
 
 

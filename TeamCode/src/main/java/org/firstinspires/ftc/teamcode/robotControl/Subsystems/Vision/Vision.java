@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode.robotControl.Subsystems;
+package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision;
+
+import androidx.annotation.NonNull;
 
 import com.qualcomm.hardware.limelightvision.*;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class Vision {
+public class Vision implements VisionConstants{
 
     private Limelight3A limelight;
 
@@ -12,12 +14,12 @@ public class Vision {
     private int tagHeight = 75;
     private int y = tagHeight - limeHeight;
 
-    public Vision(HardwareMap hardwareMap) {
+    public Vision(@NonNull HardwareMap hardwareMap, int pipeline) {
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         if (limelight != null) {
-            limelight.pipelineSwitch(1);
+            limelight.pipelineSwitch(pipeline);
             limelight.start();
         }
     }
@@ -36,7 +38,6 @@ public class Vision {
     }
 
     public double getDistance() {
-
         double tyDeg = getTy();
         double tyRad = Math.abs(Math.toRadians(tyDeg + limelightUpAngle));
         double dist = y / Math.tan(tyRad);

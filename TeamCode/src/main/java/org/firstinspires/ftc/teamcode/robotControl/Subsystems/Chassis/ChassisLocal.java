@@ -1,19 +1,22 @@
 package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis;
 
+import androidx.annotation.NonNull;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-public class ChassisLocal {
+public class ChassisLocal implements DriveConstants{
 
     private Follower follower;
 
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
     private DcMotor rotator;
 
+
+    //we don't put this in the DriveConstants class because it changes (i.e. it isn't a static final)
     private double lastTurretAngleDeg = 0;
-    private int motor180Range = 1250;
 
     public ChassisLocal(HardwareMap hardwareMap, Pose startPose) {
 
@@ -26,9 +29,6 @@ public class ChassisLocal {
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
         rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
 
-        rotator = hardwareMap.get(DcMotor.class, "rotator");
-        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setPower(1);
     }
 
     public void startTeleop() {
@@ -52,42 +52,62 @@ public class ChassisLocal {
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(r), 1);
 
         leftFront.setPower((y + x + r) / denominator);
-        leftRear.setPower((y - x + r) / denominator);
+        leftRear.setPower((y - x + r) / denominator * driveMultiplier);
         rightFront.setPower((y - x - r) / denominator);
-        rightRear.setPower((y + x - r) / denominator);
+        rightRear.setPower((y + x - r) / denominator * driveMultiplier);
     }
-    //----------------------------------------------------------------
-    //TO CHANGE?
-    public double calculateTurretAngle(Pose target) {
 
+    public double getDistance(Pose target){
+        double currentX = getPose().getX();
+        double currentY = getPose().getY();
+        double distance = Math.sqrt(Math.pow(currentX - target.getX(), 2) + Math.pow(currentY - target.getY(), 2));
+        return distance;
+    }
+
+    //Name changed from "alignTurret"
+    public double getTurretAngle(@NonNull Pose target) {
         Pose robotPose = getPose();
-
         double dx = target.getX() - robotPose.getX();
         double dy = target.getY() - robotPose.getY();
-
         double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
-        double headingDeg = Math.toDegrees(robotPose.getHeading());
-
-        double turretAngle = -(angleToGoal - headingDeg);
+        double turretAngle = angleToGoal - Math.toDegrees(robotPose.getHeading());
 
         while (turretAngle > 180) turretAngle -= 360;
         while (turretAngle < -180) turretAngle += 360;
-
+        double normalized = turretAngle;
         double diff = turretAngle - lastTurretAngleDeg;
         if (diff > 90) turretAngle -= 360;
-        if (diff < -90) turretAngle += 360;
-
+        else if (diff < -90) turretAngle += 360;
+        // Reset at 360° so we don't accumulate to 720°; command 0 and keep angle in [-180,180]
+        if (turretAngle >= 180 || turretAngle <= -180) {
+            lastTurretAngleDeg = normalized;
+            return 0;
+        }
         lastTurretAngleDeg = turretAngle;
-        return turretAngle;
+        return -turretAngle;
+    }
+
+
+    //----------------------------------------------------------------
+    //TO CHANGE? The below code is chat code
+    public double calculateTurretAngle(Pose target) {
+        Pose robotPose = getPose();
+        double dx = target.getX() - robotPose.getX();
+        double dy = target.getY() - robotPose.getY();
+        double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
+        double turretAngle = angleToGoal - Math.toDegrees(robotPose.getHeading());
+        while (turretAngle > 180) turretAngle -= 360;
+        while (turretAngle < -180) turretAngle += 360;
+        return -turretAngle;
     }
 
     //----------------------------------------------------------------
-    //TO CHANGE?
-    public void setTurretAngle(double turretAngleDeg) {
-
-        double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
-        int targetTicks = (int)(fracOf180 * motor180Range);
-
-        rotator.setTargetPosition(targetTicks);
-    }
+    //TO CHANGE? -> Put in Turret class
+//    public void setTurretAngle(double turretAngleDeg) {
+//
+//        double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
+//        int targetTicks = (int)(fracOf180 * motor180Range);
+//
+//        rotator.setTargetPosition(targetTicks);
+//    }
 }
