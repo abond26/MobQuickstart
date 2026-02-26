@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 @TeleOp
 public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
     Pose sillyTarget;
-    Pose startPose;
     Robot robot;
     RobotActions actions;
     private int veloSwitchNum = 1;
@@ -21,7 +20,7 @@ public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose startPose = PoseStorage.loadPose(new Pose(0, 0, 0));
+        Pose startPose = PoseStorage.loadPose(defaultPose);
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
         robot.chassisLocal.update();
 
@@ -90,20 +89,25 @@ public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
             //----------------------------------------------
 
             //switch
-            if (gamepad1.touchpadWasPressed()){
-                autoControls = !autoControls;
-            }
+//            if (gamepad1.touchpadWasPressed()){
+//                autoControls = !autoControls;
+//            }
+
+            //Static shooting - technically we can remove this. Just here for testing
+//            if (autoControls) {
+//                actions.aimRotatorLocal(target, telemetry);
+//                actions.adjustShootingParams(target);
+//            }
+
             if (gamepad1.leftStickButtonWasPressed()) {
                 sillyControls = !sillyControls;
             }
 
-            //Static shooting
-            if (autoControls) {
-                actions.aimRotatorLocal(target, telemetry);
-                actions.adjustShootingParams(target);
+            if (gamepad1.touchpadWasPressed()) {
+                actions.relocalize(target);
             }
 
-            //Dynamic shooting
+            //Dynamic shooting - also covers static shooting obv
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);
             if (sillyControls & !autoControls) {
                 actions.aimRotatorLocal(sillyTarget, telemetry);
