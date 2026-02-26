@@ -4,6 +4,7 @@ import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
@@ -16,12 +17,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "Reliable red gate", group = "new bot")
-public class redgatenewbot extends OpMode {
+@Autonomous(name = "tangential Blue 18 close ", group = "new bot")
+public class blue18closenewbot extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
@@ -42,7 +42,7 @@ public class redgatenewbot extends OpMode {
     private boolean beginGateCollectionAgainStarted = false;
     private boolean gateCollectionAgainStarted = false;
 
-    private Servo hood;
+    private Servo hood, blocker;
     private int limeHeight = 33;
     private int offset = 28;
     private int tagHeight = 75;
@@ -119,31 +119,44 @@ public class redgatenewbot extends OpMode {
         GateCollection,
         beginGateCollectionAgain,
         GateCollectionAgain,
+        GateCollectionAgainAgain,
+        shootAgainAgainAgainAgain,
 
     }
 
     PathState pathState;
-    private final Pose startPose = new Pose(118, 132.2, Math.toRadians(36.5));
-    private final Pose shootPose1 = new Pose(88, 92, Math.toRadians(48.5));
-    private final Pose collect1thingstart = new Pose(88, 57.5, Math.toRadians(0));
-    private final Pose collect1thing = new Pose(125, 57.5, Math.toRadians(0));
-    private final Pose shootPose2 = new Pose( 87, 84, Math.toRadians(48.5));
-    private final Pose gateCollect1 = new Pose( 129.5, 61, Math.toRadians(25));
-    private final Pose inBetween1 = new Pose(100, 61, Math.toRadians(25));
-    private final Pose shootBall3 = new Pose(87, 84, Math.toRadians(48.5));
-    private final Pose inBetween2 = new Pose(100, 61, Math.toRadians(25));
+    // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
+    private final Pose startPose = new Pose(26.7, 132, Math.toRadians(145));
+    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(134));
+    //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
+    private final Pose collect1thing = new Pose(19, 61, Math.toRadians(180));
+    private final Pose goToCollect1ControlPoint = new Pose(65, 58.5, Math.toRadians(180));
+    private final Pose shootPose2 = new Pose( 46, 97.5, Math.toRadians(131.5));
+    
+    // Control points for shoot2 path
+    private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 74.66485013623976, Math.toRadians(180));
+    private final Pose gateCollect1 = new Pose( 17, 63, Math.toRadians(150));
+    //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
+    private final Pose shootPose2ToGateControlPoint = new Pose(50, 55.801430517711175, Math.toRadians(180));
+    private final Pose shootBall3 = new Pose(46, 97.5, Math.toRadians(135));
+    private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
+    private final Pose gateCollect2 = new Pose( 17.5, 63, Math.toRadians(150));
+    private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(133));
+    private final Pose gateCollect3 = new Pose( 17.5, 63, Math.toRadians(150));
+    private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(133));
 
-    private final Pose gateCollect2 = new Pose( 129.5, 61, Math.toRadians(25));
-    private final Pose shootBall4 = new Pose(87, 84, Math.toRadians(48.5));
-    private final Pose collect3start=new Pose(95, 35, Math.toRadians(0));
+    //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
+    private final Pose shoot4ToCollect3ControlPoint = new Pose(41.25340599455039, 82.36784741144412, Math.toRadians(180));
 
     //
-    private final Pose collect3end = new Pose(127, 35, Math.toRadians(0));
-    private final Pose park = new Pose(103, 84, Math.toRadians(46));
+    private final Pose collect3end = new Pose(25, 86, Math.toRadians(180));
+    private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(150));
+
+    private final Pose park = new Pose(41, 84, Math.toRadians(134));
 
 
 
-    private PathChain shoot1, goToCollect1, collect1, shoot2,InBetween1, InBetween2, GateCollect1, GateCollect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
+    private PathChain shoot1, goToCollect1, collect1, shoot2, GateCollect3, shoot6, InBetween1, InBetween2, GateCollect1, GateCollect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
 
     public void buildPaths() {
         shoot1 = follower.pathBuilder()
@@ -151,62 +164,71 @@ public class redgatenewbot extends OpMode {
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
                 .build();
 
-        goToCollect1 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose1, collect1thingstart))
-                .setLinearHeadingInterpolation(shootPose1.getHeading(), collect1thingstart.getHeading())
+        collect1 = follower.pathBuilder()
+                .addPath(new BezierCurve(shootPose1, goToCollect1ControlPoint, collect1thing))
+                .setTangentHeadingInterpolation()
                 .build();
 
-        collect1 = follower.pathBuilder()
-                .addPath(new BezierLine(collect1thingstart, collect1thing))
-                .setLinearHeadingInterpolation(collect1thingstart.getHeading(), collect1thing.getHeading())
-                .build();
+//        collect1 = follower.pathBuilder()
+//                .addPath(new BezierLine(collect1thingstart, collect1thing))
+//                .setLinearHeadingInterpolation(collect1thingstart.getHeading(), collect1thing.getHeading())
+//                .build();
 
         shoot2 = follower.pathBuilder()
-                .addPath(new BezierLine(collect1thing, shootPose2))
+                .addPath(new BezierCurve(collect1thing, shoot2ControlPoint1, shootPose2))
+
                 .setLinearHeadingInterpolation(collect1thing.getHeading(), shootPose2.getHeading())
                 .build();
-        InBetween1 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose2, inBetween1))
-                .setLinearHeadingInterpolation(shootPose2.getHeading(), inBetween1.getHeading())
+        GateCollect1 = follower.pathBuilder()
+                .addPath(new BezierCurve(shootPose2, shootPose2ToGateControlPoint, gateCollect1))
+                .setLinearHeadingInterpolation(shootPose2.getHeading(), gateCollect1.getHeading())
                 .build();
 
-        GateCollect1 = follower.pathBuilder()
-                .addPath(new BezierLine(inBetween1, gateCollect1))
-                .setLinearHeadingInterpolation(inBetween1.getHeading(), gateCollect1.getHeading())
-                .build();
+//        GateCollect1 = follower.pathBuilder()
+//                .addPath(new BezierLine(gateCollect1, gateCollect1))
+//                .setLinearHeadingInterpolation(gateCollect1.getHeading(), gateCollect1.getHeading())
+//                .build();
 
         shoot3 = follower.pathBuilder()
-                .addPath(new BezierLine(gateCollect1, shootBall3))
+                .addPath(new BezierCurve(gateCollect1, shootPose2ToGateControlPoint, shootBall3))
                 .setLinearHeadingInterpolation(gateCollect1.getHeading(), shootBall3.getHeading())
                 .build();
-        InBetween2 = follower.pathBuilder()
-                .addPath(new BezierLine(shootBall3, inBetween2))
-                .setLinearHeadingInterpolation(shootBall3.getHeading(), inBetween2.getHeading())
-                .build();
         GateCollect2 = follower.pathBuilder()
-                .addPath(new BezierLine(inBetween2, gateCollect2))
-                .setLinearHeadingInterpolation(inBetween2.getHeading(), gateCollect2.getHeading())
+                .addPath(new BezierCurve(shootBall3, shootPose2ToGateControlPoint, gateCollect2))
+                .setLinearHeadingInterpolation(shootBall3.getHeading(), gateCollect2.getHeading())
                 .build();
+//        GateCollect2 = follower.pathBuilder()
+//                .addPath(new BezierLine(gateCollect2, gateCollect2))
+//                .setLinearHeadingInterpolation(gateCollect2.getHeading(), gateCollect2.getHeading())
+//                .build();
         shoot4 = follower.pathBuilder()
-                .addPath(new BezierLine(gateCollect2, shootBall4))
+                .addPath(new BezierCurve(gateCollect2, shootPose2ToGateControlPoint, shootBall4))
                 .setLinearHeadingInterpolation(gateCollect2.getHeading(), shootBall4.getHeading())
                 .build();
+        GateCollect3 = follower.pathBuilder()
+                .addPath(new BezierCurve(shootBall4, shootPose2ToGateControlPoint, gateCollect3))
+                .setLinearHeadingInterpolation(shootBall4.getHeading(), gateCollect3.getHeading())
+                .build();
+        shoot5 = follower.pathBuilder()
+                .addPath(new BezierCurve(gateCollect3, shootPose2ToGateControlPoint, shootBall5))
+                .setLinearHeadingInterpolation(gateCollect3.getHeading(), shootBall5.getHeading())
+                .build();
 
-//        goToCollect3 = follower.pathBuilder()
-//                .addPath(new BezierLine(shootBall3, collect3start))
-//                .setLinearHeadingInterpolation(shootBall3.getHeading(), collect3start.getHeading())
-//                .build();
-//
+        collect3 = follower.pathBuilder()
+                .addPath(new BezierCurve(shootBall5, shoot4ToCollect3ControlPoint, collect3end))
+                .setLinearHeadingInterpolation(shootBall5.getHeading(), collect3end.getHeading())
+                .build();
+
 //        collect3 = follower.pathBuilder()
 //                .addPath(new BezierLine(collect3start, collect3end))
 //                .setLinearHeadingInterpolation(collect3start.getHeading(), collect3end.getHeading())
 //                .build();
 //
 //
-//        shoot4 = follower.pathBuilder()
-//                .addPath(new BezierLine(collect3end, shootBall4))
-//                .setLinearHeadingInterpolation(collect3end.getHeading(), shootBall4.getHeading())
-//                .build();
+        shoot6 = follower.pathBuilder()
+                .addPath(new BezierLine(collect3end, shootBall6))
+                .setLinearHeadingInterpolation(collect3end.getHeading(), shootBall6.getHeading())
+                .build();
 //
 //        parking=follower.pathBuilder()
 //                .addPath(new BezierLine(shootBall4, park))
@@ -219,54 +241,72 @@ public class redgatenewbot extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-                tree.setPower(0.25);
-                theWheelOfTheOx.setPower(1);
-                rotator.setTargetPosition(rotatorStartPosition);
-                // Try to use limelight for initial adjustment, fallback to hardcoded values
-                launcher.setVelocity(1340); //1725
-                //hood.setPosition(0.2); //0.285
+                theWheelOfTheOx.setPower(0);
+                launcher.setVelocity(1160);
+                tree.setPower(1);
+                blocker.setPosition(0);
+                launcher.setVelocity(1160); //1725
+                hood.setPosition(1); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
-                setPathState(redgatenewbot.PathState.actuallyshoot1);
+                if (pathTimer.getElapsedTimeSeconds()>0.5) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                rotator.setTargetPosition(rotatorStartPosition);
+                // Try to use limelight for initial adjustment, fallback to hardcoded values
+
+                setPathState(blue18closenewbot.PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
                 rotator.setTargetPosition(rotatorStartPosition);
+                launcher.setVelocity(1160);
+                if(pathTimer.getElapsedTimeSeconds()>1.9)
+                {
+                    blocker.setPosition(1);
+                }
                 // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1){
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2.2){
                     tree.setPower(1);
+                    launcher.setVelocity(1160);
+                    hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
-                    if (pathTimer.getElapsedTimeSeconds()>3) {
-                        setPathState(redgatenewbot.PathState.collection);
+                    if(pathTimer.getElapsedTimeSeconds()>2.2)
+                    {
+                        launcher.setVelocity(1160);
                     }
-                }
-                break;
-            case gotocollect:
-                rotator.setTargetPosition(rotatorStartPosition);
-                if(!follower.isBusy())
-                {
-                    rotator.setTargetPosition(rotatorStartPosition);
-                    tree.setPower(1);
-                    follower.followPath(goToCollect1);
-                    setPathState(redgatenewbot.PathState.collection);
+                    if (pathTimer.getElapsedTimeSeconds()>2.7) {
+                        setPathState(blue18closenewbot.PathState.collection);
+                    }
                 }
                 break;
 
 
             case collection:
                 rotator.setTargetPosition(rotatorStartPosition);
+                hood.setPosition(1);
+                blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
+                tree.setPower(1);
+                rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && !collectionStarted) {
                     //rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1340);
-                    //hood.setPosition(0.2);
-                    theWheelOfTheOx.setPower(0.8);
+                    launcher.setVelocity(1160);
+                    hood.setPosition(1);
+                    rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
                     follower.followPath(collect1);
-                    collectionStarted = true; // Mark as started to prevent calling again
+                    collectionStarted = true;
+                    if (pathTimer.getElapsedTimeSeconds()>1.25)
+                    {
+                        theWheelOfTheOx.setPower(-1);
+                    }
                 }
                 if (!follower.isBusy() && collectionStarted) {
-                    setPathState((PathState.shoot));
+                    setPathState((blue18closenewbot.PathState.shoot));
+
+
                 }
                 break;
             case shoot:
@@ -274,119 +314,221 @@ public class redgatenewbot extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
                     rotator.setTargetPosition(rotatorStartPosition);
+                    hood.setPosition(1);
+                    rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1340);
+                    launcher.setVelocity(1160);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot2Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>2) {
+                    if (pathTimer.getElapsedTimeSeconds()>2)
+                    {
+                        blocker.setPosition(1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>2.25) {
                         tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>3.5) {
-                        setPathState((PathState.beginGateCollection));
+                    if(pathTimer.getElapsedTimeSeconds()>2.95) {
+                        setPathState((blue18closenewbot.PathState.GateCollection));
                     }
                 }
                 break;
 
-            case beginGateCollection:
-                rotator.setTargetPosition(rotatorStartPosition);
-                if (!follower.isBusy() && !beginGateCollectionStarted) {
-                    rotator.setTargetPosition(rotatorStartPosition);
-                    tree.setPower(1);
-                    follower.followPath(InBetween1);
-                    follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    beginGateCollectionStarted = true; // Mark as started to prevent calling again
-                }
-                if (!follower.isBusy() && beginGateCollectionStarted) {
-                    setPathState((PathState.GateCollection));
-                }
-                break;
             case GateCollection:
                 rotator.setTargetPosition(rotatorStartPosition);
+                blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
                 if (!follower.isBusy() && !gateCollectionStarted) {
                     follower.followPath(GateCollect1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1340);
+                    launcher.setVelocity(1160);
                     tree.setPower(1);
-                    //hood.setPosition(0.2);
-                    theWheelOfTheOx.setPower(0.8);
-                    //theWheelOfTheOx.setPower(0.005);
-                    //hood.setPosition(0.225);
+                    hood.setPosition(1);
+                    rotator.setTargetPosition(rotatorStartPosition);
+
                     gateCollectionStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3.5) {
-                    setPathState((redgatenewbot.PathState.shootAgain));
+                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3.15) {
+                    setPathState((blue18closenewbot.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
                 rotator.setTargetPosition(rotatorStartPosition);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot3Started) {
+                    hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot3);
+                    tree.setPower(0);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    tree.setPower(1);
+                    //tree.setPower(1);
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
+                if(pathTimer.getElapsedTimeSeconds()>1.55)
+                {
+                    tree.setPower(1);
+                    blocker.setPosition(1);
+                }
                 if (!follower.isBusy() && shoot3Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>3.5) {
+                    if(pathTimer.getElapsedTimeSeconds()>1.675) {
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>4.5)
+                    if(pathTimer.getElapsedTimeSeconds()>2.65)
                     {
-                        setPathState((PathState.beginGateCollectionAgain));
+                        setPathState((blue18closenewbot.PathState.GateCollectionAgain));
                     }
-                }
-                break;
-            case beginGateCollectionAgain:
-                if (!follower.isBusy() && !beginGateCollectionAgainStarted) {
-                    rotator.setTargetPosition(rotatorStartPosition);
-                    tree.setPower(1);
-                    follower.followPath(InBetween2);
-                    follower.setMaxPower(INTAKE_DRIVE_POWER);
-                    beginGateCollectionAgainStarted = true; // Mark as started to prevent calling again
-                    rotator.setTargetPosition(rotatorStartPosition);
-                }
-                if (!follower.isBusy() && beginGateCollectionAgainStarted) {
-                    setPathState((PathState.GateCollectionAgain));
                 }
                 break;
             case GateCollectionAgain:
                 if (!follower.isBusy() && !gateCollectionAgainStarted) {
+                    blocker.setPosition(0);
+                    theWheelOfTheOx.setPower(0);
                     follower.followPath(GateCollect2);
+                    hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1340);
+                    launcher.setVelocity(1160);
                     tree.setPower(1);
-                    //hood.setPosition(0.2);
-                    theWheelOfTheOx.setPower(1);
-                    //theWheelOfTheOx.setPower(0.005);
-                    //hood.setPosition(0.225);
+                    hood.setPosition(1);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.5) {
-                    setPathState((redgatenewbot.PathState.shootAgainAgain));
+                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.15) {
+                    setPathState((blue18closenewbot.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
+                tree.setPower(1);
+                rotator.setTargetPosition(rotatorStartPosition);
+                // Continuously adjust based on limelight during shooting
+                if (!follower.isBusy() && !shoot4Started) {
+                    hood.setPosition(1);
+                    rotator.setTargetPosition(rotatorStartPosition);
+                    follower.followPath(shoot4);
+                    tree.setPower(0);
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    shoot4Started = true; // Mark as started to prevent calling again
+                }
+                if (!follower.isBusy() && shoot4Started) {
+                    if(pathTimer.getElapsedTimeSeconds()>1.35)
+                    {
+                        tree.setPower(1);
+                        blocker.setPosition(1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>1.6) {
+                        blocker.setPosition(1);
+                        theWheelOfTheOx.setPower(-1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>2.8)
+                    {
+                        setPathState((blue18closenewbot.PathState.GateCollectionAgainAgain));
+                    }
+                }
+                break;
+            case GateCollectionAgainAgain:
+                blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
+                if (!follower.isBusy() && !gateCollectionAgainStarted) {
+                    follower.followPath(GateCollect3);
+                    rotator.setTargetPosition(rotatorStartPosition);
+                    launcher.setVelocity(1160);
+                    tree.setPower(1);
+                    hood.setPosition(1);
+                    rotator.setTargetPosition(rotatorStartPosition);
+                    gateCollectionAgainStarted = true; // Mark as started to prevent calling again
+                }
+                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.55) {
+                    setPathState((blue18closenewbot.PathState.shootAgainAgainAgain));
+                }
+                break;
+            case shootAgainAgainAgain:
+                tree.setPower(1);
                 rotator.setTargetPosition(rotatorStartPosition);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot4Started) {
                     rotator.setTargetPosition(rotatorStartPosition);
-                    follower.followPath(shoot4);
+                    follower.followPath(shoot5);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    tree.setPower(1);
+                    tree.setPower(0);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>3.5) {
+                    if (pathTimer.getElapsedTimeSeconds()>1.35)
+                    {
+                        tree.setPower(1);
+                        blocker.setPosition(1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>1.5) {
+                        blocker.setPosition(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>4.5)
+                    if(pathTimer.getElapsedTimeSeconds()>2.55)
                     {
-                        setPathState((redgatenewbot.PathState.done));
+                        setPathState((blue18closenewbot.PathState.collectAgainAgainEnd));
+                    }
+                }
+                break;
+
+            case collectAgainAgainEnd:
+                rotator.setTargetPosition(rotatorStartPosition);
+                blocker.setPosition(0);
+                theWheelOfTheOx.setPower(0);
+                if(pathTimer.getElapsedTimeSeconds()>1.5)
+                {
+                    theWheelOfTheOx.setPower(-1);
+                }
+                if (!follower.isBusy() && !collectionStarted) {
+                    //rotator.setTargetPosition(rotatorStartPosition);
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    launcher.setVelocity(1160);
+                    hood.setPosition(1);
+                    rotator.setTargetPosition(rotatorStartPosition);
+
+                    tree.setPower(1);
+                    follower.followPath(collect3);
+                    collectionStarted = true; // Mark as started to prevent calling again
+                }
+                if (!follower.isBusy() && collectionStarted) {
+                    theWheelOfTheOx.setPower(-1);
+                    if (pathTimer.getElapsedTimeSeconds()>0.25) {
+
+                        setPathState((blue18closenewbot.PathState.shootAgainAgainAgainAgain));
+                    }
+
+                }
+                break;
+            case shootAgainAgainAgainAgain:
+                rotator.setTargetPosition(rotatorStartPosition);
+                // Continuously adjust based on limelight during shooting
+                if (!follower.isBusy() && !shoot5Started) {
+                    rotator.setTargetPosition(rotatorStartPosition);
+                    follower.followPath(shoot6);
+                    launcher.setVelocity(1160);
+                    follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    tree.setPower(1);
+                    shoot5Started = true; // Mark as started to prevent calling again
+                }
+                if (!follower.isBusy() && shoot5Started) {
+                    if(pathTimer.getElapsedTimeSeconds()>1.5)
+                    {
+                        blocker.setPosition(1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>1.75) {
+                        tree.setPower(1);
+                        theWheelOfTheOx.setPower(-1);
+                    }
+                    if(pathTimer.getElapsedTimeSeconds()>2.75) {
+                        setPathState((blue18closenewbot.PathState.done));
                     }
                 }
                 break;
@@ -421,6 +563,12 @@ public class redgatenewbot extends OpMode {
     @Override
     public void init() {
         pathState = PathState.start;
+        blocker = hardwareMap.get(Servo.class, "blocker");
+        blocker.scaleRange(0, 0.362);
+        blocker.setPosition(0);
+        hood = hardwareMap.get(Servo.class, "hood");
+        hood.scaleRange(0,0.0761);
+        hood.setPosition(1);
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = ConstantsNewBot.createFollower(hardwareMap);
@@ -439,7 +587,9 @@ public class redgatenewbot extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         hood = hardwareMap.get(Servo.class, "hood");
         //hood.setPosition(0.0119);
-        hood.scaleRange(0,0.025);
+        hood.scaleRange(0,0.0761);
+        blocker = hardwareMap.get(Servo.class, "blocker");
+        blocker.scaleRange(0, 0.4);
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -456,10 +606,10 @@ public class redgatenewbot extends OpMode {
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        double P = 132.5;
+        double P = 400;
         double I = 0;
         double D = 0;
-        double F = 12.35;
+        double F = 13.2965;
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
@@ -503,7 +653,8 @@ public class redgatenewbot extends OpMode {
     public void adjustRotator(double tx) {
         double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
         int adjustment = (int) (fracOfSemiCircum * motor180Range);
-        int newPosition = rotator.getCurrentPosition() + adjustment - offset;
+        // Blue side uses +offset instead of -offset
+        int newPosition = rotator.getCurrentPosition() + adjustment + offset;
         rotator.setTargetPosition(newPosition);
     }
 

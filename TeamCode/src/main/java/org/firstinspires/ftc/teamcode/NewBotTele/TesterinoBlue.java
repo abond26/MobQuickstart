@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OldBotTeleops;
+package org.firstinspires.ftc.teamcode.NewBotTele;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -17,15 +17,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp
 
-public class TesterinoRed extends LinearOpMode {
+public class TesterinoBlue extends LinearOpMode {
     double newTime;
     double time;
     double F = 12.35;
-    double P = 282.0;
+    double P = 132.5000;
 
 
     //282
-    //-301double sumOfTrigs;
+    //-301
     double sumOfTrigs;
     boolean yLast = false;
     boolean aLast =false;
@@ -49,7 +49,7 @@ public class TesterinoRed extends LinearOpMode {
     private static final double SECOND_DISTANCE_THRESHOLD = 200;
     private static final double CLOSE_HOOD_POSITION = 0.0309; // Hood position for close shots
     private static final double MID_HOOD_POSITION = 0.18+0.0167;
-    private static final double FAR_HOOD_POSITION = 0.16+.0129; // Hood position for far shots
+    private static final double FAR_HOOD_POSITION = 0.22+.0129; // Hood position for far shots
     private final Pose startPose = new Pose(0, 0, 0);
     private DcMotor intake, flicker, rotator, theWheelOfTheOx;
     private DcMotorEx jollyCrusader;
@@ -97,7 +97,7 @@ public class TesterinoRed extends LinearOpMode {
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         if (limelight != null) {
-            limelight.pipelineSwitch(0);
+            limelight.pipelineSwitch(1);
             limelight.start();
             telemetry.addData("LL", "initialized");
         } else {
@@ -128,7 +128,7 @@ public class TesterinoRed extends LinearOpMode {
             if (!gamepad1.right_bumper) {
                 rightBumperTimerStarted = false;
             }
-//            if (gamepad1.x){
+            //            if (gamepad1.x){
 //                limelight.pipelineSwitch(1);
 //            }
 //            if (gamepad1.b){
@@ -141,10 +141,10 @@ public class TesterinoRed extends LinearOpMode {
 
             //launcha
             if (aPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+30);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()+20);
             }
             if (yPressed){
-                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-30);
+                jollyCrusader.setVelocity(jollyCrusader.getVelocity()-20);
             }
 
 
@@ -220,12 +220,17 @@ public class TesterinoRed extends LinearOpMode {
                     adjustHoodBasedOnDistance(currentDistance);
                 }
 
-//cool
+
             }
             if (gamepad1.left_stick_button){
                 jollyCrusader.setVelocity(0);
             }
+//cool
 
+            if (gamepad1.a){
+                jollyCrusader.setVelocity(1400);
+                hood.setPosition(0.0339);
+            }
             if (gamepad1.x){
                 hood.setPosition(hood.getPosition()-0.005);
             }
@@ -267,11 +272,11 @@ public class TesterinoRed extends LinearOpMode {
     public void adjustRotator(double tx, double distance) {
         double fracOfFullCircum = Math.toRadians(tx) / (Math.PI);
         int adjustment = (int) (fracOfFullCircum * motor180Range);
-        int offset = -10;
+        int offset = -24;
         if (distance < 120 ) {
-            offset = -10;
+            offset = -24;
         } else if (distance > 180) {
-            offset = -15;
+            offset = -30;
         }
         int newPosition = rotator.getCurrentPosition() + adjustment + offset;
         rotator.setTargetPosition(newPosition);
@@ -304,7 +309,6 @@ public class TesterinoRed extends LinearOpMode {
             theWheelOfTheOx.setPower(-0.4);
         }
     }
-
 
 
     public void adjustHoodBasedOnDistance(double dist) {

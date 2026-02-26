@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teleOps;
+package org.firstinspires.ftc.teamcode.NewBotTele;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -19,9 +19,9 @@ public class Localizerino extends LinearOpMode {
     int motor180Range = 590;
     private static final int DEGREES_270_TICKS = 630;
     int limelightUpAngle = 20;
-    private int limeHeight = 35;
-    private int tagHeight = 75;
-    private int y = tagHeight - limeHeight;
+    private double limeHeightIn = 13.5;
+    private double tagHeightIn = 29;
+    private double y = tagHeightIn - limeHeightIn;
     private Follower follower;
     private DcMotor rotator;
     private Pose startPose;
@@ -29,7 +29,7 @@ public class Localizerino extends LinearOpMode {
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
     Pose bluePos = new Pose(11, 137, 0);
     Pose redPos = new Pose(133, 137, 0);
-    Pose target = bluePos;
+    Pose targetPose = bluePos;
 
     /** Previous turret angle (degrees) for unwrapping so we don't snap at ±180°. */
     private double lastTurretAngleDeg = 0;
@@ -96,10 +96,46 @@ public class Localizerino extends LinearOpMode {
             double y = robotPose.getY();
             double headingDeg = Math.toDegrees(robotPose.getHeading());
 
-            double turretAngleDeg = alignTurret(x, y, headingDeg, target);
+            double turretAngleDeg = alignTurret(x, y, headingDeg, targetPose);
 
+            //setRotatorToTurretAngle(turretAngleDeg);
             drive();
-            setRotatorToTurretAngle(turretAngleDeg);
+
+
+
+            if (limelight != null) {
+                LLResult ll = limelight.getLatestResult();
+                double txDeg = 0.0; //horizontal deg
+                double tyDeg = 0.0; //vertical deg
+                double ta = 0.0;
+                boolean llValid = false;
+                if (ll != null) {
+                    txDeg = ll.getTx();
+                    tyDeg = ll.getTy();
+                    ta = ll.getTa();
+                    llValid = ll.isValid();
+
+                    if (llValid) {
+                        double llAngle = LLAngleToBlueCorner(txDeg, calcDistWithLocalization(x, y, targetPose));
+                        telemetry.addLine("Limelight Detecting Yes");
+                        telemetry.addData("Ta", ta);
+                        telemetry.addData("tx", txDeg);
+                        telemetry.addData("ty", tyDeg);
+                        telemetry.addData("angle to corner", llAngle);
+                        //setRotatorToTurretAngle(llAngle);
+                        setRotatorToTurretAngle(turretAngleDeg);
+                    } else {
+                        telemetry.addLine("Limelight Detecting No");
+                        telemetry.addLine("no data");
+                        setRotatorToTurretAngle(turretAngleDeg);
+                    }
+                }
+                if (gamepad1.aWasPressed()){
+                    reLocalizerinoRed(txDeg, getDist(tyDeg));
+                }
+            }
+
+
             telemetry.addData("turret angle", turretAngleDeg);
             telemetry.addData("x", follower.getPose().getX());
             telemetry.addData("y", follower.getPose().getY());
@@ -115,6 +151,54 @@ public class Localizerino extends LinearOpMode {
 
 
 
+    private double LLAngleToBlueCorner(double tx, double distance){
+        double x = distance*Math.sin(Math.toRadians(tx));
+        double y = distance*Math.cos(Math.toRadians(tx));
+        double xTotal = Math.abs(x) + 16; //16 is difference between tag and corner using the position (16, 130)
+        double yTotal = Math.abs(y) + 14; //same thing but for y
+        telemetry.addLine("---------------");
+        telemetry.addData("x total", xTotal);
+        telemetry.addData("y total", yTotal);
+        double angle = Math.toDegrees(Math.atan2(xTotal, yTotal));
+        return angle;
+    }
+
+    public double calcDistWithLocalization(double x, double y, Pose target){
+        double distance = Math.sqrt(Math.pow(x - target.getX(), 2) + Math.pow(y - target.getY(), 2));
+        telemetry.addData("distance", distance);
+        return distance;
+    }
+
+    public void reLocalizerinoBlue(double llAngle, double llDist){
+        double newY;
+        double newX;
+        if (llAngle < 0){
+            newX = targetPose.getX() + llDist * Math.sin(llAngle);
+            newY = targetPose.getY() - llDist * Math.cos(llAngle);
+        } else{
+            newX = targetPose.getX() + llDist * Math.cos(llAngle);
+            newY = targetPose.getY() - llDist * Math.sin(llAngle);
+        }
+        Pose newPose = new Pose(newX, newY);
+        follower.setPose(newPose);
+    }
+
+    public void reLocalizerinoRed(double llAngle, double llDist){
+        double newY;
+        double newX;
+        if (llAngle < 0){
+            newX = targetPose.getX() - llDist * Math.cos(llAngle);
+            newY = targetPose.getY() + llDist * Math.sin(llAngle);
+        } else{
+            newX = targetPose.getX() - llDist * Math.sin(llAngle);
+            newY = targetPose.getY() + llDist * Math.cos(llAngle);
+        }
+        Pose newPose = new Pose(newX, newY);
+        follower.setPose(newPose);
+    }
+
+
+
     private double alignTurret(double x, double y, double headingDeg, Pose target) {
         double dx = target.getX() - x;
         double dy = target.getY() - y;
@@ -124,10 +208,10 @@ public class Localizerino extends LinearOpMode {
         while (turretAngle < -180) turretAngle += 360;
         double normalized = turretAngle;
         double diff = turretAngle - lastTurretAngleDeg;
-        if (diff > 180) turretAngle -= 360;
-        else if (diff < -180) turretAngle += 360;
+        if (diff > 90) turretAngle -= 360;
+        else if (diff < -90) turretAngle += 360;
         // Reset at 360° so we don't accumulate to 720°; command 0 and keep angle in [-180,180]
-        if (turretAngle >= 360 || turretAngle <= -360) {
+        if (turretAngle >= 180 || turretAngle <= -180) {
             lastTurretAngleDeg = normalized;
             return 0;
         }
@@ -193,9 +277,15 @@ public class Localizerino extends LinearOpMode {
     }
 
 
-
-
-
+    public double getDist(double tyDeg) {
+        double tyRad = Math.abs(Math.toRadians(tyDeg+limelightUpAngle));
+        double dist = y / Math.tan(tyRad);
+        double realDist = 0.55*dist+40.3;
+        telemetry.addData("angle", Math.toDegrees(tyRad));
+        telemetry.addData("fakeDist", dist);
+        telemetry.addData("realDist", realDist);
+        return realDist;
+    }
 
     public void drive(){
         double y = -gamepad1.left_stick_y; //forward/backward

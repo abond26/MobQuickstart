@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Reliable 15 red close", group = "auton red")
+//@Autonomous(name = "Reliable 15 red close", group = "auton red")
 public class red15close extends OpMode {
     private int rotatorStartPosition=0;
     private Follower follower;
