@@ -40,6 +40,24 @@ public class RobotActions implements BlueUniversalConstants{
         }
     }
 
+    //To be tested
+    public void relocalize(Pose target) {
+        if (!vision.hasTarget()) return;
+
+        double tx = vision.getTx();
+        double dist = vision.getDistance();
+
+        // Calculate robot position relative to target using tx and distance
+        double angleRad = Math.toRadians(tx);
+        double dx = dist * Math.sin(angleRad);
+        double dy = dist * Math.cos(angleRad);
+
+        double newX = target.getX() - dx;
+        double newY = target.getY() - dy;
+
+        chassisLocal.setPose(new Pose(newX, newY, chassisLocal.getPose().getHeading()));
+    }
+
     //Manual hood Control
     public void hoodControl(boolean xPressed, boolean bPressed){
         if (xPressed){

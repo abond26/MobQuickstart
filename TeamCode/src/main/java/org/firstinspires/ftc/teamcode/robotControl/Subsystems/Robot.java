@@ -17,7 +17,7 @@ public class Robot {
     public final Intake intake;
     public final TransferGate gate;
     public final Vision vision;
-    public final Relocalization relocalization;
+    //public final Relocalization relocalization;
 
     public Robot(HardwareMap hardwareMap, Pose startingPose, int pipeline) {
 
@@ -26,7 +26,7 @@ public class Robot {
         intake = new Intake(hardwareMap);
         gate = new TransferGate(hardwareMap);
         vision = new Vision(hardwareMap, pipeline);
-        relocalization = new Relocalization(hardwareMap, chassisLocal);
+        //relocalization = new Relocalization(hardwareMap, chassisLocal);
 
     }
 }

@@ -21,8 +21,7 @@ public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
 
     @Override
     public void runOpMode() throws InterruptedException {
-
-        startPose = PoseStorage.loadPose(defaultPose);
+        Pose startPose = PoseStorage.loadPose(new Pose(0, 0, 0));
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
         robot.chassisLocal.update();
 

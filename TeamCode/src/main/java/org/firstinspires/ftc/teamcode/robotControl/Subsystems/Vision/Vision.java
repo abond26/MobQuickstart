@@ -9,11 +9,6 @@ public class Vision implements VisionConstants{
 
     private Limelight3A limelight;
 
-    private int limelightUpAngle = 20;
-    private int limeHeight = 35;
-    private int tagHeight = 75;
-    private int y = tagHeight - limeHeight;
-
     public Vision(@NonNull HardwareMap hardwareMap, int pipeline) {
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
