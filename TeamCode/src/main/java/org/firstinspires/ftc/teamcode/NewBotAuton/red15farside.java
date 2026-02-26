@@ -224,7 +224,7 @@ public class red15farside extends OpMode {
                     if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
                         blocker.setPosition(1);
                         tree.setPower(1);
-                        turret.setFeedPower(-1);
+                        theWheelOfTheOx.setPower(-1);
                     }
                 } else {
                     turret.setRotatorPos(0);
@@ -267,9 +267,8 @@ public class red15farside extends OpMode {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
                     if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
                         blocker.setPosition(1);
-                        theWheelOfTheOx.setPower(-1);
                         tree.setPower(1);
-                        turret.setFeedPower(-1);
+                        theWheelOfTheOx.setPower(-1);
                     }
                 } else {
                     turret.setRotatorPos(0);
@@ -333,9 +332,8 @@ public class red15farside extends OpMode {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
                     if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
                         blocker.setPosition(1);
-                        theWheelOfTheOx.setPower(-1);
                         tree.setPower(1);
-                        turret.setFeedPower(-1);
+                        theWheelOfTheOx.setPower(-1);
                     }
                 } else {
                     turret.setRotatorPos(0);
@@ -381,9 +379,8 @@ public class red15farside extends OpMode {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
                     if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
                         blocker.setPosition(1);
-                        theWheelOfTheOx.setPower(-1);
                         tree.setPower(1);
-                        turret.setFeedPower(-1);
+                        theWheelOfTheOx.setPower(-1);
                     }
                 } else {
                     turret.setRotatorPos(0);
@@ -428,9 +425,8 @@ public class red15farside extends OpMode {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
                     if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
                         blocker.setPosition(1);
-                        theWheelOfTheOx.setPower(-1);
                         tree.setPower(1);
-                        turret.setFeedPower(-1);
+                        theWheelOfTheOx.setPower(-1);
                     }
                 } else {
                     turret.setRotatorPos(0);
@@ -497,7 +493,6 @@ public class red15farside extends OpMode {
         setPathState(pathState);
 
         turret = new Turret(hardwareMap);
-        turret.setRotatorPower(1.0);
 
         tree = hardwareMap.get(DcMotor.class, "tree");
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
