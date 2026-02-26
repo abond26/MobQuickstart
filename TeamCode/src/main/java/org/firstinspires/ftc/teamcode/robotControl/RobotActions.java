@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.NewBotTele.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis.ChassisLocal;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;

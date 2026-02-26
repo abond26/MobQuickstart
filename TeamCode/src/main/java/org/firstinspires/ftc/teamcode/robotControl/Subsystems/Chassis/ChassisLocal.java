@@ -7,7 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.*;
 
-import org.firstinspires.ftc.teamcode.NewBotTele.ShotTimeLookupTable;
+import org.firstinspires.ftc.teamcode.robotControl.ShotTimeLookupTable;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class ChassisLocal implements DriveConstants{

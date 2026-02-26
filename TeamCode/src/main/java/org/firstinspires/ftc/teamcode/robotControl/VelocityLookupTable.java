@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.NewBotTele;
+package org.firstinspires.ftc.teamcode.robotControl;
 
 /**
  * Pure lookup table for distance to velocity conversion.

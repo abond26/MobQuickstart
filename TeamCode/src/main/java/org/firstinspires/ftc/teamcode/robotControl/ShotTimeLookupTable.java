@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.NewBotTele;
+package org.firstinspires.ftc.teamcode.robotControl;
 
 /**
  * Pure lookup table for distance to velocity conversion.
@@ -47,7 +47,7 @@ public class ShotTimeLookupTable {
 //        1620, 1560, 1700,
 //    };
     private static final double[] ShotTime = {
-            1.01, 0.92,1.12, 1.13, 0.94
+            0.91, 0.82,1.02, 1.03, 0.84
 
             // Zone 1: Close range ShotTime (tune these for close shots)
 

@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.robotControl.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @TeleOp
