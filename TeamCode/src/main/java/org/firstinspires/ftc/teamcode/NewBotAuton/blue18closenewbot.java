@@ -126,7 +126,7 @@ public class blue18closenewbot extends OpMode {
 
     PathState pathState;
     // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
-    private final Pose startPose = new Pose(26.7, 132, Math.toRadians(145));
+    private final Pose startPose = new Pose(26.7, 132, Math.toRadians(144));
     private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(134));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 61, Math.toRadians(180));
@@ -134,7 +134,7 @@ public class blue18closenewbot extends OpMode {
     private final Pose shootPose2 = new Pose( 46, 97.5, Math.toRadians(131.5));
     
     // Control points for shoot2 path
-    private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 74.66485013623976, Math.toRadians(180));
+    private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 76, Math.toRadians(180));
     private final Pose gateCollect1 = new Pose( 17, 63, Math.toRadians(150));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(50, 55.801430517711175, Math.toRadians(180));
@@ -365,10 +365,14 @@ public class blue18closenewbot extends OpMode {
                     hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot3);
-                    tree.setPower(0);
+                    tree.setPower(1);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     //tree.setPower(1);
                     shoot3Started = true; // Mark as started to prevent calling again
+                }
+                if(pathTimer.getElapsedTimeSeconds()>1)
+                {
+                    tree.setPower(0);
                 }
                 if(pathTimer.getElapsedTimeSeconds()>1.55)
                 {
@@ -412,11 +416,15 @@ public class blue18closenewbot extends OpMode {
                     hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot4);
-                    tree.setPower(0);
+                    tree.setPower(1);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
+                    if(pathTimer.getElapsedTimeSeconds()>0.9)
+                    {
+                        tree.setPower(0);
+                    }
                     if(pathTimer.getElapsedTimeSeconds()>1.35)
                     {
                         tree.setPower(1);
@@ -459,10 +467,14 @@ public class blue18closenewbot extends OpMode {
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot5);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    tree.setPower(0);
+                    tree.setPower(1);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
+                    if(pathTimer.getElapsedTimeSeconds()>0.9)
+                    {
+                        tree.setPower(0);
+                    }
                     if (pathTimer.getElapsedTimeSeconds()>1.35)
                     {
                         tree.setPower(1);
