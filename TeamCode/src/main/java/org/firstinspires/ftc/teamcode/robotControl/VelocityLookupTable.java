@@ -30,7 +30,7 @@ public class VelocityLookupTable {
 //    };
     private static final double[] DISTANCES = {
             // Zone 1: Close range (< 95) // hood position 1.
-            57.8585, 92.4, 72, 64.2, 81.8, 55.3, 77.59, 88.33, // 1.
+            57.8585, 92.4, 72, 64.2, 81.8, 55.3, 77.59, 88.33,// 1.
             // Zone 2: Mid range (95-120) //hood 0.5
             97.81, 102.22, 109.17, 112.02, 118.4,
             // Zone 3: Far range (>= 120)
@@ -52,7 +52,7 @@ public class VelocityLookupTable {
             // Zone 1: Close range velocities (tune these for close shots)
             1110, 1260, 1150, 1135, 1165, 1070, 1160, 1200,
             // Zone 2: Mid range velocities (tune these for mid shots)
-            1255, 1315, 1330, 1335, 1355,
+            1243, 1300, 1320, 1330, 1355,
             // Zone 3: Far range velocities (tune these for far shots)
             1440, 1450, 1460, 1480, 1540, 1520
     };

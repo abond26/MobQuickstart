@@ -4,13 +4,13 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
-import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 
 @TeleOp
-public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
+public class RedTele extends LinearOpMode implements RedUniversalConstants {
     Pose sillyTarget;
     Robot robot;
     RobotActions actions;
@@ -104,7 +104,7 @@ public class SubsysTele extends LinearOpMode implements BlueUniversalConstants {
             }
 
             if (gamepad1.touchpadWasPressed()) {
-                actions.relocalize(target);
+                actions.relocalizeRed(target);
             }
 
             //Dynamic shooting - also covers static shooting obv
