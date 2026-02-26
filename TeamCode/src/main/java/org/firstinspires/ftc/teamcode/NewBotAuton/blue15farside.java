@@ -126,17 +126,17 @@ public class blue15farside extends OpMode {
     private final Pose collect1ControlPoint = new Pose(47.80926430517712, 35.68937329700272); // red (96.19..., 35.69...)
 
     private final Pose collect1thing = new Pose(13, 36, Math.toRadians(180));                           // red (131, 36, 0)
-    private final Pose shootPose2 = new Pose(55, 15, Math.toRadians(115.5));         // red (89, 15, 66)
+    private final Pose shootPose2 = new Pose(55, 15, Math.toRadians(114.5));         // red (89, 15, 66)
 
-    private final Pose collect2End = new Pose(11, 12, Math.toRadians(180));// red (135, 4, 0)
-    private final Pose collect2End2 = new Pose(11, 8.5, Math.toRadians(180));// red (135, 4, 0)
+    private final Pose collect2End = new Pose(15, 12, Math.toRadians(180));// red (135, 4, 0)
+    private final Pose collect2End2 = new Pose(15, 9.5, Math.toRadians(180));// red (135, 4, 0)
 
-    private final Pose shootBall3 = new Pose(55, 15, Math.toRadians(113));         // red (89, 10, 64)
+    private final Pose shootBall3 = new Pose(55, 15, Math.toRadians(110));         // red (89, 10, 64)
     //private final Pose shoot3ControlPoint = new Pose(30.215258855585834, 20.50544959128065); // red (106.53..., 8.24...)
-    private final Pose collect3Start = new Pose(11, 8.5, Math.toRadians(180));
-    private final Pose shootBall4 = new Pose(55, 15, Math.toRadians(113));
-    private final Pose collect4Start = new Pose(11, 8.5, Math.toRadians(180));
-    private final Pose shootBall5 = new Pose(55, 15, Math.toRadians(111));  // red (89, 10, 64)
+    private final Pose collect3Start = new Pose(15, 9.5, Math.toRadians(180));
+    private final Pose shootBall4 = new Pose(55, 15, Math.toRadians(110));
+    private final Pose collect4Start = new Pose(15, 9.5, Math.toRadians(180));
+    private final Pose shootBall5 = new Pose(55, 15, Math.toRadians(110));  // red (89, 10, 64)
     private final Pose park = new Pose(41, 22,  Math.toRadians(180));
     private PathChain shoot1, collect5, goToCollect1, collect2StartAgain, collect2EndAgain, collect1, shoot2, goToCollect2, collect2, shoot3,goToCollect2Again, collect2Again, goToCollect2AgainAgain, collect2AgainAgain, goToCollect3, collect3, shoot4, goToCollect4, collect4, shoot5, parking;
 
@@ -224,7 +224,7 @@ public class blue15farside extends OpMode {
                 tree.setPower(1);
                 theWheelOfTheOx.setPower(-0.5);
                     follower.followPath(collect1);
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(INTAKE_DRIVE_POWER);
 
@@ -237,7 +237,7 @@ public class blue15farside extends OpMode {
                 theWheelOfTheOx.setPower(-0.25);
                 if (!follower.isBusy() && !shoot2Started) {
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     follower.followPath(shoot2);
@@ -249,14 +249,14 @@ public class blue15farside extends OpMode {
             case shooting1:
                 theWheelOfTheOx.setPower(-0.25);
                 rotator.setTargetPosition(rotatorStartPosition);
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 tree.setPower(1);
                 if (!follower.isBusy() && launcher.getVelocity()>=1500 && launcher.getVelocity()<=1580 && pathTimer.getElapsedTimeSeconds()>2.5) {
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     blocker.setPosition(1);
                     tree.setPower(0.6);
                         theWheelOfTheOx.setPower(-1);
-                        launcher.setVelocity(1540);
+                        launcher.setVelocity(1520);
                         if (pathTimer.getElapsedTimeSeconds()>4.5) {
                             setPathState((PathState.collectAgainEnd));
                         }
@@ -301,9 +301,9 @@ public class blue15farside extends OpMode {
             case shootAgain:
                 tree.setPower(1);
                 theWheelOfTheOx.setPower(-0.25);
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy() && !shoot3Started) {
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -316,14 +316,14 @@ public class blue15farside extends OpMode {
             case shooting2:
                 tree.setPower(1);
                 theWheelOfTheOx.setPower(-0.25);
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy() && launcher.getVelocity()>=1500 && launcher.getVelocity()<=1580) {
-                        launcher.setVelocity(1540);
+                        launcher.setVelocity(1520);
                         tree.setPower(0.6);
                         theWheelOfTheOx.setPower(-1);
                     rotator.setTargetPosition(rotatorStartPosition);
                         blocker.setPosition(1);
-                        launcher.setVelocity(1540);
+                        launcher.setVelocity(1520);
                         if (pathTimer.getElapsedTimeSeconds()>3.5)
                         {
                             setPathState((PathState.collectAgainAgainAgain));
@@ -351,9 +351,9 @@ public class blue15farside extends OpMode {
             case shootAgainAgain:
                 tree.setPower(1);
                 theWheelOfTheOx.setPower(-0.25);
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy() && !shoot3Started) {
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -363,13 +363,13 @@ public class blue15farside extends OpMode {
                 }
                break;
             case shooting3:
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy() && launcher.getVelocity()>=1500 && launcher.getVelocity()<=1580) {
                         tree.setPower(0.6);
                         blocker.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                         theWheelOfTheOx.setPower(-1);
-                        launcher.setVelocity(1540);
+                        launcher.setVelocity(1520);
                         if (pathTimer.getElapsedTimeSeconds()>2.5) {
                             setPathState((PathState.collection4));
                         }
@@ -394,9 +394,9 @@ public class blue15farside extends OpMode {
                 }
                 break;
             case shootAgainAgainAgain:
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy() && !shoot5Started) {
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot5);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -412,7 +412,7 @@ public class blue15farside extends OpMode {
                     rotator.setTargetPosition(rotatorStartPosition);
                         blocker.setPosition(1);
                             theWheelOfTheOx.setPower(-1);
-                            launcher.setVelocity(1540);
+                            launcher.setVelocity(1520);
                         if (pathTimer.getElapsedTimeSeconds()>2.5) {
                             setPathState((PathState.parklol));
                         }
@@ -457,7 +457,7 @@ public class blue15farside extends OpMode {
     public void init() {
         pathState = PathState.start;
         blocker = hardwareMap.get(Servo.class, "blocker");
-        blocker.scaleRange(0, 0.4);
+        blocker.scaleRange(0, 0.362);
         blocker.setPosition(0);
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(0,0.0761);
