@@ -20,8 +20,11 @@ public class Vision implements VisionConstants{
     }
 
     public boolean hasTarget() {
-        LLResult result = limelight.getLatestResult();
-        return result != null && result.isValid();
+        if (limelight != null) {
+            LLResult data = limelight.getLatestResult();
+            return data != null && data.isValid();
+        }
+        else {return false;}
     }
 
     public double getTx() {

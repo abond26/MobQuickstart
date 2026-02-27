@@ -63,11 +63,11 @@ public class BlueTele extends LinearOpMode implements BlueUniversalConstants {
             //Rotator control
             if (gamepad1.dpad_left) {
                 robot.turret.shiftRotator(-rotatorIncrement);
-                autoControls = false;
+                sillyControls = false;
             }
             if (gamepad1.dpad_right) {
                 robot.turret.shiftRotator(rotatorIncrement);
-                autoControls = false;
+                sillyControls = false;
             }
 
             //Feed
@@ -103,7 +103,8 @@ public class BlueTele extends LinearOpMode implements BlueUniversalConstants {
                 sillyControls = !sillyControls;
             }
 
-            if (gamepad1.touchpadWasPressed()) {
+            //Relocalization
+            if (gamepad1.touchpad) {
                 actions.relocalizeBlue(aprilTagPose, telemetry);
             }
 
@@ -113,6 +114,17 @@ public class BlueTele extends LinearOpMode implements BlueUniversalConstants {
                 actions.aimRotatorLocal(sillyTarget, telemetry);
                 actions.adjustShootingParams(sillyTarget);
             }
+
+
+            telemetry.addLine("LIMELIGHT DATA");
+
+            boolean bool = robot.vision.hasTarget();
+            if (bool == true){
+                double llDist = robot.vision.getDistance();
+                telemetry.addData("Limelight Dist", llDist);
+            }
+
+            telemetry.addData("Limelight?", bool);
 
             telemetry.addLine("Automatic Telemetry");
             telemetry.addLine("--------------------------");

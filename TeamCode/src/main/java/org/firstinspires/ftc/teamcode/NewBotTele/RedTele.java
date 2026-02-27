@@ -114,6 +114,8 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
                 actions.adjustShootingParams(sillyTarget);
             }
 
+
+
             telemetry.addLine("Automatic Telemetry");
             telemetry.addLine("--------------------------");
             telemetry.addData("Distance with Local", robot.chassisLocal.getDistance(target));
