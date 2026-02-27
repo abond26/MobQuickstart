@@ -5,7 +5,7 @@ public interface TurretConstants {
     double shooterF = 13.2965;
     int ROTATOR_ZERO_TICKS = 0;
     int rotator180Range = 624;
-    double rotatorPower = 0.5;
+    double rotatorPower = 0.75;
 
     double CLOSE_VELOCITY = 1300;
     double MID_VELOCITY = 1500;

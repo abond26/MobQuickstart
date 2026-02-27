@@ -29,7 +29,7 @@ public class ShotTimeLookupTable {
 //        210.5,  205.2,  221.5,
 //    };
     private static final double[] DISTANCES = {
-            86.0824, 69.0667,103.917,104.803,81.472
+            86.0824, 69.0667,103.917,104.803,81.472,97.81,102.22,109.17
 
             // Zone 1: Close range (< 95) // hood position 1.
 
@@ -47,7 +47,7 @@ public class ShotTimeLookupTable {
 //        1620, 1560, 1700,
 //    };
     private static final double[] ShotTime = {
-            0.91, 0.82,1.02, 1.03, 0.84
+            0.91, 0.82,1.02, 1.03, 0.84,0.98153,1.01055,1.05629
 
             // Zone 1: Close range ShotTime (tune these for close shots)
 
