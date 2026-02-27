@@ -61,7 +61,7 @@ public class red15farside extends OpMode {
     private static final double RED_GOAL_X = 144;
     private static final double RED_GOAL_Y = 144;
     /** Degrees added to turret angle to correct aim (positive = aim more right). Tune if shots go left/right. */
-    private static final double RED_AIM_OFFSET_DEG = 2.5;
+    private static final double RED_AIM_OFFSET_DEG = 2.7;
     /** Rotator must be within this many ticks of goal angle before we open blocker / feed. */
     private static final int ROTATOR_AIM_TOLERANCE_TICKS = 35;
     /** Only aim rotator when chassis speed is below this (in/s) so we lock on when robot is at the point and not moving. */
@@ -83,7 +83,7 @@ public class red15farside extends OpMode {
 
 
     private DcMotorEx launcher;
-    private DcMotor tree, theWheelOfTheOx;
+    private DcMotor tree, theWheelOfTheOx, rotator;
     private Turret turret;
     private Timer pathTimer, opModeTimer;
 
@@ -147,9 +147,9 @@ public class red15farside extends OpMode {
     private final Pose collect2End2 = new Pose(132, 10, Math.toRadians(0));
 
     private final Pose shootBall3 = new Pose(89, 15, Math.toRadians(69));
-    private final Pose collect3Start = new Pose(129, 10, Math.toRadians(0));
+    private final Pose collect3Start = new Pose(129, 11, Math.toRadians(0));
     private final Pose shootBall4 = new Pose(89, 15, Math.toRadians(69));
-    private final Pose collect4Start = new Pose(129, 10, Math.toRadians(0));
+    private final Pose collect4Start = new Pose(129, 11, Math.toRadians(0));
     private final Pose shootBall5 = new Pose(89, 15, Math.toRadians(69));
     private final Pose park = new Pose(103, 22, Math.toRadians(0));
     private PathChain shoot1, collect5, goToCollect1, collect2StartAgain, collect2EndAgain, collect1, shoot2, goToCollect2, collect2, shoot3,goToCollect2Again, collect2Again, goToCollect2AgainAgain, collect2AgainAgain, goToCollect3, collect3, shoot4, goToCollect4, collect4, shoot5, parking;
@@ -211,19 +211,19 @@ public class red15farside extends OpMode {
             case start:
                 hood.setPosition(0);
                 blocker.setPosition(0);
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 turret.setRotatorPos(0);
                 setPathState(PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
                     if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
                         blocker.setPosition(1);
-                        tree.setPower(1);
+                        tree.setPower(0.75);
                         theWheelOfTheOx.setPower(-1);
                     }
                 } else {
@@ -239,7 +239,7 @@ public class red15farside extends OpMode {
                 tree.setPower(1);
                 theWheelOfTheOx.setPower(-0.5);
                 follower.followPath(collect1);
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 turret.setRotatorPos(0);
                 follower.setMaxPower(INTAKE_DRIVE_POWER);
 
@@ -252,7 +252,7 @@ public class red15farside extends OpMode {
                 theWheelOfTheOx.setPower(-0.25);
                 turret.setRotatorPos(0);
                 if (!follower.isBusy() && !shoot2Started) {
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     follower.followPath(shoot2);
@@ -262,12 +262,12 @@ public class red15farside extends OpMode {
                 }
                 break;
             case shooting1:
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
+                    if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()&&pathTimer.getElapsedTimeSeconds()>2.5) {
                         blocker.setPosition(1);
-                        tree.setPower(1);
+                        tree.setPower(0.75);
                         theWheelOfTheOx.setPower(-1);
                     }
                 } else {
@@ -315,10 +315,10 @@ public class red15farside extends OpMode {
             case shootAgain:
                 tree.setPower(1);
                 theWheelOfTheOx.setPower(-0.25);
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 turret.setRotatorPos(0);
                 if (!follower.isBusy() && !shoot3Started) {
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     follower.followPath(shoot3);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     theWheelOfTheOx.setPower(-1);
@@ -327,12 +327,12 @@ public class red15farside extends OpMode {
                 }
                 break;
             case shooting2:
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
                     if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
                         blocker.setPosition(1);
-                        tree.setPower(1);
+                        tree.setPower(0.75);
                         theWheelOfTheOx.setPower(-1);
                     }
                 } else {
@@ -362,10 +362,10 @@ public class red15farside extends OpMode {
             case shootAgainAgain:
                 tree.setPower(1);
                 theWheelOfTheOx.setPower(-0.25);
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 turret.setRotatorPos(0);
                 if (!follower.isBusy() && !shoot3Started) {
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     follower.followPath(shoot4);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
@@ -374,12 +374,12 @@ public class red15farside extends OpMode {
                 }
                 break;
             case shooting3:
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
                     if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
                         blocker.setPosition(1);
-                        tree.setPower(1);
+                        tree.setPower(0.75);
                         theWheelOfTheOx.setPower(-1);
                     }
                 } else {
@@ -407,10 +407,10 @@ public class red15farside extends OpMode {
                 }
                 break;
             case shootAgainAgainAgain:
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 turret.setRotatorPos(0);
                 if (!follower.isBusy() && !shoot5Started) {
-                    launcher.setVelocity(1540);
+                    launcher.setVelocity(1520);
                     follower.followPath(shoot5);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(0.6);
@@ -420,12 +420,12 @@ public class red15farside extends OpMode {
                 }
                 break;
             case shooting4:
-                launcher.setVelocity(1540);
+                launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
                     if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
                         blocker.setPosition(1);
-                        tree.setPower(1);
+                        tree.setPower(0.75);
                         theWheelOfTheOx.setPower(-1);
                     }
                 } else {
@@ -497,8 +497,12 @@ public class red15farside extends OpMode {
         tree = hardwareMap.get(DcMotor.class, "tree");
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        rotator = hardwareMap.get(DcMotor.class, "rotator");
+        rotator.setPower(1.0); // full power so rotator moves quickly to aim
 
         theWheelOfTheOx.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Match red18closenewbot: wheel FORWARD so setPower(-1) feeds balls UP (Turret constructor sets REVERSE)
+        theWheelOfTheOx.setDirection(DcMotorSimple.Direction.FORWARD);
 
         tree.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         tree.setDirection(DcMotorSimple.Direction.REVERSE);

@@ -41,11 +41,13 @@ public class RobotActions implements BlueUniversalConstants{
     }
 
     //To be tested
-    public void relocalizeBlue(Pose target) {
+    public void relocalizeBlue(Pose target, Telemetry telemetry) {
         if (!vision.hasTarget()) return;
 
         double tx = vision.getTx();
         double dist = vision.getDistance();
+        telemetry.addData("Dist", dist);
+
 
         // Calculate robot position relative to target using tx and distance
         double angleRad = Math.toRadians(tx);
@@ -55,8 +57,12 @@ public class RobotActions implements BlueUniversalConstants{
         double newX = target.getX() + dx;
         double newY = target.getY() - dy;
 
+        Pose newPose = new Pose(newX, newY, chassisLocal.getPose().getHeading());
+
+        telemetry.addData("New Position", newPose);
+
         //maybe add heading?
-        chassisLocal.setPose(new Pose(newX, newY, chassisLocal.getPose().getHeading()));
+        chassisLocal.setPose(newPose);
     }
     public void relocalizeRed(Pose target) {
         if (!vision.hasTarget()) return;

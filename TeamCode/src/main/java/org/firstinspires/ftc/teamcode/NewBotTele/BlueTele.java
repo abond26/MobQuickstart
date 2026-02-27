@@ -104,7 +104,7 @@ public class BlueTele extends LinearOpMode implements BlueUniversalConstants {
             }
 
             if (gamepad1.touchpadWasPressed()) {
-                actions.relocalizeBlue(aprilTagPose);
+                actions.relocalizeBlue(aprilTagPose, telemetry);
             }
 
             //Dynamic shooting - also covers static shooting obv
