@@ -103,9 +103,9 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
                 sillyControls = !sillyControls;
             }
 
-            if (gamepad1.touchpadWasPressed()) {
-                actions.relocalizeRed(target);
-            }
+//            if (gamepad1.touchpadWasPressed()) {
+//                actions.relocalizeRed(target);
+//            }
 
             //Dynamic shooting - also covers static shooting obv
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);

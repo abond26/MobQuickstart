@@ -104,18 +104,14 @@ public class BlueTele extends LinearOpMode implements BlueUniversalConstants {
             }
 
             if (gamepad1.touchpadWasPressed()) {
-                actions.relocalizeBlue(target);
+                actions.relocalizeBlue(aprilTagPose);
             }
 
             //Dynamic shooting - also covers static shooting obv
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);
-            if (sillyControls & !autoControls &robot.chassisLocal.getDistance(target)<120) {
+            if (sillyControls & !autoControls ) {
                 actions.aimRotatorLocal(sillyTarget, telemetry);
                 actions.adjustShootingParams(sillyTarget);
-            }
-            else{
-                actions.aimRotatorLocal(target, telemetry);
-                actions.adjustShootingParams(target);
             }
 
             telemetry.addLine("Automatic Telemetry");

@@ -135,14 +135,14 @@ public class blue18closenewbot extends OpMode {
     
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 15.5, 62, Math.toRadians(150));
+    private final Pose gateCollect1 = new Pose( 17, 62, Math.toRadians(150));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(50, 55.801430517711175, Math.toRadians(180));
     private final Pose shootBall3 = new Pose(46, 97.5, Math.toRadians(135));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 15.5, 62, Math.toRadians(150));
+    private final Pose gateCollect2 = new Pose( 17, 62, Math.toRadians(150));
     private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(133));
-    private final Pose gateCollect3 = new Pose( 15.5, 62, Math.toRadians(150));
+    private final Pose gateCollect3 = new Pose( 17, 62, Math.toRadians(150));
     private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(133));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
