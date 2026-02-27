@@ -62,10 +62,12 @@ public class red15farside extends OpMode {
     private static final double RED_GOAL_Y = 144;
     /** Degrees added to turret angle to correct aim (positive = aim more right). Tune if shots go left/right. */
     private static final double RED_AIM_OFFSET_DEG = 2.7;
-    /** Rotator must be within this many ticks of goal angle before we open blocker / feed. */
-    private static final int ROTATOR_AIM_TOLERANCE_TICKS = 35;
+    /** Rotator must be within this many ticks of goal angle before we open blocker / feed. 1 = tightest (may dither). */
+    private static final int ROTATOR_AIM_TOLERANCE_TICKS = 1;
     /** Only aim rotator when chassis speed is below this (in/s) so we lock on when robot is at the point and not moving. */
     private static final double CHASSIS_AT_REST_THRESHOLD = 2.0;
+    /** Seconds to keep shooting after rotator is aimed before moving to next step. */
+    private static final double SHOOT_DWELL_SEC = 2.0;
 
     //Rotator: use Turret subsystem (same as SubsysTele – direction, power, rotator180Range)
     int limelightMotor180Range = 910;
@@ -85,7 +87,9 @@ public class red15farside extends OpMode {
     private DcMotorEx launcher;
     private DcMotor tree, theWheelOfTheOx, rotator;
     private Turret turret;
-    private Timer pathTimer, opModeTimer;
+    private Timer pathTimer, opModeTimer, shootDwellTimer;
+    /** True once rotator has been aimed this state; used to start shoot dwell timer. */
+    private boolean aimedForShootDwell = false;
 
     public enum PathState {
         shooting1,
@@ -146,11 +150,11 @@ public class red15farside extends OpMode {
     private final Pose collect2End = new Pose(132, 12, Math.toRadians(0));
     private final Pose collect2End2 = new Pose(132, 10, Math.toRadians(0));
 
-    private final Pose shootBall3 = new Pose(89, 15, Math.toRadians(69));
+    private final Pose shootBall3 = new Pose(89, 15, Math.toRadians(67));
     private final Pose collect3Start = new Pose(129, 11, Math.toRadians(0));
-    private final Pose shootBall4 = new Pose(89, 15, Math.toRadians(69));
+    private final Pose shootBall4 = new Pose(89, 15, Math.toRadians(67));
     private final Pose collect4Start = new Pose(129, 11, Math.toRadians(0));
-    private final Pose shootBall5 = new Pose(89, 15, Math.toRadians(69));
+    private final Pose shootBall5 = new Pose(89, 15, Math.toRadians(67));
     private final Pose park = new Pose(103, 22, Math.toRadians(0));
     private PathChain shoot1, collect5, goToCollect1, collect2StartAgain, collect2EndAgain, collect1, shoot2, goToCollect2, collect2, shoot3,goToCollect2Again, collect2Again, goToCollect2AgainAgain, collect2AgainAgain, goToCollect3, collect3, shoot4, goToCollect4, collect4, shoot5, parking;
 
@@ -221,15 +225,21 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
-                        blocker.setPosition(1);
-                        tree.setPower(0.75);
-                        theWheelOfTheOx.setPower(-1);
+                    if (isRotatorAimedAtGoal()) {
+                        if (!aimedForShootDwell) {
+                            aimedForShootDwell = true;
+                            shootDwellTimer.resetTimer();
+                        }
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                            blocker.setPosition(1);
+                            tree.setPower(0.75);
+                            theWheelOfTheOx.setPower(-1);
+                        }
                     }
                 } else {
                     turret.setRotatorPos(0);
                 }
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
+                if (!follower.isBusy() && aimedForShootDwell && shootDwellTimer.getElapsedTimeSeconds() > SHOOT_DWELL_SEC) {
                     setPathState((PathState.collection));
                 }
                 break;
@@ -265,15 +275,21 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()&&pathTimer.getElapsedTimeSeconds()>2.5) {
-                        blocker.setPosition(1);
-                        tree.setPower(0.75);
-                        theWheelOfTheOx.setPower(-1);
+                    if (isRotatorAimedAtGoal()) {
+                        if (!aimedForShootDwell) {
+                            aimedForShootDwell = true;
+                            shootDwellTimer.resetTimer();
+                        }
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                            blocker.setPosition(1);
+                            tree.setPower(0.75);
+                            theWheelOfTheOx.setPower(-1);
+                        }
                     }
                 } else {
                     turret.setRotatorPos(0);
                 }
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4.5) {
+                if (!follower.isBusy() && aimedForShootDwell && shootDwellTimer.getElapsedTimeSeconds() > SHOOT_DWELL_SEC) {
                     setPathState((PathState.collectAgainEnd));
                 }
                 break;
@@ -330,15 +346,21 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
-                        blocker.setPosition(1);
-                        tree.setPower(0.75);
-                        theWheelOfTheOx.setPower(-1);
+                    if (isRotatorAimedAtGoal()) {
+                        if (!aimedForShootDwell) {
+                            aimedForShootDwell = true;
+                            shootDwellTimer.resetTimer();
+                        }
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                            blocker.setPosition(1);
+                            tree.setPower(0.75);
+                            theWheelOfTheOx.setPower(-1);
+                        }
                     }
                 } else {
                     turret.setRotatorPos(0);
                 }
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3.5) {
+                if (!follower.isBusy() && aimedForShootDwell && shootDwellTimer.getElapsedTimeSeconds() > SHOOT_DWELL_SEC) {
                     setPathState((PathState.collectAgainAgainAgain));
                 }
                 break;
@@ -377,15 +399,21 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
-                        blocker.setPosition(1);
-                        tree.setPower(0.75);
-                        theWheelOfTheOx.setPower(-1);
+                    if (isRotatorAimedAtGoal()) {
+                        if (!aimedForShootDwell) {
+                            aimedForShootDwell = true;
+                            shootDwellTimer.resetTimer();
+                        }
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                            blocker.setPosition(1);
+                            tree.setPower(0.75);
+                            theWheelOfTheOx.setPower(-1);
+                        }
                     }
                 } else {
                     turret.setRotatorPos(0);
                 }
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.5) {
+                if (!follower.isBusy() && aimedForShootDwell && shootDwellTimer.getElapsedTimeSeconds() > SHOOT_DWELL_SEC) {
                     setPathState((PathState.collection4));
                 }
                 break;
@@ -423,15 +451,21 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560 && isRotatorAimedAtGoal()) {
-                        blocker.setPosition(1);
-                        tree.setPower(0.75);
-                        theWheelOfTheOx.setPower(-1);
+                    if (isRotatorAimedAtGoal()) {
+                        if (!aimedForShootDwell) {
+                            aimedForShootDwell = true;
+                            shootDwellTimer.resetTimer();
+                        }
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                            blocker.setPosition(1);
+                            tree.setPower(0.75);
+                            theWheelOfTheOx.setPower(-1);
+                        }
                     }
                 } else {
                     turret.setRotatorPos(0);
                 }
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.5) {
+                if (!follower.isBusy() && aimedForShootDwell && shootDwellTimer.getElapsedTimeSeconds() > SHOOT_DWELL_SEC) {
                     setPathState((PathState.parklol));
                 }
                 break;
@@ -469,6 +503,7 @@ public class red15farside extends OpMode {
         collectAgainAgainAgainStarted = false;
         collectAgainAgainAgainEndStarted = false;
         parkingStarted = false;
+        aimedForShootDwell = false;
     }
 
     @Override
@@ -482,6 +517,7 @@ public class red15farside extends OpMode {
         hood.setPosition(0);
         pathTimer = new Timer();
         opModeTimer = new Timer();
+        shootDwellTimer = new Timer();
         follower = ConstantsNewBot.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
