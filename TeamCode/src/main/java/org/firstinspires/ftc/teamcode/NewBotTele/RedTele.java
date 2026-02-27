@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
+import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 
 @TeleOp
 public class RedTele extends LinearOpMode implements RedUniversalConstants {
@@ -63,12 +64,13 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
             //Rotator control
             if (gamepad1.dpad_left) {
                 robot.turret.shiftRotator(-rotatorIncrement);
-                autoControls = false;
+                sillyControls = false;
             }
             if (gamepad1.dpad_right) {
                 robot.turret.shiftRotator(rotatorIncrement);
-                autoControls = false;
+                sillyControls = false;
             }
+
 
             //Feed
             actions.launch(1, gamepad1.right_bumper);
@@ -76,12 +78,14 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
             if (gamepad1.right_bumper){
                 gamepad1.rumble(100);
             }
-
-            //intake
             double sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
             if (!gamepad1.right_bumper){
                 actions.intake(sumOfTrigs);
             }
+
+
+            //intake
+
 
 
 
@@ -103,18 +107,28 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
                 sillyControls = !sillyControls;
             }
 
-//            if (gamepad1.touchpadWasPressed()) {
-//                actions.relocalizeRed(target);
-//            }
+            //Relocalization
+            if (gamepad1.touchpad) {
+                actions.relocalizeBlue(aprilTagPose, telemetry);
+            }
 
             //Dynamic shooting - also covers static shooting obv
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);
-            if (sillyControls & !autoControls) {
+            if (sillyControls & !autoControls ) {
                 actions.aimRotatorLocal(sillyTarget, telemetry);
                 actions.adjustShootingParams(sillyTarget);
             }
 
 
+            telemetry.addLine("LIMELIGHT DATA");
+
+            boolean bool = robot.vision.hasTarget();
+            if (bool == true){
+                double llDist = robot.vision.getDistance();
+                telemetry.addData("Limelight Dist", llDist);
+            }
+
+            telemetry.addData("Limelight?", bool);
 
             telemetry.addLine("Automatic Telemetry");
             telemetry.addLine("--------------------------");
