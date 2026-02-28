@@ -19,6 +19,9 @@ public class RobotActions implements BlueUniversalConstants{
     private TransferGate gate;
     private Vision vision;
 
+    /** When non-null, used as shooting target instead of {@link BlueUniversalConstants#target}. */
+    private Pose shootingTargetOverride = null;
+
     public RobotActions(ChassisLocal chassis, Vision vision, Turret turret, TransferGate gate, Intake intake) {
         this.chassisLocal = chassis;
         this.turret = turret;
@@ -91,6 +94,29 @@ public class RobotActions implements BlueUniversalConstants{
             turret.shiftHood(hoodIncrement);
         }
     }
+    public void setRobotPose(Pose pose) {
+        chassisLocal.setPose(pose);
+    }
+    public void setTargetPose(Pose targetPose){
+        this.shootingTargetOverride = targetPose;
+    }
+
+    /** Returns the current shooting target (override if set, otherwise default from constants). */
+    public Pose getShootingTarget() {
+        return shootingTargetOverride != null ? shootingTargetOverride : target;
+    }
+
+
+//    public void LimelightRelocal(Telemetry telemetry){
+//        Pose llPose = vision.getPoseLimelight();
+//        if (llPose == null) {
+//            telemetry.addData("Limelight relocal", "No valid pose (no target or limelight)");
+//            return;
+//        }
+//        chassisLocal.setPose(llPose);
+//        telemetry.addData("Limelight relocal", "OK (%.1f, %.1f, %.0f°)",
+//                llPose.getX(), llPose.getY(), Math.toDegrees(llPose.getHeading()));
+//    }
 
 
     //we have a control for intake in this class in case intaking becomes more complex

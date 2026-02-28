@@ -17,6 +17,8 @@ public class BlueTele extends LinearOpMode implements BlueUniversalConstants {
     private int veloSwitchNum = 1;
     boolean autoControls = false;
     boolean sillyControls = false;
+    private boolean lastDpadUp = false;
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -104,9 +106,11 @@ public class BlueTele extends LinearOpMode implements BlueUniversalConstants {
             }
 
             //Relocalization
-            if (gamepad1.touchpad) {
-                actions.relocalizeBlue(aprilTagPose, telemetry);
+
+            if (gamepad1.dpad_up && !lastDpadUp) {
+                actions.setRobotPose(dpadUpPose);
             }
+            lastDpadUp = gamepad1.dpad_up;
 
             //Dynamic shooting - also covers static shooting obv
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);
@@ -125,6 +129,9 @@ public class BlueTele extends LinearOpMode implements BlueUniversalConstants {
             }
 
             telemetry.addData("Limelight?", bool);
+            telemetry.addData("Limelight?", bool);
+
+
 
             telemetry.addLine("Automatic Telemetry");
             telemetry.addLine("--------------------------");

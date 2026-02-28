@@ -18,6 +18,8 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
     private int veloSwitchNum = 1;
     boolean autoControls = false;
     boolean sillyControls = false;
+    private boolean lastDpadUp = false;
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -70,6 +72,10 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
                 robot.turret.shiftRotator(rotatorIncrement);
                 sillyControls = false;
             }
+            if (gamepad1.dpad_up && !lastDpadUp) {
+                actions.setRobotPose(dpadUpPose);
+            }
+            lastDpadUp = gamepad1.dpad_up;
 
 
             //Feed
