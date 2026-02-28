@@ -58,16 +58,17 @@ public class red15farside extends OpMode {
 
     // Localization: pose comes from dead wheels only (Pinpoint localizer in ConstantsNewBot.createFollower), same as SubsysTele.
     /** Red backboard / goal target for localization-based rotator aiming (field coords). */
-    private static final double RED_GOAL_X = 144;
+    private static final double RED_GOAL_X = 143;
     private static final double RED_GOAL_Y = 144;
     /** Degrees added to turret angle to correct aim (positive = aim more right). Tune if shots go left/right. */
-    private static final double RED_AIM_OFFSET_DEG = 2.7;
+    private static final double RED_AIM_OFFSET_DEG = 0.5;
     /** Rotator must be within this many ticks of goal angle before we open blocker / feed. 1 = tightest (may dither). */
     private static final int ROTATOR_AIM_TOLERANCE_TICKS = 1;
     /** Only aim rotator when chassis speed is below this (in/s) so we lock on when robot is at the point and not moving. */
     private static final double CHASSIS_AT_REST_THRESHOLD = 2.0;
     /** Seconds to keep shooting after rotator is aimed before moving to next step. */
-    private static final double SHOOT_DWELL_SEC = 2.0;
+    private static final double SHOOT_DWELL_SEC = 1.6;
+    private static final double SHOOT_DWELL_SEC_FIRST_SHOT = 2.75;
 
     //Rotator: use Turret subsystem (same as SubsysTele – direction, power, rotator180Range)
     int limelightMotor180Range = 910;
@@ -225,7 +226,7 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (isRotatorAimedAtGoal()) {
+                    if (isRobotAtRest() && isRotatorAimedAtGoal()) {
                         if (!aimedForShootDwell) {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
@@ -239,7 +240,7 @@ public class red15farside extends OpMode {
                 } else {
                     turret.setRotatorPos(0);
                 }
-                if (!follower.isBusy() && aimedForShootDwell && shootDwellTimer.getElapsedTimeSeconds() > SHOOT_DWELL_SEC) {
+                if (!follower.isBusy() && aimedForShootDwell && shootDwellTimer.getElapsedTimeSeconds() > SHOOT_DWELL_SEC_FIRST_SHOT) {
                     setPathState((PathState.collection));
                 }
                 break;
@@ -275,7 +276,7 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (isRotatorAimedAtGoal()) {
+                    if (isRobotAtRest() && isRotatorAimedAtGoal()) {
                         if (!aimedForShootDwell) {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
@@ -346,7 +347,7 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (isRotatorAimedAtGoal()) {
+                    if (isRobotAtRest() && isRotatorAimedAtGoal()) {
                         if (!aimedForShootDwell) {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
@@ -399,7 +400,7 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (isRotatorAimedAtGoal()) {
+                    if (isRobotAtRest() && isRotatorAimedAtGoal()) {
                         if (!aimedForShootDwell) {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
@@ -451,7 +452,7 @@ public class red15farside extends OpMode {
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtRedGoal();
-                    if (isRotatorAimedAtGoal()) {
+                    if (isRobotAtRest() && isRotatorAimedAtGoal()) {
                         if (!aimedForShootDwell) {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
