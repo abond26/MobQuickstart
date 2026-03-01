@@ -592,6 +592,9 @@ public class blue18shotwhilemove extends OpMode {
         follower.update();
         statePathUpdate();
         PoseStorage.savePose(follower.getPose());
+        if (rotator != null) {
+            PoseStorage.saveRotatorPosition(rotator.getCurrentPosition());
+        }
 
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());

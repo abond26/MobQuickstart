@@ -21,6 +21,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants;
+import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "sideways 15 far blue", group = "sideways")
 public class blue15farside extends OpMode {
@@ -554,9 +555,14 @@ public class blue15farside extends OpMode {
 
     @Override
     public void loop() {
-        follower.update(); // dead-wheel localization + path following (same as SubsysTele chassisLocal.update())
+        follower.update();
         statePathUpdate();
-        telemetry.addData("paths state", pathState.toString());
+
+        // Continuously save pose so it's saved even if autonomous ends early
+        PoseStorage.savePose(follower.getPose());
+        if (rotator != null) {
+            PoseStorage.saveRotatorPosition(rotator.getCurrentPosition());
+        }        telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
