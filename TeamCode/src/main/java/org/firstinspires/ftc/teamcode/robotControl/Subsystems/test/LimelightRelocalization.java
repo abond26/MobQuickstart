@@ -102,21 +102,17 @@ public class LimelightRelocalization implements LimelightRelocalizationConstants
      * Returns a corrected Pose in Pedro Pathing coordinates if a valid
      * AprilTag reading is available, or null if no valid reading.
      *
-     * When this returns non-null, call chassisLocal.setPose(result) to
-     * correct the deadwheel localizer.
-     *
      * @param currentPedroPose the current Pedro Pathing pose (for sanity checking)
+     * @param result the cached LLResult polled once per loop in TeleOp
      * @return corrected Pose in Pedro Pathing coords, or null if no valid data
      */
     @Nullable
-    public Pose getRelocalizationPose(@NonNull Pose currentPedroPose) {
+    public Pose getRelocalizationPose(@NonNull Pose currentPedroPose, @Nullable LLResult result) {
         if (limelight == null) {
             lastResultValid = false;
             lastRejectReason = "Limelight not initialized";
             return null;
         }
-
-        LLResult result = limelight.getLatestResult();
 
         // ── Check 1: Result exists and is valid ──
         if (result == null || !result.isValid()) {

@@ -78,6 +78,9 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
         robot.chassisLocal.startTeleop();
 
         int loopCount = 0;
+        double lastLimelightPollTime = 0;
+        com.qualcomm.hardware.limelightvision.LLResult cachedResult = null;
+
         while (opModeIsActive()) {
             // ═══════════════════════════════════════════════════
             // DRIVING AND LOCALIZATION UPDATE
@@ -86,15 +89,10 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
             robot.chassisLocal.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
             // ═══════════════════════════════════════════════════
-            // LIMELIGHT MEGATAG2 RELOCALIZATION
+            // LIMELIGHT MEGATAG1 RELOCALIZATION
             // ═══════════════════════════════════════════════════
 
-            // Feed combined heading (chassis + turret) to Limelight every loop (required for MegaTag2)
-            double chassisHeadingDeg = Math.toDegrees(robot.chassisLocal.getPose().getHeading());
-            double turretRelativeDeg = LimelightRelocalization.rotatorTicksToDegrees(robot.turret.getRotatorPos());
-            relocalization.updateOrientation(chassisHeadingDeg, turretRelativeDeg);
-
-            // TOUCHPAD: Toggle auto-relocalization
+            // Toggle auto relocalization (Touchpad)
             if (gamepad1.touchpad && !lastTouchpad) {
                 autoRelocalize = !autoRelocalize;
             }
@@ -104,10 +102,24 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
             boolean forceRelocalize = gamepad1.dpad_down && !lastDpadDown;
             lastDpadDown = gamepad1.dpad_down;
 
-            // Attempt relocalization
-            if (autoRelocalize || forceRelocalize) {
+            // 2. Poll Limelight asynchronously to prevent massive input lag
+            // The camera runs at ~30 FPS (33ms). If we poll it every loop, we throttle the drive loop!
+            // We only ask for new data at most every 50ms, or immediately if forced.
+            double currentTime = getRuntime();
+            if (forceRelocalize || (autoRelocalize && (currentTime - lastLimelightPollTime > 0.05))) {
+                cachedResult = robot.vision.getLimelight().getLatestResult();
+                lastLimelightPollTime = currentTime;
+            } else if (!autoRelocalize) {
+                // Keep the last result active for telemetry if we just turned it off
+                if (cachedResult != null && currentTime - lastLimelightPollTime > 1.0) {
+                    cachedResult = null; // Clear old data after 1 second
+                }
+            }
+
+            // Attempt relocalization only when needed
+            if ((autoRelocalize && cachedResult != null) || forceRelocalize) {
                 Pose currentPose = robot.chassisLocal.getPose();
-                Pose correctedPose = relocalization.getRelocalizationPose(currentPose);
+                Pose correctedPose = relocalization.getRelocalizationPose(currentPose, cachedResult);
                 if (correctedPose != null) {
                     robot.chassisLocal.setPose(correctedPose);
                 }
@@ -165,12 +177,15 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
             telemetry.addData("Force Single", "Press DPAD DOWN");
             relocalization.addTelemetry(telemetry, robot.chassisLocal.getPose());
 
-            // Limelight data (from BlueTele)
+            // Limelight data (optimized to use the cached result)
             telemetry.addLine("");
             telemetry.addLine("LIMELIGHT DATA");
-            boolean bool = robot.vision.hasTarget();
+            boolean bool = (cachedResult != null && cachedResult.isValid());
             if (bool) {
-                double llDist = robot.vision.getDistance();
+                // Calculate distance manually since we bypass getDistance() to save a poll
+                double tyDeg = cachedResult.getTy();
+                double tyRad = Math.abs(Math.toRadians(tyDeg + robot.vision.limelightUpAngle));
+                double llDist = robot.vision.y / Math.tan(tyRad);
                 telemetry.addData("Limelight Dist", llDist);
             }
             telemetry.addData("Limelight?", bool);
@@ -196,7 +211,19 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
             telemetry.update();
         }
 
-        // Note: intentionally NOT calling relocalization.stop()
-        // as limelight.stop() can hang the OpMode on the FTC SDK
+        // ── CLEANUP (Crucial for preventing stop() hangs in LinearOpMode) ──
+        // The Limelight runs a background VisionPortal thread. If we don't explicitly
+        // stop it when the OpMode ends, the FTC SDK gets stuck waiting for that thread
+        // to die, causing the "stuck in stop()" error.
+
+        telemetry.addLine("Stopping Limelight...");
+        telemetry.update();
+        try {
+            if (robot.vision.getLimelight() != null) {
+                robot.vision.getLimelight().stop();
+            }
+        } catch (Exception e) {
+            // Ignore any shutdown errors
+        }
     }
 }

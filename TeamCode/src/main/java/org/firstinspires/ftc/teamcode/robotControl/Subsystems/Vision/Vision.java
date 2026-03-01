@@ -14,21 +14,36 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
 
 import java.util.List;
 
 public class Vision implements VisionConstants{
 
     private Limelight3A limelight;
-
+public Limelight3A getLimelight() {
+    return limelight;
+}
     public Vision(@NonNull HardwareMap hardwareMap, int pipeline) {
 
+        // Try common config names (Driver Station lets you rename the device)
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        if (limelight == null) {
+            limelight = hardwareMap.get(Limelight3A.class, "Limelight");
+        }
+        if (limelight == null) {
+            limelight = hardwareMap.get(Limelight3A.class, "limelight3a");
+        }
 
         if (limelight != null) {
             limelight.pipelineSwitch(pipeline);
             limelight.start();
         }
+    }
+
+    /** True if the Limelight was found in the robot configuration. */
+    public boolean isConnected() {
+        return limelight != null;
     }
 
     public boolean hasTarget() {
@@ -37,14 +52,19 @@ public class Vision implements VisionConstants{
     }
 
     public double getTx() {
-        return limelight.getLatestResult().getTx();
+        if (limelight == null) return 0;
+        LLResult r = limelight.getLatestResult();
+        return (r != null) ? r.getTx() : 0;
     }
 
     public double getTy() {
-        return limelight.getLatestResult().getTy();
+        if (limelight == null) return 0;
+        LLResult r = limelight.getLatestResult();
+        return (r != null) ? r.getTy() : 0;
     }
 
     public double getDistance() {
+        if (limelight == null) return 0;
         double tyDeg = getTy();
         double tyRad = Math.abs(Math.toRadians(tyDeg + limelightUpAngle));
         double dist = y / Math.tan(tyRad);
