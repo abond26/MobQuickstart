@@ -135,21 +135,21 @@ public class blue18closenewbot extends OpMode {
     
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 16.5, 63, Math.toRadians(150));
+    private final Pose gateCollect1 = new Pose( 15, 62, Math.toRadians(147));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(50, 55.801430517711175, Math.toRadians(180));
     private final Pose shootBall3 = new Pose(46, 97.5, Math.toRadians(135));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 16.5, 63, Math.toRadians(150));
+    private final Pose gateCollect2 = new Pose( 15, 62, Math.toRadians(147));
     private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(133));
-    private final Pose gateCollect3 = new Pose( 16, 63, Math.toRadians(150));
+    private final Pose gateCollect3 = new Pose( 15, 62, Math.toRadians(147));
     private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(133));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
     private final Pose shoot4ToCollect3ControlPoint = new Pose(41.25340599455039, 82.36784741144412, Math.toRadians(180));
 
     //
-    private final Pose collect3end = new Pose(25, 86, Math.toRadians(180));
+    private final Pose collect3end = new Pose(24, 86, Math.toRadians(180));
     private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(157));
 
     private final Pose park = new Pose(41, 84, Math.toRadians(134));
@@ -242,10 +242,10 @@ public class blue18closenewbot extends OpMode {
         switch (pathState) {
             case start:
                 theWheelOfTheOx.setPower(0);
-                launcher.setVelocity(1120);
+                launcher.setVelocity(1100);
                 tree.setPower(1);
                 blocker.setPosition(0);
-                launcher.setVelocity(1120); //1725
+                launcher.setVelocity(1100); //1725
                 hood.setPosition(1); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
@@ -259,7 +259,7 @@ public class blue18closenewbot extends OpMode {
                 break;
             case actuallyshoot1:
                 rotator.setTargetPosition(rotatorStartPosition);
-                launcher.setVelocity(1120);
+                launcher.setVelocity(1100);
                 if(pathTimer.getElapsedTimeSeconds()>1.9)
                 {
                     blocker.setPosition(1);
@@ -267,13 +267,13 @@ public class blue18closenewbot extends OpMode {
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2.2){
                     tree.setPower(1);
-                    launcher.setVelocity(1120);
+                    launcher.setVelocity(1100);
                     hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     theWheelOfTheOx.setPower(-1);
                     if(pathTimer.getElapsedTimeSeconds()>2.2)
                     {
-                        launcher.setVelocity(1120);
+                        launcher.setVelocity(1100);
                     }
                     if (pathTimer.getElapsedTimeSeconds()>2.7) {
                         setPathState(blue18closenewbot.PathState.collection);
@@ -292,7 +292,7 @@ public class blue18closenewbot extends OpMode {
                 if (!follower.isBusy() && !collectionStarted) {
                     //rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1120);
+                    launcher.setVelocity(1100);
                     hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
@@ -317,7 +317,7 @@ public class blue18closenewbot extends OpMode {
                     hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot2);
-                    launcher.setVelocity(1120);
+                    launcher.setVelocity(1100);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot2Started = true; // Mark as started to prevent calling again
@@ -354,7 +354,7 @@ public class blue18closenewbot extends OpMode {
                 if (pathTimer.getElapsedTimeSeconds()>2.25) {
                     theWheelOfTheOx.setPower(-1);
                 }
-                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3.15) {
+                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3) {
                     setPathState((blue18closenewbot.PathState.shootAgain));
                 }
                 break;
@@ -425,7 +425,7 @@ public class blue18closenewbot extends OpMode {
                     {
                         tree.setPower(0);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>1.35)
+                    if(pathTimer.getElapsedTimeSeconds()>1.45)
                     {
                         tree.setPower(1);
                         blocker.setPosition(1);
@@ -502,7 +502,7 @@ public class blue18closenewbot extends OpMode {
                 if (!follower.isBusy() && !collectionStarted) {
                     //rotator.setTargetPosition(rotatorStartPosition);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1100);
+                    launcher.setVelocity(1080);
                     hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
                     tree.setPower(1);
@@ -524,7 +524,7 @@ public class blue18closenewbot extends OpMode {
                 if (!follower.isBusy() && !shoot5Started) {
                     rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(shoot6);
-                    launcher.setVelocity(1100);
+                    launcher.setVelocity(1080);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     shoot5Started = true; // Mark as started to prevent calling again

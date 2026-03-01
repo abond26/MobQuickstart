@@ -71,7 +71,7 @@ public class ChassisLocal implements DriveConstants{
                 target.getX() - vx * ShotTimeLookupTable.getTime(dist),
                 target.getY() - vy * ShotTimeLookupTable.getTime(dist)
         );
-        if (dist < 130){
+        if (dist < 120){
             return sillyTarget;
         }else{
             return target;

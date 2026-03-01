@@ -59,7 +59,7 @@ public class blue15farside extends OpMode {
 
     // Localization: pose from dead wheels only (Pinpoint localizer in ConstantsNewBot.createFollower), same as SubsysTele.
     /** Blue backboard / goal target for localization-based rotator aiming (field coords). */
-    private static final double BLUE_GOAL_X = 1;
+    private static final double BLUE_GOAL_X = 2;
     private static final double BLUE_GOAL_Y = 144;
     /** Degrees added to turret angle to correct aim (positive = aim more right). Tune if shots go left/right. */
     private static final double BLUE_AIM_OFFSET_DEG = 0.5;
@@ -232,9 +232,9 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
                             blocker.setPosition(1);
-                            tree.setPower(0.75);
+                            tree.setPower(0.6);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }
@@ -282,9 +282,9 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
                             blocker.setPosition(1);
-                            tree.setPower(0.75);
+                            tree.setPower(0.6);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }
@@ -353,9 +353,9 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
                             blocker.setPosition(1);
-                            tree.setPower(0.75);
+                            tree.setPower(0.6);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }
@@ -406,9 +406,9 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
                             blocker.setPosition(1);
-                            tree.setPower(0.75);
+                            tree.setPower(0.6);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }
@@ -458,9 +458,9 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
+                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
                             blocker.setPosition(1);
-                            tree.setPower(0.75);
+                            tree.setPower(0.6);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }

@@ -38,7 +38,7 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
     Pose sillyTarget;
     Robot robot;
     RobotActions actions;
-
+    private int veloSwitchNum = 1;
     boolean autoControls = false;
     boolean sillyControls = false;
     private boolean lastDpadUp = false;
@@ -47,7 +47,10 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
     private LimelightRelocalization relocalization;
     private boolean autoRelocalize = false;
     private boolean lastDpadDown = false;
+    private boolean lastLeftBumper = false;
     private boolean lastTouchpad = false;
+
+
 
     // Limelight pipeline for AprilTag 3D (must match your Limelight config)
     private static final int APRILTAG_PIPELINE = 0;
@@ -80,6 +83,7 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
         int loopCount = 0;
         double lastLimelightPollTime = 0;
         com.qualcomm.hardware.limelightvision.LLResult cachedResult = null;
+        Pose lastLimelightPose = null; // To store the last successfully calculated pose from Limelight
 
         while (opModeIsActive()) {
             // ═══════════════════════════════════════════════════
@@ -98,9 +102,10 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
             }
             lastTouchpad = gamepad1.touchpad;
 
-            // DPAD DOWN: Force single relocalization
-            boolean forceRelocalize = gamepad1.dpad_down && !lastDpadDown;
+            // DPAD DOWN or LEFT BUMPER: Force single relocalization
+            boolean forceRelocalize = (gamepad1.dpad_down && !lastDpadDown) || (gamepad1.left_bumper && !lastLeftBumper);
             lastDpadDown = gamepad1.dpad_down;
+            lastLeftBumper = gamepad1.left_bumper;
 
             // 2. Poll Limelight asynchronously to prevent massive input lag
             // The camera runs at ~30 FPS (33ms). If we poll it every loop, we throttle the drive loop!
@@ -116,18 +121,65 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
                 }
             }
 
-            // Attempt relocalization only when needed
-            if ((autoRelocalize && cachedResult != null) || forceRelocalize) {
-                Pose currentPose = robot.chassisLocal.getPose();
-                Pose correctedPose = relocalization.getRelocalizationPose(currentPose, cachedResult);
-                if (correctedPose != null) {
-                    robot.chassisLocal.setPose(correctedPose);
+            if (gamepad1.dpad_down && (cachedResult != null)) {
+                // DPAD DOWN = Position Resnap Only (as requested)
+                com.pedropathing.geometry.Pose poseCorrection = relocalization.getRelocalizationPose(
+                        robot.chassisLocal.getPose(),
+                        cachedResult,
+                        false, // includeHeading = false
+                        robot.turret.getRotatorPos()
+                );
+                if (poseCorrection != null) {
+                    robot.chassisLocal.setPose(poseCorrection);
+                    lastLimelightPose = poseCorrection; // Store for telemetry
+                    gamepad1.rumble(250);
+                }
+            }
+
+            if (gamepad1.left_bumper && (cachedResult != null)) {
+                // LEFT BUMPER = Full Snap (Position + Heading)
+                com.pedropathing.geometry.Pose fullResnap = relocalization.getRelocalizationPose(
+                        robot.chassisLocal.getPose(),
+                        cachedResult,
+                        true, // includeHeading = true
+                        robot.turret.getRotatorPos()
+                );
+                if (fullResnap != null) {
+                    robot.chassisLocal.setPose(fullResnap);
+                    lastLimelightPose = fullResnap; // Store for telemetry
+                    gamepad1.rumble(500); // Heavy rumble for heading reset
+                }
+            }
+
+            if (autoRelocalize && (cachedResult != null)) {
+                // Auto-Relocalize = Position Only (safer for driving)
+                com.pedropathing.geometry.Pose poseCorrection = relocalization.getRelocalizationPose(
+                        robot.chassisLocal.getPose(),
+                        cachedResult,
+                        false, // includeHeading = false
+                        robot.turret.getRotatorPos()
+                );
+                if (poseCorrection != null) {
+                    robot.chassisLocal.setPose(poseCorrection);
+                    lastLimelightPose = poseCorrection; // Store for telemetry
                 }
             }
 
             // ═══════════════════════════════════════════════════
-            // MANUAL CONTROLS (same as BlueTele)
+            // MANUAL CONTROLS — SHOOTING (same as BlueTele)
             // ═══════════════════════════════════════════════════
+
+            // Turret velocity
+            if (gamepad1.aWasPressed()) {
+                robot.turret.shiftVelocity(launcherSpeedIncrement);
+            }
+            if (gamepad1.yWasPressed()) {
+                robot.turret.shiftVelocity(-launcherSpeedIncrement);
+            }
+            if (gamepad1.rightStickButtonWasPressed()) {
+                robot.turret.presetVeloSwitch(veloSwitchNum);
+                veloSwitchNum += 1;
+            }
 
             // Hood control
             actions.hoodControl(gamepad1.x, gamepad1.b);
@@ -142,9 +194,17 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
                 sillyControls = false;
             }
 
-            // Intake
+            // Feed (launch)
+            actions.launch(1, gamepad1.right_bumper);
+            if (gamepad1.right_bumper) {
+                gamepad1.rumble(100);
+            }
+
+            // Intake — only when not launching (same as BlueTele)
             double sumOfTrigs = gamepad1.left_trigger - gamepad1.right_trigger;
-            actions.intake(sumOfTrigs);
+            if (!gamepad1.right_bumper) {
+                actions.intake(sumOfTrigs);
+            }
 
             // ═══════════════════════════════════════════════════
             // AUTOMATIC CONTROLS (same as BlueTele)
@@ -182,33 +242,55 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
             telemetry.addLine("LIMELIGHT DATA");
             boolean bool = (cachedResult != null && cachedResult.isValid());
             if (bool) {
-                // Calculate distance manually since we bypass getDistance() to save a poll
-                double tyDeg = cachedResult.getTy();
-                double tyRad = Math.abs(Math.toRadians(tyDeg + robot.vision.limelightUpAngle));
-                double llDist = robot.vision.y / Math.tan(tyRad);
-                telemetry.addData("Limelight Dist", llDist);
+                // To get true distance to the AprilTag, we use the camera-to-target 3D translation vector.
+                java.util.List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> fiducials = cachedResult.getFiducialResults();
+                if (fiducials != null && !fiducials.isEmpty()) {
+                    com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult topTag = fiducials.get(0);
+                    org.firstinspires.ftc.robotcore.external.navigation.Pose3D camPose = topTag.getCameraPoseTargetSpace();
+
+                    telemetry.addData("Tag ID Seen", topTag.getFiducialId());
+
+                    if (camPose != null) {
+                        double xMeters = camPose.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).x;
+                        double yMeters = camPose.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).y;
+                        double zMeters = camPose.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).z;
+
+                        // 3D Distance (the hypotenuse in space, like a tape measure from lens to tag)
+                        double distance3DMeters = Math.sqrt(xMeters*xMeters + yMeters*yMeters + zMeters*zMeters);
+                        double distance3DInches = distance3DMeters * 39.3701;
+
+                        // 2D Ground Distance (ignoring height differences, matching the Pedro Pathing flat plane)
+                        double dist2D = Math.sqrt(xMeters*xMeters + zMeters*zMeters) * 39.3701;
+
+                        telemetry.addData("Limelight 3D Dist (Tape Measure)", "%.1f in", distance3DInches);
+                        telemetry.addData("Limelight 2D Dist (Flat Floor)", "%.1f in", dist2D);
+                    } else {
+                        telemetry.addData("Limelight 3D Dist", "N/A (No Pose3D in Fiducial)");
+                    }
+                } else {
+                    telemetry.addData("Limelight 3D Dist", "N/A (No Fiducials)");
+                }
             }
             telemetry.addData("Limelight?", bool);
 
             // Position data
             telemetry.addLine("");
-            telemetry.addLine("Automatic Telemetry");
-            telemetry.addLine("--------------------------");
-            telemetry.addData("Distance with Local", robot.chassisLocal.getDistance(target));
-            telemetry.addData("X Position", robot.chassisLocal.getPose().getX());
-            telemetry.addData("Y Position", robot.chassisLocal.getPose().getY());
-            telemetry.addData("Heading", Math.toDegrees(robot.chassisLocal.getPose().getHeading()));
+            telemetry.addLine("ROBOT POSITION");
+            telemetry.addData("X", "%.1f", robot.chassisLocal.getPose().getX());
+            telemetry.addData("Y", "%.1f", robot.chassisLocal.getPose().getY());
+            telemetry.addData("Heading", "%.1f°", Math.toDegrees(robot.chassisLocal.getPose().getHeading()));
 
             // Hardware data
             telemetry.addLine("");
-            telemetry.addLine("Basic Hardware Telemetry");
-            telemetry.addLine("--------------------------");
-            telemetry.addData("Hood position", robot.turret.getHoodPos());
-            telemetry.addData("Rotator position", robot.turret.getRotatorPos());
-            telemetry.addData("Rotator angle", "%.1f°",
+            telemetry.addLine("HARDWARE STATUS");
+            telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
+            telemetry.addData("Rotator", "%d (%.1f°)",
+                    robot.turret.getRotatorPos(),
                     LimelightRelocalization.rotatorTicksToDegrees(robot.turret.getRotatorPos()));
-            telemetry.addData("Intake power", robot.intake.getPower());
+            telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
+            telemetry.addData("Launcher velocity", robot.turret.getVelocity());
             telemetry.update();
+
         }
 
         // ── CLEANUP (Crucial for preventing stop() hangs in LinearOpMode) ──
@@ -227,3 +309,4 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
         }
     }
 }
+

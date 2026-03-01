@@ -45,7 +45,7 @@ import java.util.List;
  *       chassisLocal.setPose(newPose);
  *   }
  */
-public class LimelightRelocalization implements LimelightRelocalizationConstants {
+public class LimelightRelocalization implements LimelightRelocalizationConstants, org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants {
 
     private Limelight3A limelight;
 
@@ -97,17 +97,14 @@ public class LimelightRelocalization implements LimelightRelocalizationConstants
     }
 
     /**
-     * Attempt to relocalize the robot using AprilTags.
-     *
-     * Returns a corrected Pose in Pedro Pathing coordinates if a valid
-     * AprilTag reading is available, or null if no valid reading.
-     *
-     * @param currentPedroPose the current Pedro Pathing pose (for sanity checking)
-     * @param result the cached LLResult polled once per loop in TeleOp
-     * @return corrected Pose in Pedro Pathing coords, or null if no valid data
+     * Calculates the corrected field pose from Limelight data.
+     * @param currentPedroPose The current pose from Pedro Pathing (deadwheels)
+     * @param cachedResult The Limelight result to use
+     * @param includeHeading If true, will also return the visually calculated chassis heading.
+     * @param turretTicks The current encoder ticks of the turret rotator
+     * @return A new Pose representing the corrected world position, or null if rejected.
      */
-    @Nullable
-    public Pose getRelocalizationPose(@NonNull Pose currentPedroPose, @Nullable LLResult result) {
+    public Pose getRelocalizationPose(Pose currentPedroPose, LLResult cachedResult, boolean includeHeading, int turretTicks) {
         if (limelight == null) {
             lastResultValid = false;
             lastRejectReason = "Limelight not initialized";
@@ -115,14 +112,14 @@ public class LimelightRelocalization implements LimelightRelocalizationConstants
         }
 
         // ── Check 1: Result exists and is valid ──
-        if (result == null || !result.isValid()) {
+        if (cachedResult == null || !cachedResult.isValid()) {
             lastResultValid = false;
             lastRejectReason = "No valid result";
             return null;
         }
 
         // ── Check 2: Fiducials detected ──
-        List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+        List<LLResultTypes.FiducialResult> fiducials = cachedResult.getFiducialResults();
         if (fiducials == null || fiducials.size() < MIN_FIDUCIALS_REQUIRED) {
             lastResultValid = false;
             lastRejectReason = "Not enough fiducials: " +
@@ -131,22 +128,24 @@ public class LimelightRelocalization implements LimelightRelocalizationConstants
         }
 
         // ── Get MT1 (botpose - pure visual) ──
-        Pose3D botposeMT1 = result.getBotpose();
+        // Note: WPILib/Limelight standard for botpose is (0,0) at field center,
+        // with robot facing +X as Right (Red Alliance) and +Y as Forward (Audience to Backdrop).
+        Pose3D botposeMT1 = cachedResult.getBotpose();
         if (botposeMT1 == null) {
             lastResultValid = false;
             lastRejectReason = "No botpose available";
             return null;
         }
 
-        Position p1 = botposeMT1.getPosition().toUnit(DistanceUnit.INCH);
-        mt1X = p1.x;
-        mt1Y = p1.y;
+        Position posInches = botposeMT1.getPosition().toUnit(DistanceUnit.INCH);
+        mt1X = posInches.x;
+        mt1Y = posInches.y;
         mt1Yaw = botposeMT1.getOrientation().getYaw(AngleUnit.DEGREES);
 
         // We will use MT1 for our position because MT2 injection on a turret is too unstable.
         double limelightX = mt1X; // inches, field-center origin
         double limelightY = mt1Y; // inches, field-center origin
-        double limelightZ = p1.z; // inches, height
+        double limelightZ = posInches.z; // inches, height
         double headingRad = Math.toRadians(mt1Yaw);
 
         // Save raw values for telemetry debugging (we're now using MT1 as raw)
@@ -164,15 +163,33 @@ public class LimelightRelocalization implements LimelightRelocalizationConstants
         //   +X = Right
         //   +Y = Forward
 
-        // Since Pedro is corner-origin, we add 72 (FIELD_OFFSET).
-        // The MT1 data (X=16.5, Y=25.0) correctly maps to Pedro (88.5, 97.0)
-        double pedroX = limelightX + FIELD_OFFSET_X;
-        double pedroY = limelightY + FIELD_OFFSET_Y;
+        // Since Pedro is corner-origin, we add 72 (FIELD_OFFSET)
+        // The user tested moving Left/Back. Pedro decreased, but Limelight increased.
+        // Therefore, we MUST invert the Limelight axes to match Pedro's direction grid.
+        double invertedLLX = limelightY;
+        double invertedLLY = -limelightX;
 
-        // Note: For heading, we ALWAYS keep the Pedro Pathing (deadwheel/IMU) heading.
-        // The Limelight's MT1 Yaw represents the *camera's* yaw (turret inclusive),
-        // not the chassis heading. So we use currentPedroPose.getHeading() below.
-        double chassisHeadingRad = currentPedroPose.getHeading();
+        double pedroX = invertedLLX + FIELD_OFFSET_X;
+        double pedroY = invertedLLY + FIELD_OFFSET_Y;
+
+        // --- HEADING CALCULATION ---
+        double chassisHeadingRad;
+        if (includeHeading) {
+            // Limelight mt1Yaw is the visual heading of the CAMERA in field space.
+            // Turret angle is the rotation of the camera RELATIVE to the CHASSIS.
+            // ChassisHeading = CameraYaw - TurretAngle
+            double turretAngleDeg = (turretTicks - ROTATOR_ZERO_TICKS) / TICKS_PER_DEGREE;
+            double calculatedChassisHeadingDeg = mt1Yaw - turretAngleDeg;
+
+            // Normalize to [-180, 180]
+            while (calculatedChassisHeadingDeg > 180) calculatedChassisHeadingDeg -= 360;
+            while (calculatedChassisHeadingDeg < -180) calculatedChassisHeadingDeg += 360;
+
+            chassisHeadingRad = Math.toRadians(calculatedChassisHeadingDeg);
+        } else {
+            // Default: Keep the Pedro Pathing (deadwheel/IMU) heading as the source of truth.
+            chassisHeadingRad = currentPedroPose.getHeading();
+        }
 
         Pose correctedPose = new Pose(pedroX, pedroY, chassisHeadingRad);
 
@@ -285,3 +302,4 @@ public class LimelightRelocalization implements LimelightRelocalizationConstants
         }
     }
 }
+

@@ -363,7 +363,7 @@ public class blue18shotwhilemove extends OpMode {
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     shoot3Started = true;
                 }
-                if (pathTimer.getElapsedTimeSeconds() > 1.0) {
+                if (pathTimer.getElapsedTimeSeconds() > 1.25) {
                     tree.setPower(0);
                 }
                 if (shoot3Started) {
