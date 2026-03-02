@@ -57,7 +57,7 @@ public class RobotActions implements BlueUniversalConstants {
                 farShootingActive = true;
                 // How many balls have been fed based on elapsed time
                 long elapsed = System.currentTimeMillis() - launchStartTime;
-                int expectedBalls = (int) (elapsed / 75);
+                int expectedBalls = (int) (elapsed / 50);
                 if (expectedBalls > shotCount) {
                     shotCount = expectedBalls;
                 }

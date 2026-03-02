@@ -1,17 +1,14 @@
-package org.firstinspires.ftc.teamcode.NewBotTele;
+package org.firstinspires.ftc.teamcode.ReferenceTeles;
 
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 
-@TeleOp
-public class RedTele extends LinearOpMode implements RedUniversalConstants {
+public class BlueTeleExample extends LinearOpMode implements BlueUniversalConstants {
     Pose sillyTarget;
     Robot robot;
     RobotActions actions;
@@ -68,10 +65,6 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
                 robot.turret.shiftRotator(rotatorIncrement);
                 sillyControls = false;
             }
-            if (gamepad1.dpad_up && !lastDpadUp) {
-                actions.setRobotPose(dpadUpPose);
-            }
-            lastDpadUp = gamepad1.dpad_up;
 
             // Feed
             actions.launch(1, gamepad1.right_bumper, sillyTarget);
@@ -79,12 +72,12 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
             if (gamepad1.right_bumper) {
                 gamepad1.rumble(100);
             }
+
+            // intake
             double sumOfTrigs = gamepad1.left_trigger - gamepad1.right_trigger;
             if (!gamepad1.right_bumper) {
                 actions.intake(sumOfTrigs);
             }
-
-            // intake
 
             // AUTOMATIC CONTROLS
             // ----------------------------------------------
@@ -105,6 +98,12 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
             }
 
             // Relocalization
+
+            if (gamepad1.dpad_up && !lastDpadUp) {
+                actions.setRobotPose(dpadUpPose);
+            }
+            lastDpadUp = gamepad1.dpad_up;
+
             if (gamepad1.touchpad) {
                 actions.LimelightRelocal(telemetry);
             }
@@ -124,6 +123,7 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
                 telemetry.addData("Limelight Dist", llDist);
             }
 
+            telemetry.addData("Limelight?", bool);
             telemetry.addData("Limelight?", bool);
 
             telemetry.addLine("Automatic Telemetry");

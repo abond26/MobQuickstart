@@ -10,8 +10,8 @@ public interface RedUniversalConstants {
     //Pose defaultPose = new Pose(24.4, 126.7, Math.toRadians(143));
     Pose defaultPose = new Pose(117.3, 132, Math.toRadians(36));
     Pose target = new Pose(140, 144, 0);
-    Pose aprilTagPose = new Pose(128, 132, Math.toRadians(145));
-    Pose dpadUpPose = new Pose(15.77, 14.84, Math.toRadians(180));
+    Pose aprilTagPose = new Pose(16, 132, Math.toRadians(145));
+    Pose dpadUpPose = new Pose(136, 9, Math.toRadians(0));
 
 
     double CLOSE_HOOD_POSITION = 1; // Hood position for close shots

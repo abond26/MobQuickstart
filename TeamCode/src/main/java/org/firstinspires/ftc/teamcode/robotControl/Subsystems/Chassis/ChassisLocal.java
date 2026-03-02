@@ -56,9 +56,9 @@ public class ChassisLocal implements DriveConstants{
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(r), 1);
 
         leftFront.setPower((y + x + r) / denominator);
-        leftRear.setPower((y - x + r) / denominator * driveMultiplier);
+        leftRear.setPower((y - x + r) / denominator );
         rightFront.setPower((y - x - r) / denominator);
-        rightRear.setPower((y + x - r) / denominator * driveMultiplier);
+        rightRear.setPower((y + x - r) / denominator);
     }
 
     public Pose sillyTargetPose(Pose target){

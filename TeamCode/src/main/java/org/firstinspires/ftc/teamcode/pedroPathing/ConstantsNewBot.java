@@ -33,7 +33,7 @@ public class ConstantsNewBot {
 
 
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99,
+    public static PathConstraints pathConstraints = new PathConstraints(100,
             100,
             1.3,
             1);
