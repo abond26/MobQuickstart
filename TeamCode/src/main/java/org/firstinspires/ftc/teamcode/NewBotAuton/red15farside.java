@@ -56,7 +56,7 @@ public class red15farside extends OpMode {
 
     private int y = tagHeight - limeHeight;
 
-    // Localization: pose comes from dead wheels only (Pinpoint localizer in ConstantsNewBot.createFollower), same as SubsysTele.
+    // Localization: pose from dead wheels only (Pinpoint localizer in ConstantsNewBot.createFollower), same as SubsysTele.
     /** Red backboard / goal target for localization-based rotator aiming (field coords). */
     private static final double RED_GOAL_X = 143;
     private static final double RED_GOAL_Y = 144;
@@ -145,7 +145,7 @@ public class red15farside extends OpMode {
     private final Pose shootPose1 = new Pose(89, 15, Math.toRadians(67));
     private final Pose collect1ControlPoint = new Pose(96.19073569482288, 35.68937329700272);
 
-    private final Pose collect1thing = new Pose(131, 36, Math.toRadians(0));
+    private final Pose collect1thing = new Pose(129, 36, Math.toRadians(0));
     private final Pose shootPose2 = new Pose(89, 15, Math.toRadians(66));
 
     private final Pose collect2End = new Pose(132, 12, Math.toRadians(0));

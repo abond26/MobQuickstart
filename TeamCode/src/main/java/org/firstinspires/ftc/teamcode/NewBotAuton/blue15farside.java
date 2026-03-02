@@ -21,7 +21,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants;
-import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "sideways 15 far blue", group = "sideways")
 public class blue15farside extends OpMode {
@@ -54,12 +53,18 @@ public class blue15farside extends OpMode {
     private static final double DISTANCE_THRESHOLD = 180.0;
     private static final double CLOSE_HOOD_POSITION = .2541; // Hood position for close shots
     private static final double FAR_HOOD_POSITION = 0.36; // Hood position for far shots
+    /** Mid hood cap for far multi-shot (same idea as RobotActions zone 3). */
+    private static final double MID_HOOD_POSITION = 0.5;
+    /** Hood position increment per ball during far shooting (shift hood down per ball). */
+    private static final double FAR_HOOD_INCREMENT_PER_BALL = 0.3;
+    /** Ms per ball fed (same as RobotActions) – used to step hood by time. */
+    private static final long MS_PER_BALL = 75;
 
     private int y = tagHeight - limeHeight;
 
     // Localization: pose from dead wheels only (Pinpoint localizer in ConstantsNewBot.createFollower), same as SubsysTele.
     /** Blue backboard / goal target for localization-based rotator aiming (field coords). */
-    private static final double BLUE_GOAL_X = 2;
+    private static final double BLUE_GOAL_X = 4;
     private static final double BLUE_GOAL_Y = 144;
     /** Degrees added to turret angle to correct aim (positive = aim more right). Tune if shots go left/right. */
     private static final double BLUE_AIM_OFFSET_DEG = 0.5;
@@ -68,8 +73,8 @@ public class blue15farside extends OpMode {
     /** Only aim rotator when chassis speed is below this (in/s) so we lock on when robot is at the point and not moving. */
     private static final double CHASSIS_AT_REST_THRESHOLD = 2.0;
     /** Seconds to keep shooting after rotator is aimed before moving to next step. */
-    private static final double SHOOT_DWELL_SEC = 1.45;
-    private static final double SHOOT_DWELL_SEC_FIRST_SHOT = 3;
+    private static final double SHOOT_DWELL_SEC = 1.6;
+    private static final double SHOOT_DWELL_SEC_FIRST_SHOT = 2.75;
 
     //Rotator: use Turret subsystem (same as SubsysTele – direction, power, rotator180Range)
     int limelightMotor180Range = 910;
@@ -90,6 +95,10 @@ public class blue15farside extends OpMode {
     private DcMotor tree, theWheelOfTheOx, rotator;
     private Turret turret;
     private Timer pathTimer, opModeTimer, shootDwellTimer;
+    /** Timer for hood step (starts when blocker opens to position 1). */
+    private Timer feedStartTimer;
+    /** True once we have set blocker to 1 this state; hood steps from that moment. */
+    private boolean blockerOpenedThisState = false;
     /** True once rotator has been aimed this state; used to start shoot dwell timer. */
     private boolean aimedForShootDwell = false;
 
@@ -146,7 +155,7 @@ public class blue15farside extends OpMode {
     private final Pose shootPose1 = new Pose(55, 15, Math.toRadians(113));
     private final Pose collect1ControlPoint = new Pose(47.80926430517712, 35.68937329700272);
 
-    private final Pose collect1thing = new Pose(13, 36, Math.toRadians(180));
+    private final Pose collect1thing = new Pose(15, 36, Math.toRadians(180));
     private final Pose shootPose2 = new Pose(55, 15, Math.toRadians(114));
 
     private final Pose collect2End = new Pose(12, 12, Math.toRadians(180));
@@ -224,6 +233,11 @@ public class blue15farside extends OpMode {
                 setPathState(PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
+                if (blockerOpenedThisState) {
+                    hood.setPosition(getFarShotHoodPositionFromElapsed((long) (feedStartTimer.getElapsedTimeSeconds() * 1000)));
+                } else {
+                    hood.setPosition(FAR_HOOD_POSITION);
+                }
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtBlueGoal();
@@ -232,9 +246,13 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
                             blocker.setPosition(1);
-                            tree.setPower(0.6);
+                            if (!blockerOpenedThisState) {
+                                blockerOpenedThisState = true;
+                                feedStartTimer.resetTimer();
+                            }
+                            tree.setPower(0.75);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }
@@ -274,6 +292,11 @@ public class blue15farside extends OpMode {
                 }
                 break;
             case shooting1:
+                if (blockerOpenedThisState) {
+                    hood.setPosition(getFarShotHoodPositionFromElapsed((long) (feedStartTimer.getElapsedTimeSeconds() * 1000)));
+                } else {
+                    hood.setPosition(FAR_HOOD_POSITION);
+                }
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtBlueGoal();
@@ -282,9 +305,13 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
                             blocker.setPosition(1);
-                            tree.setPower(0.6);
+                            if (!blockerOpenedThisState) {
+                                blockerOpenedThisState = true;
+                                feedStartTimer.resetTimer();
+                            }
+                            tree.setPower(0.75);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }
@@ -345,6 +372,11 @@ public class blue15farside extends OpMode {
                 }
                 break;
             case shooting2:
+                if (blockerOpenedThisState) {
+                    hood.setPosition(getFarShotHoodPositionFromElapsed((long) (feedStartTimer.getElapsedTimeSeconds() * 1000)));
+                } else {
+                    hood.setPosition(FAR_HOOD_POSITION);
+                }
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtBlueGoal();
@@ -353,9 +385,13 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
                             blocker.setPosition(1);
-                            tree.setPower(0.6);
+                            if (!blockerOpenedThisState) {
+                                blockerOpenedThisState = true;
+                                feedStartTimer.resetTimer();
+                            }
+                            tree.setPower(0.75);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }
@@ -398,6 +434,11 @@ public class blue15farside extends OpMode {
                 }
                 break;
             case shooting3:
+                if (blockerOpenedThisState) {
+                    hood.setPosition(getFarShotHoodPositionFromElapsed((long) (feedStartTimer.getElapsedTimeSeconds() * 1000)));
+                } else {
+                    hood.setPosition(FAR_HOOD_POSITION);
+                }
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtBlueGoal();
@@ -406,9 +447,13 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
                             blocker.setPosition(1);
-                            tree.setPower(0.6);
+                            if (!blockerOpenedThisState) {
+                                blockerOpenedThisState = true;
+                                feedStartTimer.resetTimer();
+                            }
+                            tree.setPower(0.75);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }
@@ -450,6 +495,11 @@ public class blue15farside extends OpMode {
                 }
                 break;
             case shooting4:
+                if (blockerOpenedThisState) {
+                    hood.setPosition(getFarShotHoodPositionFromElapsed((long) (feedStartTimer.getElapsedTimeSeconds() * 1000)));
+                } else {
+                    hood.setPosition(FAR_HOOD_POSITION);
+                }
                 launcher.setVelocity(1520);
                 if (!follower.isBusy()) {
                     if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtBlueGoal();
@@ -458,9 +508,13 @@ public class blue15farside extends OpMode {
                             aimedForShootDwell = true;
                             shootDwellTimer.resetTimer();
                         }
-                        if (launcher.getVelocity() >= 1500 && launcher.getVelocity() <= 1540) {
+                        if (launcher.getVelocity() >= 1520 && launcher.getVelocity() <= 1560) {
                             blocker.setPosition(1);
-                            tree.setPower(0.6);
+                            if (!blockerOpenedThisState) {
+                                blockerOpenedThisState = true;
+                                feedStartTimer.resetTimer();
+                            }
+                            tree.setPower(0.75);
                             theWheelOfTheOx.setPower(-1);
                         }
                     }
@@ -506,6 +560,7 @@ public class blue15farside extends OpMode {
         collectAgainAgainAgainEndStarted = false;
         parkingStarted = false;
         aimedForShootDwell = false;
+        blockerOpenedThisState = false;
     }
 
     @Override
@@ -520,6 +575,7 @@ public class blue15farside extends OpMode {
         pathTimer = new Timer();
         opModeTimer = new Timer();
         shootDwellTimer = new Timer();
+        feedStartTimer = new Timer();
         follower = ConstantsNewBot.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
@@ -555,14 +611,9 @@ public class blue15farside extends OpMode {
 
     @Override
     public void loop() {
-        follower.update();
+        follower.update(); // dead-wheel localization + path following (same as SubsysTele chassisLocal.update())
         statePathUpdate();
-
-        // Continuously save pose so it's saved even if autonomous ends early
-        PoseStorage.savePose(follower.getPose());
-        if (rotator != null) {
-            PoseStorage.saveRotatorPosition(rotator.getCurrentPosition());
-        }        telemetry.addData("paths state", pathState.toString());
+        telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
@@ -651,6 +702,17 @@ public class blue15farside extends OpMode {
                 hood.setPosition(CLOSE_HOOD_POSITION);
             }
         }
+    }
+
+    /**
+     * Hood position for far shooting from elapsed time (same as RobotActions zone 3).
+     * Starts at FAR; every MS_PER_BALL ms counts as one ball and steps hood toward MID.
+     * @param elapsedMs time since shooting started in this state (pathTimer)
+     */
+    private double getFarShotHoodPositionFromElapsed(long elapsedMs) {
+        int expectedBalls = (int) (elapsedMs / MS_PER_BALL);
+        double pos = FAR_HOOD_POSITION + (expectedBalls * FAR_HOOD_INCREMENT_PER_BALL);
+        return Math.min(pos, MID_HOOD_POSITION);
     }
 
     public void updateLimelightAdjustments() {

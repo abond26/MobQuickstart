@@ -8,33 +8,34 @@ import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
-import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
+import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 
- /**
-  * ═══════════════════════════════════════════════════════════════════
-  *  TEST TELEOP — BlueTele + Limelight AprilTag Relocalization
-  * ═══════════════════════════════════════════════════════════════════
-  *
-  *  This is a copy of BlueTele with MegaTag2 AprilTag relocalization
-  *  added on top. When the Limelight sees an AprilTag, it corrects
-  *  the Pedro Pathing deadwheel pose to fix localization drift.
-  *
-  *  NEW CONTROLS (in addition to all BlueTele controls):
-  *    DPAD DOWN  = One-time position-only snap (x,y)
-  *    TOUCHPAD   = One-time full snap (position + heading)
-  *
-  *  All original BlueTele controls still work:
-  *    Left stick   = drive
-  *    Right stick  = rotate
-  *    X / B        = hood control
-  *    DPAD L/R     = manual rotator
-  *    Triggers     = intake
-  *    Left stick button  = toggle silly (dynamic) auto-aim
-  *    DPAD UP      = relocalize to dpadUpPose (manual override)
-  * ═══════════════════════════════════════════════════════════════════
-  */
-@TeleOp(name = "blue test tele", group = "test")
-public class testTele extends LinearOpMode implements BlueUniversalConstants {
+/**
+ * ═══════════════════════════════════════════════════════════════════
+ *  TEST TELEOP — RedTele + Limelight AprilTag Relocalization
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ *  This is a copy of Blue-side testTele with MegaTag2 AprilTag
+ *  relocalization, but using the red-side constants and default pose.
+ *  When the Limelight sees an AprilTag, it corrects the Pedro Pathing
+ *  deadwheel pose to fix localization drift.
+ *
+ *  NEW CONTROLS (in addition to all RedTele controls):
+ *    DPAD DOWN  = One-time position-only snap (x,y)
+ *    TOUCHPAD   = One-time full snap (position + heading)
+ *
+ *  All original RedTele controls still work:
+ *    Left stick   = drive
+ *    Right stick  = rotate
+ *    X / B        = hood control
+ *    DPAD L/R     = manual rotator
+ *    Triggers     = intake
+ *    Left stick button  = toggle silly (dynamic) auto-aim
+ *    DPAD UP      = relocalize to dpadUpPose (manual override)
+ * ═══════════════════════════════════════════════════════════════════
+ */
+@TeleOp(name = "red test tele", group = "test")
+public class testTele2 extends LinearOpMode implements RedUniversalConstants {
     Pose sillyTarget;
     Robot robot;
     RobotActions actions;
@@ -43,12 +44,10 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
     boolean sillyControls = false;
     private boolean lastDpadUp = false;
 
-     // ── Relocalization ──
-     private LimelightRelocalization relocalization;
-     private boolean lastDpadDown = false;
-     private boolean lastTouchpad = false;
-
-
+    // ── Relocalization ──
+    private LimelightRelocalization relocalization;
+    private boolean lastDpadDown = false;
+    private boolean lastTouchpad = false;
 
     // Limelight pipeline for AprilTag 3D (must match your Limelight config)
     private static final int APRILTAG_PIPELINE = 0;
@@ -78,9 +77,9 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
         waitForStart();
         robot.chassisLocal.startTeleop();
 
-         int loopCount = 0;
-         double lastLimelightPollTime = 0;
-         com.qualcomm.hardware.limelightvision.LLResult cachedResult = null;
+        int loopCount = 0;
+        double lastLimelightPollTime = 0;
+        com.qualcomm.hardware.limelightvision.LLResult cachedResult = null;
         Pose lastLimelightPose = null; // To store the last successfully calculated pose from Limelight
 
         while (opModeIsActive()) {
@@ -90,57 +89,57 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
             robot.chassisLocal.update();
             robot.chassisLocal.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-             // ═══════════════════════════════════════════════════
-             // LIMELIGHT MEGATAG1 RELOCALIZATION
-             // ═══════════════════════════════════════════════════
+            // ═══════════════════════════════════════════════════
+            // LIMELIGHT MEGATAG1 RELOCALIZATION
+            // ═══════════════════════════════════════════════════
 
-             // Edge-detect inputs for single snaps
-             boolean positionSnapPressed = gamepad1.dpad_down && !lastDpadDown;
-             boolean fullSnapPressed = gamepad1.touchpad && !lastTouchpad;
-             lastDpadDown = gamepad1.dpad_down;
-             lastTouchpad = gamepad1.touchpad;
+            // Edge-detect inputs for single snaps
+            boolean positionSnapPressed = gamepad1.dpad_down && !lastDpadDown;
+            boolean fullSnapPressed = gamepad1.touchpad && !lastTouchpad;
+            lastDpadDown = gamepad1.dpad_down;
+            lastTouchpad = gamepad1.touchpad;
 
-             // When either snap is requested, grab a fresh Limelight result
-             if (positionSnapPressed || fullSnapPressed) {
-                 cachedResult = robot.vision.getLimelight().getLatestResult();
-                 lastLimelightPollTime = getRuntime();
-             } else if (cachedResult != null && (getRuntime() - lastLimelightPollTime > 1.0)) {
-                 // Clear stale data after 1 second (for telemetry cleanliness)
-                 cachedResult = null;
-             }
+            // When either snap is requested, grab a fresh Limelight result
+            if (positionSnapPressed || fullSnapPressed) {
+                cachedResult = robot.vision.getLimelight().getLatestResult();
+                lastLimelightPollTime = getRuntime();
+            } else if (cachedResult != null && (getRuntime() - lastLimelightPollTime > 1.0)) {
+                // Clear stale data after 1 second (for telemetry cleanliness)
+                cachedResult = null;
+            }
 
-             if (positionSnapPressed && (cachedResult != null) && cachedResult.isValid()) {
-                 // DPAD DOWN = Position Resnap Only
-                 com.pedropathing.geometry.Pose poseCorrection = relocalization.getRelocalizationPose(
-                         robot.chassisLocal.getPose(),
-                         cachedResult,
-                         false, // includeHeading = false
-                         robot.turret.getRotatorPos()
-                 );
-                 if (poseCorrection != null) {
-                     robot.chassisLocal.setPose(poseCorrection);
-                     lastLimelightPose = poseCorrection; // Store for telemetry
-                     gamepad1.rumble(250);
-                 }
-             }
+            if (positionSnapPressed && (cachedResult != null) && cachedResult.isValid()) {
+                // DPAD DOWN = Position Resnap Only
+                com.pedropathing.geometry.Pose poseCorrection = relocalization.getRelocalizationPose(
+                        robot.chassisLocal.getPose(),
+                        cachedResult,
+                        false, // includeHeading = false
+                        robot.turret.getRotatorPos()
+                );
+                if (poseCorrection != null) {
+                    robot.chassisLocal.setPose(poseCorrection);
+                    lastLimelightPose = poseCorrection; // Store for telemetry
+                    gamepad1.rumble(250);
+                }
+            }
 
-             if (fullSnapPressed && (cachedResult != null) && cachedResult.isValid()) {
-                 // TOUCHPAD = Full Snap (Position + Heading)
-                 com.pedropathing.geometry.Pose fullResnap = relocalization.getRelocalizationPose(
-                         robot.chassisLocal.getPose(),
-                         cachedResult,
-                         true, // includeHeading = true
-                         robot.turret.getRotatorPos()
-                 );
-                 if (fullResnap != null) {
-                     robot.chassisLocal.setPose(fullResnap);
-                     lastLimelightPose = fullResnap; // Store for telemetry
-                     gamepad1.rumble(500); // Heavy rumble for heading reset
-                 }
-             }
+            if (fullSnapPressed && (cachedResult != null) && cachedResult.isValid()) {
+                // TOUCHPAD = Full Snap (Position + Heading)
+                com.pedropathing.geometry.Pose fullResnap = relocalization.getRelocalizationPose(
+                        robot.chassisLocal.getPose(),
+                        cachedResult,
+                        true, // includeHeading = true
+                        robot.turret.getRotatorPos()
+                );
+                if (fullResnap != null) {
+                    robot.chassisLocal.setPose(fullResnap);
+                    lastLimelightPose = fullResnap; // Store for telemetry
+                    gamepad1.rumble(500); // Heavy rumble for heading reset
+                }
+            }
 
             // ═══════════════════════════════════════════════════
-            // MANUAL CONTROLS — SHOOTING (same as BlueTele)
+            // MANUAL CONTROLS — SHOOTING (same as RedTele)
             // ═══════════════════════════════════════════════════
 
             // Turret velocity
@@ -174,21 +173,21 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
                 gamepad1.rumble(100);
             }
 
-            // Intake — only when not launching (same as BlueTele)
+            // Intake — only when not launching
             double sumOfTrigs = gamepad1.left_trigger - gamepad1.right_trigger;
             if (!gamepad1.right_bumper) {
                 actions.intake(sumOfTrigs);
             }
 
             // ═══════════════════════════════════════════════════
-            // AUTOMATIC CONTROLS (same as BlueTele)
+            // AUTOMATIC CONTROLS (same as RedTele)
             // ═══════════════════════════════════════════════════
 
             if (gamepad1.leftStickButtonWasPressed()) {
                 sillyControls = !sillyControls;
             }
 
-            // Manual relocalization (DPAD UP — same as BlueTele)
+            // Manual relocalization (DPAD UP — same as RedTele)
             if (gamepad1.dpad_up && !lastDpadUp) {
                 actions.setRobotPose(dpadUpPose);
             }
@@ -283,4 +282,3 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
         }
     }
 }
-
