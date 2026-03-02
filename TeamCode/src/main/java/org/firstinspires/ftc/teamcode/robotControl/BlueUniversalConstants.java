@@ -11,7 +11,9 @@ public interface BlueUniversalConstants {
     Pose defaultPose = new Pose(26.7, 132, Math.toRadians(144));
     Pose target = new Pose(4, 144, 0);
     Pose aprilTagPose = new Pose(16, 132, Math.toRadians(145));
-    Pose dpadUpPose = new Pose(129, 23, Math.toRadians(0));
+    //Pose dpadUpPose = new Pose(130.8, 24.08, Math.toRadians(0)); //change for every auton close
+    Pose dpadUpPose = new Pose(122.5, 12.5, Math.toRadians(0)); //change for every auton far
+
 
 
 

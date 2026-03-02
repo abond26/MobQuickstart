@@ -24,11 +24,17 @@ public class ConstantsNewBot {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .centripetalScaling(0.00035)
-            .headingPIDFCoefficients(new PIDFCoefficients(1.08, 0.0001, 0.032, 0))
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.45, 0.00001, 0.045, 0))
-            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.01, 0, 0.00001, 0.01, 0.03)))
+            .headingPIDFCoefficients(new PIDFCoefficients(1.5, 0.01, 0.09, 0.01))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.3, 0.01, 0.05, 0.01))
+            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.011, 0.001, 0.000015, 0.01, 0.03)))
            .forwardZeroPowerAcceleration(-35.10634166681744)
             .lateralZeroPowerAcceleration(-69.08488597190241)
+            .useSecondaryTranslationalPIDF(true)
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
+            .useSecondaryHeadingPIDF(true)
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
+            .useSecondaryDrivePIDF(true)
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0,0.01,0.6,0.01))
             .mass(11.793);
 
 
