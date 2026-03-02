@@ -20,7 +20,6 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
     boolean sillyControls = false;
     private boolean lastDpadUp = false;
 
-
     @Override
     public void runOpMode() throws InterruptedException {
         Pose startPose = PoseStorage.loadPose(defaultPose);
@@ -37,17 +36,15 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
         waitForStart();
         robot.chassisLocal.startTeleop();
 
-
         int loopCount = 0;
         while (opModeIsActive()) {
-            //Driving and updating position
+            // Driving and updating position
             robot.chassisLocal.update();
             robot.chassisLocal.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-
-            //MANUAL CONTROLS
-            //----------------------------------------------
-            //Turret velocity
+            // MANUAL CONTROLS
+            // ----------------------------------------------
+            // Turret velocity
             if (gamepad1.aWasPressed()) {
                 robot.turret.shiftVelocity(launcherSpeedIncrement);
             }
@@ -59,11 +56,10 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
                 veloSwitchNum += 1;
             }
 
-
-            //Hood control
+            // Hood control
             actions.hoodControl(gamepad1.x, gamepad1.b);
 
-            //Rotator control
+            // Rotator control
             if (gamepad1.dpad_left) {
                 robot.turret.shiftRotator(-rotatorIncrement);
                 sillyControls = false;
@@ -77,59 +73,53 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
             }
             lastDpadUp = gamepad1.dpad_up;
 
-
-            //Feed
-            actions.launch(1, gamepad1.right_bumper);
-            //Rumble on launch
-            if (gamepad1.right_bumper){
+            // Feed
+            actions.launch(1, gamepad1.right_bumper, sillyTarget);
+            // Rumble on launch
+            if (gamepad1.right_bumper) {
                 gamepad1.rumble(100);
             }
-            double sumOfTrigs = gamepad1.left_trigger-gamepad1.right_trigger;
-            if (!gamepad1.right_bumper){
+            double sumOfTrigs = gamepad1.left_trigger - gamepad1.right_trigger;
+            if (!gamepad1.right_bumper) {
                 actions.intake(sumOfTrigs);
             }
 
+            // intake
 
-            //intake
+            // AUTOMATIC CONTROLS
+            // ----------------------------------------------
 
+            // switch
+            // if (gamepad1.touchpadWasPressed()){
+            // autoControls = !autoControls;
+            // }
 
-
-
-            //AUTOMATIC CONTROLS
-            //----------------------------------------------
-
-            //switch
-//            if (gamepad1.touchpadWasPressed()){
-//                autoControls = !autoControls;
-//            }
-
-            //Static shooting - technically we can remove this. Just here for testing
-//            if (autoControls) {
-//                actions.aimRotatorLocal(target, telemetry);
-//                actions.adjustShootingParams(target);
-//            }
+            // Static shooting - technically we can remove this. Just here for testing
+            // if (autoControls) {
+            // actions.aimRotatorLocal(target, telemetry);
+            // actions.adjustShootingParams(target);
+            // }
 
             if (gamepad1.leftStickButtonWasPressed()) {
                 sillyControls = !sillyControls;
             }
 
-            //Relocalization
+            // Relocalization
             if (gamepad1.touchpad) {
-                actions.relocalizeBlue(aprilTagPose, telemetry);
+                actions.LimelightRelocal(telemetry);
             }
 
-            //Dynamic shooting - also covers static shooting obv
+            // Dynamic shooting - also covers static shooting obv
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);
-            if (sillyControls & !autoControls ) {
+            if (sillyControls & !autoControls) {
                 actions.aimRotatorLocal(sillyTarget, telemetry);
                 actions.adjustShootingParams(sillyTarget);
             }
 
-
             telemetry.addLine("LIMELIGHT DATA");
 
             boolean bool = robot.vision.hasTarget();
-            if (bool == true){
+            if (bool == true) {
                 double llDist = robot.vision.getDistance();
                 telemetry.addData("Limelight Dist", llDist);
             }
@@ -142,8 +132,6 @@ public class RedTele extends LinearOpMode implements RedUniversalConstants {
             telemetry.addData("X Position", robot.chassisLocal.getPose().getX());
             telemetry.addData("Y Position", robot.chassisLocal.getPose().getY());
             telemetry.addData("Heading", Math.toDegrees(robot.chassisLocal.getPose().getHeading()));
-
-
 
             telemetry.addLine("");
             telemetry.addLine("Basic Hardware Telemetry");

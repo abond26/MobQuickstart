@@ -195,7 +195,7 @@ public class testTele extends LinearOpMode implements BlueUniversalConstants {
             }
 
             // Feed (launch)
-            actions.launch(1, gamepad1.right_bumper);
+            actions.launch(1, gamepad1.right_bumper, sillyTarget);
             if (gamepad1.right_bumper) {
                 gamepad1.rumble(100);
             }
