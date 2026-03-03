@@ -79,7 +79,7 @@ public class ChassisLocal implements DriveConstants{
     }
 
 
-    public double getDistance(Pose target){
+    public double getDistance(@NonNull Pose target){
         double currentX = getPose().getX();
         double currentY = getPose().getY();
         double distance = Math.sqrt(Math.pow(currentX - target.getX(), 2) + Math.pow(currentY - target.getY(), 2));
@@ -113,7 +113,7 @@ public class ChassisLocal implements DriveConstants{
 
     //----------------------------------------------------------------
     //TO CHANGE? The below code is chat code
-    public double calculateTurretAngle(Pose target) {
+    public double calculateTurretAngle(@NonNull Pose target) {
         Pose robotPose = getPose();
         double dx = target.getX() - robotPose.getX();
         double dy = target.getY() - robotPose.getY();
@@ -122,6 +122,37 @@ public class ChassisLocal implements DriveConstants{
         while (turretAngle > 180) turretAngle -= 360;
         while (turretAngle < -180) turretAngle += 360;
         return -turretAngle;
+    }
+
+    /*if blue:
+         y = -x + 144
+         if red:
+         y = x
+         */
+    public Pose getTargetPoseBlueSimple(@NonNull Pose goalPose){
+        Pose bestPose;
+        Pose currentPosition = getPose();
+        double y = -currentPosition.getX() + 144;
+        if (currentPosition.getY() < y) {
+            bestPose = new Pose(4, 144, 0);
+        }
+        else {
+            bestPose = new Pose(0, 140, 0);
+        }
+        return bestPose;
+    }
+
+    public Pose getTargetPoseBlueLinear(@NonNull Pose goalPose){
+        Pose bestPose;
+        Pose currentPosition = getPose();
+        double y = -currentPosition.getX() + 144;
+        double dy = Math.abs(y - currentPosition.getY());
+        double distance = dy * Math.cos(Math.toRadians(45));
+        if (currentPosition.getY() < y) {
+
+        }
+
+        return bestPose;
     }
 
     //----------------------------------------------------------------
