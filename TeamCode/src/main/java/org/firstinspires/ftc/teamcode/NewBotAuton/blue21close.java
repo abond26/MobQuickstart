@@ -152,16 +152,16 @@ public class blue21close extends OpMode {
     
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 15, 62, Math.toRadians(147));
+    private final Pose gateCollect1 = new Pose( 17, 64, Math.toRadians(147));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(20.94414168937329, 58.42302452316075, Math.toRadians(180));
     private final Pose shootBall3 = new Pose(56, 82.5, Math.toRadians(270));
-    private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 15, 62, Math.toRadians(147));
+    private final Pose inBetween2 = new Pose(44, 64, Math.toRadians(157.5));
+    private final Pose gateCollect2 = new Pose( 17, 64, Math.toRadians(147));
     private final Pose shootBall4 = new Pose(56, 82.5, Math.toRadians(270));
-    private final Pose gateCollect3 = new Pose( 15, 62, Math.toRadians(147));
+    private final Pose gateCollect3 = new Pose( 17, 64, Math.toRadians(147));
     private final Pose shootBall5 = new Pose(56, 82.5, Math.toRadians(270));
-    private final Pose gateCollect4 = new Pose( 15, 62, Math.toRadians(147));
+    private final Pose gateCollect4 = new Pose( 17, 64, Math.toRadians(147));
     private final Pose shootBall7 = new Pose(56, 82.5, Math.toRadians(270));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
