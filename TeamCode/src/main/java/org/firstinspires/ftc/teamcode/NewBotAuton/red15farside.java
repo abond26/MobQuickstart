@@ -58,7 +58,7 @@ public class red15farside extends OpMode {
 
     // Localization: pose from dead wheels only (Pinpoint localizer in ConstantsNewBot.createFollower), same as SubsysTele.
     /** Red backboard / goal target for localization-based rotator aiming (field coords). */
-    private static final double RED_GOAL_X = 143;
+    private static final double RED_GOAL_X = 140.0;
     private static final double RED_GOAL_Y = 144;
     /** Degrees added to turret angle to correct aim (positive = aim more right). Tune if shots go left/right. */
     private static final double RED_AIM_OFFSET_DEG = 0.5;
@@ -71,7 +71,7 @@ public class red15farside extends OpMode {
     private static final double SHOOT_DWELL_SEC_FIRST_SHOT = 2.75;
 
     //Rotator: use Turret subsystem (same as SubsysTele – direction, power, rotator180Range)
-    int limelightMotor180Range = 910;
+    int limelightMotor180Range = 624;
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;

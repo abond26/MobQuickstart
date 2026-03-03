@@ -29,37 +29,19 @@ public class VelocityLookupTable {
 //        210.5,  205.2,  221.5,
 //    };
     private static final double[] DISTANCES = {
-            // Zone 1: Close range (< 95) // hood position 1.
-            57.8585, 92.4, 72, 64.2, 81.8, 55.3, 77.59, 88.33,// 1.
-            // Zone 2: Mid range (95-120) //hood 0.5
-            97.81, 102.22, 109.17, 112.02, 118.4,
-            // Zone 3: Far range (>= 120)
-            123.81,  129.02,  135.07, 142.99, 157.18, 147.6
+            55.3, 57.8585, 64.2, 72, 77.59, 81.8, 88.33, 92.4, 97.81, 102.22, 109.17, 112.02, 118.4, 123.81, 129.02, 135.07, 142.99, 147.6, 157.18
     };
     
     // Corresponding velocity values (in encoder ticks per second)
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
-//    private static final double[] VELOCITIES = {
-//        // Zone 1: Close range velocities (tune these for close shots)
-//        1060, 1100, 1160, 1200, 1240, 1280,
-//        // Zone 2: Mid range velocities (tune these for mid shots)
-//        1320, 1380, 1400, 1360, 1460, 1500,
-//        // Zone 3: Far range velocities (tune these for far shots)
-//        1620, 1560, 1700,
-//    };
     private static final double[] VELOCITIES = {
-            // Zone 1: Close range velocities (tune these for close shots)
-            1110, 1260, 1150, 1135, 1165, 1070, 1160, 1200,
-            // Zone 2: Mid range velocities (tune these for mid shots)
-            1243, 1300, 1320, 1330, 1355,
-            // Zone 3: Far range velocities (tune these for far shots)
-            1440, 1450, 1460, 1480, 1540, 1520
+            1070, 1110, 1135, 1150, 1160, 1165, 1200, 1260, 1243, 1300, 1320, 1330, 1355, 1440, 1450, 1460, 1480, 1520, 1540
     };
     
     // Minimum and maximum distances in the table
-    private static final double MIN_DISTANCE = DISTANCES[0];
-    private static final double MAX_DISTANCE = DISTANCES[DISTANCES.length - 1];
+    private static final double MIN_DISTANCE = 55.3;
+    private static final double MAX_DISTANCE = 157.18;
     
     /**
      * Gets the velocity for a given distance using pure lookup table with linear interpolation.

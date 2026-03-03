@@ -17,8 +17,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants;
+import com.pedropathing.math.Vector;
 
 @Autonomous(name = "Reliable 12 blue far new bot", group = "new bot")
 public class blue12farnewbot extends OpMode {
@@ -55,9 +57,15 @@ public class blue12farnewbot extends OpMode {
 
     private int y = tagHeight - limeHeight;
     //Rotator var
-    int motor180Range = 910;
+    int motor180Range = 624;
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
+    private static final double BLUE_GOAL_X = 4.0;
+    private static final double BLUE_GOAL_Y = 144;
+    private static final double BLUE_AIM_OFFSET_DEG = 0.5;
+    private static final double CHASSIS_AT_REST_THRESHOLD = 2.0;
+    private static final int ROTATOR_AIM_TOLERANCE_TICKS = 15;
+    private Turret turret;
     private Limelight3A limelight;
 
     // Store last valid limelight values for fallback
@@ -199,20 +207,18 @@ public class blue12farnewbot extends OpMode {
                 setPathState(PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2.5) {
-                    blocker.setPosition(1);
-                    tree.setPower(0.6);
-                    rotator.setTargetPosition(rotatorStartPosition);
-                    //theWheelOfTheOx.setPower(-1);
-                    launcher.setVelocity(1500);
+                launcher.setVelocity(1500);
+                if (!follower.isBusy()) {
+                    if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtBlueGoal();
+                    if (isRobotAtRest() && isRotatorAimedAtGoal()) {
+                        blocker.setPosition(1);
+                        tree.setPower(0.6);
+                        launcher.setVelocity(1500);
+                        theWheelOfTheOx.setPower(-1);
+                    }
                 }
-                if (pathTimer.getElapsedTimeSeconds()>2.75)
-                {
-                    theWheelOfTheOx.setPower(-1);
-                    launcher.setVelocity(1500);
-                }
-                if (pathTimer.getElapsedTimeSeconds()>4.5) {
-                    setPathState((PathState.collection));
+                if (!follower.isBusy() && isRotatorAimedAtGoal() && pathTimer.getElapsedTimeSeconds() > 4.5) {
+                    setPathState(PathState.collection);
                 }
                 break;
 
@@ -425,13 +431,14 @@ public class blue12farnewbot extends OpMode {
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
 
-        rotator = hardwareMap.get(DcMotor.class, "rotator");
+        turret = new Turret(hardwareMap);
+        turret.getRotator().setPower(1.0); // Full power for fast aiming
+        rotator = turret.getRotator();
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotatorStartPosition=0;
         rotator.setTargetPosition(rotatorStartPosition);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setPower(1);
 
         theWheelOfTheOx.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -531,6 +538,40 @@ public class blue12farnewbot extends OpMode {
         lastValidTx = 0.0;
         lastValidTy = 0.0;
         lastValidDistance = 0.0;
+    }
+
+    private double getTurretAngleDegForBlueGoal() {
+        Pose robot = follower.getPose();
+        double dx = BLUE_GOAL_X - robot.getX();
+        double dy = BLUE_GOAL_Y - robot.getY();
+        double angleToGoalDeg = Math.toDegrees(Math.atan2(dy, dx));
+        double headingDeg = Math.toDegrees(robot.getHeading());
+        double turretAngleDeg = angleToGoalDeg - headingDeg;
+        while (turretAngleDeg > 180) turretAngleDeg -= 360;
+        while (turretAngleDeg < -180) turretAngleDeg += 360;
+        return -turretAngleDeg + BLUE_AIM_OFFSET_DEG;
+    }
+
+    private int getRotatorTargetTicksForBlueGoal() {
+        double fracOf180 = Math.toRadians(getTurretAngleDegForBlueGoal()) / Math.PI;
+        return (int) (fracOf180 * motor180Range);
+    }
+
+    private void aimRotatorAtBlueGoal() {
+        if (turret == null) return;
+        turret.setRotatorToAngle(getTurretAngleDegForBlueGoal());
+    }
+
+    private boolean isRotatorAimedAtGoal() {
+        if (turret == null) return false;
+        int targetTicks = getRotatorTargetTicksForBlueGoal();
+        int currentTicks = turret.getRotatorPos();
+        return Math.abs(currentTicks - targetTicks) <= ROTATOR_AIM_TOLERANCE_TICKS;
+    }
+
+    private boolean isRobotAtRest() {
+        Vector v = follower.getVelocity();
+        return v != null && v.getMagnitude() < CHASSIS_AT_REST_THRESHOLD;
     }
 
 }

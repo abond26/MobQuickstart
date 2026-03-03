@@ -29,33 +29,19 @@ public class ShotTimeLookupTable {
 //        210.5,  205.2,  221.5,
 //    };
     private static final double[] DISTANCES = {
-            86.0824, 69.0667,103.917,104.803,81.472,97.81,102.22,109.17,91,75,65,55,95
-
-            // Zone 1: Close range (< 95) // hood position 1.
-
+            55, 65, 69.0667, 75, 81.472, 86.0824, 91, 95, 97.81, 102.22, 103.917, 104.803, 109.17
     };
 
     // Corresponding velocity values (in encoder ticks per second)
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
-//    private static final double[] ShotTime = {
-//        // Zone 1: Close range ShotTime (tune these for close shots)
-//        1060, 1100, 1160, 1200, 1240, 1280,
-//        // Zone 2: Mid range ShotTime (tune these for mid shots)
-//        1320, 1380, 1400, 1360, 1460, 1500,
-//        // Zone 3: Far range ShotTime (tune these for far shots)
-//        1620, 1560, 1700,
-//    };
     private static final double[] ShotTime = {
-            0.91, 0.82,1.02, 1.03, 0.84,0.98153,1.01055,1.05629,0.937436,0.835628,0.771998,0.708368,0.962888
-
-            // Zone 1: Close range ShotTime (tune these for close shots)
-
+            0.708368, 0.771998, 0.82, 0.835628, 0.84, 0.91, 0.937436, 0.962888, 0.98153, 1.01055, 1.02, 1.03, 1.05629
     };
 
     // Minimum and maximum distances in the table
-    private static final double MIN_DISTANCE = DISTANCES[0];
-    private static final double MAX_DISTANCE = DISTANCES[DISTANCES.length - 1];
+    private static final double MIN_DISTANCE = 55;
+    private static final double MAX_DISTANCE = 109.17;
 
     /**
      * Gets the velocity for a given distance using pure lookup table with linear interpolation.

@@ -56,9 +56,14 @@ public class blue18closenewbot extends OpMode {
 
     private int y = tagHeight - limeHeight;
     //Rotator var
-    int motor180Range = 910;
+    int motor180Range = 624;
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
+    private static final double BLUE_GOAL_X = 4.0;
+    private static final double BLUE_GOAL_Y = 144;
+    private static final double BLUE_AIM_OFFSET_DEG = 0.5;
+    private static final double CHASSIS_AT_REST_THRESHOLD = 2.0;
+    private static final int ROTATOR_AIM_TOLERANCE_TICKS = 15;
     private Limelight3A limelight;
 
     // Store last valid limelight values for fallback
@@ -260,24 +265,18 @@ public class blue18closenewbot extends OpMode {
             case actuallyshoot1:
                 rotator.setTargetPosition(rotatorStartPosition);
                 launcher.setVelocity(1100);
-                if(pathTimer.getElapsedTimeSeconds()>1.9)
-                {
-                    blocker.setPosition(1);
-                }
-                // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2.2){
-                    tree.setPower(1);
-                    launcher.setVelocity(1100);
-                    hood.setPosition(1);
-                    rotator.setTargetPosition(rotatorStartPosition);
-                    theWheelOfTheOx.setPower(-1);
-                    if(pathTimer.getElapsedTimeSeconds()>2.2)
-                    {
+                if (!follower.isBusy()) {
+                    if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtBlueGoal();
+                    if (isRobotAtRest() && isRotatorAimedAtGoal()) {
+                        blocker.setPosition(1);
+                        tree.setPower(1);
                         launcher.setVelocity(1100);
+                        hood.setPosition(1);
+                        theWheelOfTheOx.setPower(-1);
                     }
-                    if (pathTimer.getElapsedTimeSeconds()>2.7) {
-                        setPathState(blue18closenewbot.PathState.collection);
-                    }
+                }
+                if (!follower.isBusy() && isRotatorAimedAtGoal() && pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    setPathState(blue18closenewbot.PathState.collection);
                 }
                 break;
 
@@ -608,7 +607,7 @@ public class blue18closenewbot extends OpMode {
         rotatorStartPosition=0;
         rotator.setTargetPosition(rotatorStartPosition);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setPower(1);
+        rotator.setPower(1.0);
 
         theWheelOfTheOx.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -732,6 +731,38 @@ public class blue18closenewbot extends OpMode {
         lastValidTx = 0.0;
         lastValidTy = 0.0;
         lastValidDistance = 0.0;
+    }
+
+    private double getTurretAngleDegForBlueGoal() {
+        Pose robot = follower.getPose();
+        double dx = BLUE_GOAL_X - robot.getX();
+        double dy = BLUE_GOAL_Y - robot.getY();
+        double angleToGoalDeg = Math.toDegrees(Math.atan2(dy, dx));
+        double headingDeg = Math.toDegrees(robot.getHeading());
+        double turretAngleDeg = angleToGoalDeg - headingDeg;
+        while (turretAngleDeg > 180) turretAngleDeg -= 360;
+        while (turretAngleDeg < -180) turretAngleDeg += 360;
+        return -turretAngleDeg + BLUE_AIM_OFFSET_DEG;
+    }
+
+    private int getRotatorTargetTicksForBlueGoal() {
+        double fracOf180 = Math.toRadians(getTurretAngleDegForBlueGoal()) / Math.PI;
+        return (int) (fracOf180 * motor180Range);
+    }
+
+    private void aimRotatorAtBlueGoal() {
+        rotator.setTargetPosition(getRotatorTargetTicksForBlueGoal());
+    }
+
+    private boolean isRotatorAimedAtGoal() {
+        int targetTicks = getRotatorTargetTicksForBlueGoal();
+        int currentTicks = rotator.getCurrentPosition();
+        return Math.abs(currentTicks - targetTicks) <= ROTATOR_AIM_TOLERANCE_TICKS;
+    }
+
+    private boolean isRobotAtRest() {
+        Vector v = follower.getVelocity();
+        return v != null && v.getMagnitude() < CHASSIS_AT_REST_THRESHOLD;
     }
 
 }
