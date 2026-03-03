@@ -147,9 +147,24 @@ public class ChassisLocal implements DriveConstants{
         Pose currentPosition = getPose();
         double y = -currentPosition.getX() + 144;
         double dy = Math.abs(y - currentPosition.getY());
-        double distance = dy * Math.cos(Math.toRadians(45));
-        if (currentPosition.getY() < y) {
+        double distanceToLine = dy * Math.cos(Math.toRadians(45));
+        double distanceToGoal = getDistance(goalPose);
 
+        //angle between imaginary line and goal
+        double angle = Math.acos(distanceToGoal/distanceToLine);
+        /*For easy scaling, the extreme has to be the largest number
+        - thus subtract 90 and get the magnitude of that.
+        Then divide by 45 to get it to be a scale between 0 and 1.
+         */
+        double scaledAngle = Math.abs(angle - 90)/45;
+
+        //Linear adjustment: Max adjust = m and scaledAngle = x
+        double adjustment = MAX_GOAL_ADJUSTMENT * scaledAngle;
+        if (currentPosition.getY() < y) {
+            bestPose = new Pose(adjustment, 144, 0);
+        }
+        else{
+            bestPose = new Pose(0, 144 - adjustment, 0);
         }
 
         return bestPose;
