@@ -56,6 +56,10 @@ public class Turret implements TurretConstants {
 
 
     //FUNCTIONS FOR ROTATOR
+    /** Set rotator motor power (e.g. 1.0 for full speed). Use in auton for faster aiming. */
+    public void setRotatorPower(double power) {
+        rotator.setPower(power);
+    }
     public void setRotatorPos(int ticks){
         rotator.setTargetPosition(ticks);
     }

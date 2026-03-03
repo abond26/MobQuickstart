@@ -64,12 +64,15 @@ public class blue21close extends OpMode {
     private static final double FAR_HOOD_POSITION = 0.36; // Hood position for far shots
 
     /** Blue goal for localization-based rotator aiming (field coords). */
-    private static final double BLUE_GOAL_X = 4.0;
+    private static final double BLUE_GOAL_X = -1;
     private static final double BLUE_GOAL_Y = 144;
-    private static final double BLUE_AIM_OFFSET_DEG = 0.5;
-    /** Only aim rotator when chassis speed is below this (in/s). */
-    private static final double CHASSIS_AT_REST_THRESHOLD = 2.0;
-    private static final int ROTATOR_AIM_TOLERANCE_TICKS = 1;
+    private static final double BLUE_AIM_OFFSET_DEG = 1;
+    /** Chassis speed below this (in/s) before we open blocker and feed. Rotator aiming runs every loop regardless. */
+    private static final double CHASSIS_AT_REST_THRESHOLD = 7.5;
+    /** Rotator “aimed” when within this many ticks of goal – larger = open blocker earlier, slightly less precise. */
+    private static final int ROTATOR_AIM_TOLERANCE_TICKS = 5;
+    /** If not aimed within this many seconds after path done, open blocker anyway so we don’t wait forever. */
+    private static final double MAX_AIM_WAIT_SEC = 1.0;
 
     private int y = tagHeight - limeHeight;
     //Rotator var
@@ -152,21 +155,21 @@ public class blue21close extends OpMode {
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 61, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(65, 58.5, Math.toRadians(180));
-    private final Pose shootPose2 = new Pose( 46, 97.5, Math.toRadians(270));
+    private final Pose shootPose2 = new Pose( 46, 97.5, Math.toRadians(147));
     
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 17, 64, Math.toRadians(147));
+    private final Pose gateCollect1 = new Pose( 15.5, 64, Math.toRadians(147));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose shootPose2ToGateControlPoint = new Pose(20.94414168937329, 58.42302452316075, Math.toRadians(180));
-    private final Pose shootBall3 = new Pose(56, 82.5, Math.toRadians(270));
+    private final Pose shootPose2ToGateControlPoint = new Pose(49.15667574931882, 70);
+    private final Pose shootBall3 = new Pose(56, 82.5, Math.toRadians(147));
     private final Pose inBetween2 = new Pose(44, 64, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 17, 64, Math.toRadians(147));
-    private final Pose shootBall4 = new Pose(56, 82.5, Math.toRadians(270));
-    private final Pose gateCollect3 = new Pose( 17, 64, Math.toRadians(147));
-    private final Pose shootBall5 = new Pose(56, 82.5, Math.toRadians(270));
-    private final Pose gateCollect4 = new Pose( 17, 64, Math.toRadians(147));
-    private final Pose shootBall7 = new Pose(56, 82.5, Math.toRadians(270));
+    private final Pose gateCollect2 = new Pose( 15.5, 64, Math.toRadians(147));
+    private final Pose shootBall4 = new Pose(56, 82.5, Math.toRadians(147));
+    private final Pose gateCollect3 = new Pose( 15.5, 64, Math.toRadians(147));
+    private final Pose shootBall5 = new Pose(56, 82.5, Math.toRadians(147));
+    private final Pose gateCollect4 = new Pose( 15.5, 64, Math.toRadians(147));
+    private final Pose shootBall7 = new Pose(56, 82.5, Math.toRadians(147));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
     //private final Pose shoot4ToCollect3ControlPoint = new Pose(41.25340599455039, 82.36784741144412, Math.toRadians(180));
@@ -204,7 +207,7 @@ public class blue21close extends OpMode {
                 .build();
         GateCollect1 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootPose2, shootPose2ToGateControlPoint, gateCollect1))
-                .setLinearHeadingInterpolation(shootPose2.getHeading(), gateCollect1.getHeading())
+                .setConstantHeadingInterpolation(Math.toRadians(147))
                 .build();
 
 //        GateCollect1 = follower.pathBuilder()
@@ -214,8 +217,7 @@ public class blue21close extends OpMode {
 
         shoot3 = follower.pathBuilder()
                 .addPath(new BezierCurve(gateCollect1, shootPose2ToGateControlPoint, shootBall3))
-                .setTangentHeadingInterpolation()
-                .setReversed()
+                .setConstantHeadingInterpolation(Math.toRadians(147))
                 .build();
         GateCollect2 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootBall3, shootPose2ToGateControlPoint, gateCollect2))
@@ -227,8 +229,7 @@ public class blue21close extends OpMode {
 //                .build();
         shoot4 = follower.pathBuilder()
                 .addPath(new BezierCurve(gateCollect2, shootPose2ToGateControlPoint, shootBall4))
-                .setTangentHeadingInterpolation()
-                .setReversed()
+                .setConstantHeadingInterpolation(Math.toRadians(147))
                 .build();
         GateCollect3 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootBall4, shootPose2ToGateControlPoint, gateCollect3))
@@ -236,8 +237,7 @@ public class blue21close extends OpMode {
                 .build();
         shoot5 = follower.pathBuilder()
                 .addPath(new BezierCurve(gateCollect3, shootPose2ToGateControlPoint, shootBall5))
-                .setTangentHeadingInterpolation()
-                .setReversed()
+                .setConstantHeadingInterpolation(Math.toRadians(147))
                 .build();
         GateCollect4 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootBall5, shootPose2ToGateControlPoint, gateCollect4))
@@ -245,8 +245,7 @@ public class blue21close extends OpMode {
                 .build();
         shoot7 = follower.pathBuilder()
                 .addPath(new BezierCurve(gateCollect4, shootPose2ToGateControlPoint, shootBall7))
-                .setTangentHeadingInterpolation()
-                .setReversed()
+                .setConstantHeadingInterpolation(Math.toRadians(147))
                 .build();
 
         collect3 = follower.pathBuilder()
@@ -297,7 +296,7 @@ public class blue21close extends OpMode {
                 double time1 = ShotTimeLookupTable.getTime(dist1);
                 launcher.setVelocity(velo1);
                 
-                if (!follower.isBusy() && isRobotAtRest() && isRotatorAimedAtGoal()) {
+                if (!follower.isBusy() && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
                         tree.setPower(1);
@@ -351,7 +350,7 @@ public class blue21close extends OpMode {
                     shoot2Started = true; 
                 }
                 
-                if (!follower.isBusy() && shoot2Started && isRobotAtRest() && isRotatorAimedAtGoal()) {
+                if (!follower.isBusy() && shoot2Started && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
                         tree.setPower(1);
@@ -374,7 +373,6 @@ public class blue21close extends OpMode {
                     launcher.setVelocity(1120);
                     tree.setPower(1);
                     hood.setPosition(1);
-
                     gateCollectionStarted = true; // Mark as started to prevent calling again
                 }
                 if (pathTimer.getElapsedTimeSeconds()>2.25) {
@@ -403,7 +401,7 @@ public class blue21close extends OpMode {
                     tree.setPower(0);
                 }
                 
-                if (!follower.isBusy() && shoot3Started && isRobotAtRest() && isRotatorAimedAtGoal()) {
+                if (!follower.isBusy() && shoot3Started && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
                         tree.setPower(1);
@@ -455,7 +453,7 @@ public class blue21close extends OpMode {
                     tree.setPower(0);
                 }
 
-                if (!follower.isBusy() && shoot4Started && isRobotAtRest() && isRotatorAimedAtGoal()) {
+                if (!follower.isBusy() && shoot4Started && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
                         tree.setPower(1);
@@ -507,7 +505,7 @@ public class blue21close extends OpMode {
                     tree.setPower(0);
                 }
 
-                if (!follower.isBusy() && shoot5Started && isRobotAtRest() && isRotatorAimedAtGoal()) {
+                if (!follower.isBusy() && shoot5Started && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
                         tree.setPower(1);
@@ -558,7 +556,7 @@ public class blue21close extends OpMode {
                     tree.setPower(0);
                 }
 
-                if (!follower.isBusy() && shoot6Started && isRobotAtRest() && isRotatorAimedAtGoal()) {
+                if (!follower.isBusy() && shoot6Started && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
                         tree.setPower(1);
@@ -608,7 +606,7 @@ public class blue21close extends OpMode {
                     shoot7Started = true; // Mark as started to prevent calling again
                 }
                 
-                if (!follower.isBusy() && shoot7Started && isRobotAtRest() && isRotatorAimedAtGoal()) {
+                if (!follower.isBusy() && shoot7Started && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
                         tree.setPower(1);
@@ -677,7 +675,7 @@ public class blue21close extends OpMode {
         setPathState(pathState);
 
         turret = new Turret(hardwareMap);
-        turret.getRotator().setPower(1.0); // Full power for fast aiming
+        turret.setRotatorPower(1.0); // full power so rotator aims faster
 
         tree = hardwareMap.get(DcMotor.class, "tree");
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");

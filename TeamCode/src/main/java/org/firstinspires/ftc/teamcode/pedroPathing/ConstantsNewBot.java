@@ -30,11 +30,11 @@ public class ConstantsNewBot {
            .forwardZeroPowerAcceleration(-35.10634166681744)
             .lateralZeroPowerAcceleration(-69.08488597190241)
             .useSecondaryTranslationalPIDF(true)
-            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.2,0.0001,0.06,0))
             .useSecondaryHeadingPIDF(true)
-            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0))
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.6,0.0001,0.06,0))
             .useSecondaryDrivePIDF(true)
-            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0,0.01,0.6,0.01))
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.1,0.0001,0.03,0.6,0.01))
             .mass(11.793);
 
 

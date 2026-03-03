@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "tangential Blue 18 close ", group = "new bot")
 public class blue18closenewbot extends OpMode {
-    private int rotatorStartPosition=0;
+    private int rotatorStartPosition = 0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
@@ -56,14 +56,9 @@ public class blue18closenewbot extends OpMode {
 
     private int y = tagHeight - limeHeight;
     //Rotator var
-    int motor180Range = 624;
+    int motor180Range = 910;
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
-    private static final double BLUE_GOAL_X = 4.0;
-    private static final double BLUE_GOAL_Y = 144;
-    private static final double BLUE_AIM_OFFSET_DEG = 0.5;
-    private static final double CHASSIS_AT_REST_THRESHOLD = 2.0;
-    private static final int ROTATOR_AIM_TOLERANCE_TICKS = 15;
     private Limelight3A limelight;
 
     // Store last valid limelight values for fallback
@@ -136,18 +131,18 @@ public class blue18closenewbot extends OpMode {
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 61, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(65, 58.5, Math.toRadians(180));
-    private final Pose shootPose2 = new Pose( 46, 97.5, Math.toRadians(131.5));
-    
+    private final Pose shootPose2 = new Pose(46, 97.5, Math.toRadians(131.5));
+
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 15, 62, Math.toRadians(147));
+    private final Pose gateCollect1 = new Pose(15, 62, Math.toRadians(147));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(50, 55.801430517711175, Math.toRadians(180));
     private final Pose shootBall3 = new Pose(46, 97.5, Math.toRadians(135));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 15, 62, Math.toRadians(147));
+    private final Pose gateCollect2 = new Pose(15, 62, Math.toRadians(147));
     private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(133));
-    private final Pose gateCollect3 = new Pose( 15, 62, Math.toRadians(147));
+    private final Pose gateCollect3 = new Pose(15, 62, Math.toRadians(147));
     private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(133));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
@@ -158,7 +153,6 @@ public class blue18closenewbot extends OpMode {
     private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(157));
 
     private final Pose park = new Pose(41, 84, Math.toRadians(134));
-
 
 
     private PathChain shoot1, goToCollect1, collect1, shoot2, GateCollect3, shoot6, InBetween1, InBetween2, GateCollect1, GateCollect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
@@ -254,7 +248,7 @@ public class blue18closenewbot extends OpMode {
                 hood.setPosition(1); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
-                if (pathTimer.getElapsedTimeSeconds()>0.5) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.5) {
                     theWheelOfTheOx.setPower(-1);
                 }
                 rotator.setTargetPosition(rotatorStartPosition);
@@ -265,18 +259,22 @@ public class blue18closenewbot extends OpMode {
             case actuallyshoot1:
                 rotator.setTargetPosition(rotatorStartPosition);
                 launcher.setVelocity(1100);
-                if (!follower.isBusy()) {
-                    if (isRobotAtRest() && !isRotatorAimedAtGoal()) aimRotatorAtBlueGoal();
-                    if (isRobotAtRest() && isRotatorAimedAtGoal()) {
-                        blocker.setPosition(1);
-                        tree.setPower(1);
-                        launcher.setVelocity(1100);
-                        hood.setPosition(1);
-                        theWheelOfTheOx.setPower(-1);
-                    }
+                if (pathTimer.getElapsedTimeSeconds() > 1.9) {
+                    blocker.setPosition(1);
                 }
-                if (!follower.isBusy() && isRotatorAimedAtGoal() && pathTimer.getElapsedTimeSeconds() > 2.5) {
-                    setPathState(blue18closenewbot.PathState.collection);
+                // Continuously adjust based on limelight during shooting
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.2) {
+                    tree.setPower(1);
+                    launcher.setVelocity(1100);
+                    hood.setPosition(1);
+                    rotator.setTargetPosition(rotatorStartPosition);
+                    theWheelOfTheOx.setPower(-1);
+                    if (pathTimer.getElapsedTimeSeconds() > 2.2) {
+                        launcher.setVelocity(1100);
+                    }
+                    if (pathTimer.getElapsedTimeSeconds() > 2.7) {
+                        setPathState(blue18closenewbot.PathState.collection);
+                    }
                 }
                 break;
 
@@ -297,8 +295,7 @@ public class blue18closenewbot extends OpMode {
                     tree.setPower(1);
                     follower.followPath(collect1);
                     collectionStarted = true;
-                    if (pathTimer.getElapsedTimeSeconds()>1.25)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 1.25) {
                         theWheelOfTheOx.setPower(-1);
                     }
                 }
@@ -322,15 +319,14 @@ public class blue18closenewbot extends OpMode {
                     shoot2Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot2Started) {
-                    if (pathTimer.getElapsedTimeSeconds()>2)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 2) {
                         blocker.setPosition(1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.25) {
+                    if (pathTimer.getElapsedTimeSeconds() > 2.25) {
                         tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.95) {
+                    if (pathTimer.getElapsedTimeSeconds() > 2.95) {
                         setPathState((blue18closenewbot.PathState.GateCollection));
                     }
                 }
@@ -350,10 +346,10 @@ public class blue18closenewbot extends OpMode {
 
                     gateCollectionStarted = true; // Mark as started to prevent calling again
                 }
-                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                if (pathTimer.getElapsedTimeSeconds() > 2.25) {
                     theWheelOfTheOx.setPower(-1);
                 }
-                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3) {
+                if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds() > 3) {
                     setPathState((blue18closenewbot.PathState.shootAgain));
                 }
                 break;
@@ -369,21 +365,18 @@ public class blue18closenewbot extends OpMode {
                     //tree.setPower(1);
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
-                if(pathTimer.getElapsedTimeSeconds()>1)
-                {
+                if (pathTimer.getElapsedTimeSeconds() > 1) {
                     tree.setPower(0);
                 }
-                if(pathTimer.getElapsedTimeSeconds()>1.65)
-                {
+                if (pathTimer.getElapsedTimeSeconds() > 1.65) {
                     tree.setPower(1);
                     blocker.setPosition(1);
                 }
                 if (!follower.isBusy() && shoot3Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>1.8) {
+                    if (pathTimer.getElapsedTimeSeconds() > 1.8) {
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.75)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 2.75) {
                         setPathState((blue18closenewbot.PathState.GateCollectionAgain));
                     }
                 }
@@ -400,10 +393,10 @@ public class blue18closenewbot extends OpMode {
                     hood.setPosition(1);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
-                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                if (pathTimer.getElapsedTimeSeconds() > 2.25) {
                     theWheelOfTheOx.setPower(-1);
                 }
-                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.15) {
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds() > 3.15) {
                     setPathState((blue18closenewbot.PathState.shootAgainAgain));
                 }
                 break;
@@ -420,21 +413,18 @@ public class blue18closenewbot extends OpMode {
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>0.9)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 0.9) {
                         tree.setPower(0);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>1.45)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 1.45) {
                         tree.setPower(1);
                         blocker.setPosition(1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>1.6) {
+                    if (pathTimer.getElapsedTimeSeconds() > 1.6) {
                         blocker.setPosition(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.8)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 2.8) {
                         setPathState((blue18closenewbot.PathState.GateCollectionAgainAgain));
                     }
                 }
@@ -451,10 +441,10 @@ public class blue18closenewbot extends OpMode {
                     rotator.setTargetPosition(rotatorStartPosition);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
-                if (pathTimer.getElapsedTimeSeconds()>2.25) {
+                if (pathTimer.getElapsedTimeSeconds() > 2.25) {
                     theWheelOfTheOx.setPower(-1);
                 }
-                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.55) {
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds() > 3.55) {
                     setPathState((blue18closenewbot.PathState.shootAgainAgainAgain));
                 }
                 break;
@@ -470,21 +460,18 @@ public class blue18closenewbot extends OpMode {
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>0.9)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 0.9) {
                         tree.setPower(0);
                     }
-                    if (pathTimer.getElapsedTimeSeconds()>1.35)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 1.35) {
                         tree.setPower(1);
                         blocker.setPosition(1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>1.5) {
+                    if (pathTimer.getElapsedTimeSeconds() > 1.5) {
                         blocker.setPosition(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.55)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 2.55) {
                         setPathState((blue18closenewbot.PathState.collectAgainAgainEnd));
                     }
                 }
@@ -494,8 +481,7 @@ public class blue18closenewbot extends OpMode {
                 rotator.setTargetPosition(rotatorStartPosition);
                 blocker.setPosition(0);
                 theWheelOfTheOx.setPower(0);
-                if(pathTimer.getElapsedTimeSeconds()>1.5)
-                {
+                if (pathTimer.getElapsedTimeSeconds() > 1.5) {
                     theWheelOfTheOx.setPower(-1);
                 }
                 if (!follower.isBusy() && !collectionStarted) {
@@ -510,7 +496,7 @@ public class blue18closenewbot extends OpMode {
                 }
                 if (!follower.isBusy() && collectionStarted) {
                     theWheelOfTheOx.setPower(-1);
-                    if (pathTimer.getElapsedTimeSeconds()>0.25) {
+                    if (pathTimer.getElapsedTimeSeconds() > 0.25) {
 
                         setPathState((blue18closenewbot.PathState.shootAgainAgainAgainAgain));
                     }
@@ -529,15 +515,14 @@ public class blue18closenewbot extends OpMode {
                     shoot5Started = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && shoot5Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>1.5)
-                    {
+                    if (pathTimer.getElapsedTimeSeconds() > 1.5) {
                         blocker.setPosition(1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>1.75) {
+                    if (pathTimer.getElapsedTimeSeconds() > 1.75) {
                         tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
                     }
-                    if(pathTimer.getElapsedTimeSeconds()>2.75) {
+                    if (pathTimer.getElapsedTimeSeconds() > 2.75) {
                         setPathState((blue18closenewbot.PathState.done));
                     }
                 }
@@ -551,6 +536,7 @@ public class blue18closenewbot extends OpMode {
                 break;
         }
     }
+
     public void setPathState(PathState newState) {
         pathState = newState;
         pathTimer.resetTimer();
@@ -577,7 +563,7 @@ public class blue18closenewbot extends OpMode {
         blocker.scaleRange(0, 0.362);
         blocker.setPosition(0);
         hood = hardwareMap.get(Servo.class, "hood");
-        hood.scaleRange(0,0.0761);
+        hood.scaleRange(0, 0.0761);
         hood.setPosition(1);
         pathTimer = new Timer();
         opModeTimer = new Timer();
@@ -597,17 +583,17 @@ public class blue18closenewbot extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         hood = hardwareMap.get(Servo.class, "hood");
         //hood.setPosition(0.0119);
-        hood.scaleRange(0,0.0761);
+        hood.scaleRange(0, 0.0761);
         blocker = hardwareMap.get(Servo.class, "blocker");
         blocker.scaleRange(0, 0.4);
 
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotatorStartPosition=0;
+        rotatorStartPosition = 0;
         rotator.setTargetPosition(rotatorStartPosition);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setPower(1.0);
+        rotator.setPower(1);
 
         theWheelOfTheOx.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -647,18 +633,20 @@ public class blue18closenewbot extends OpMode {
         double realDist = 0.55 * dist + 40.3; // Correction formula from TesterinoBlue
         return realDist;
     }
+
     public double calcVelocity(double dist) {
         // Use simpler linear formula from TesterinoBlue
         double velocity = 3.30933 * dist + 1507.01002;
         return velocity;
     }
 
-    public void intake(double intakePower){
+    public void intake(double intakePower) {
         tree.setPower(intakePower);
         if (!gamepad1.right_bumper) {
             theWheelOfTheOx.setPower(-0.3);
         }
     }
+
     //comment
     public void adjustRotator(double tx) {
         double fracOfSemiCircum = Math.toRadians(tx) / Math.PI;
@@ -732,37 +720,4 @@ public class blue18closenewbot extends OpMode {
         lastValidTy = 0.0;
         lastValidDistance = 0.0;
     }
-
-    private double getTurretAngleDegForBlueGoal() {
-        Pose robot = follower.getPose();
-        double dx = BLUE_GOAL_X - robot.getX();
-        double dy = BLUE_GOAL_Y - robot.getY();
-        double angleToGoalDeg = Math.toDegrees(Math.atan2(dy, dx));
-        double headingDeg = Math.toDegrees(robot.getHeading());
-        double turretAngleDeg = angleToGoalDeg - headingDeg;
-        while (turretAngleDeg > 180) turretAngleDeg -= 360;
-        while (turretAngleDeg < -180) turretAngleDeg += 360;
-        return -turretAngleDeg + BLUE_AIM_OFFSET_DEG;
-    }
-
-    private int getRotatorTargetTicksForBlueGoal() {
-        double fracOf180 = Math.toRadians(getTurretAngleDegForBlueGoal()) / Math.PI;
-        return (int) (fracOf180 * motor180Range);
-    }
-
-    private void aimRotatorAtBlueGoal() {
-        rotator.setTargetPosition(getRotatorTargetTicksForBlueGoal());
-    }
-
-    private boolean isRotatorAimedAtGoal() {
-        int targetTicks = getRotatorTargetTicksForBlueGoal();
-        int currentTicks = rotator.getCurrentPosition();
-        return Math.abs(currentTicks - targetTicks) <= ROTATOR_AIM_TOLERANCE_TICKS;
-    }
-
-    private boolean isRobotAtRest() {
-        Vector v = follower.getVelocity();
-        return v != null && v.getMagnitude() < CHASSIS_AT_REST_THRESHOLD;
-    }
-
 }

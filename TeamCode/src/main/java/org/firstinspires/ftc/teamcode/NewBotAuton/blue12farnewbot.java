@@ -432,8 +432,6 @@ public class blue12farnewbot extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
 
         turret = new Turret(hardwareMap);
-        turret.getRotator().setPower(1.0); // Full power for fast aiming
-        rotator = turret.getRotator();
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotatorStartPosition=0;
