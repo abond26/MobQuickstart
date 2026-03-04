@@ -170,6 +170,38 @@ public class ChassisLocal implements DriveConstants{
         return bestPose;
     }
 
+    public boolean isShootingPosition(){
+        boolean inPosition = false;
+        Pose currentPosition = getPose();
+        double y = currentPosition.getY();
+        double x = currentPosition.getX();
+        double leftUpBound = -x + 144 - boundaryExpansion;
+        double leftBottomBound = x - 48 + boundaryExpansion;
+        double rightUpBound = x - boundaryExpansion;
+        double rightBottomBound = -x + 144 - 48 + boundaryExpansion;
+
+        if (currentPosition.getX() < 72) {
+            if (y > leftUpBound || y < leftBottomBound) {
+                inPosition = true;
+            }
+        }
+        else{
+            if (y > rightUpBound || y < rightBottomBound) {
+                inPosition = true;
+            }
+        }
+        return inPosition;
+
+        //Left Side
+        //y = -x + 144 - boundaryExpansion;
+        //y = x - 48
+
+        //right side
+        //y = x
+        //y = -x + 144
+
+    }
+
     //----------------------------------------------------------------
     //TO CHANGE? -> Put in Turret class
 //    public void setTurretAngle(double turretAngleDeg) {

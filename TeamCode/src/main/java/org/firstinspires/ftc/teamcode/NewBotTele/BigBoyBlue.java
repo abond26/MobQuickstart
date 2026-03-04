@@ -4,6 +4,7 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
@@ -39,8 +40,8 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
     Robot robot;
     RobotActions actions;
     private int veloSwitchNum = 1;
-    boolean autoControls = false;
     boolean sillyControls = false;
+    boolean inPosition;
     private boolean lastDpadUp = false;
 
     // ── Relocalization ──
@@ -222,10 +223,18 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
 
             // Dynamic shooting
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);
-            if (sillyControls & !autoControls) {
-                actions.aimRotatorLocal(sillyTarget, telemetry);
-                actions.adjustShootingParams(sillyTarget);
+            inPosition = robot.chassisLocal.isShootingPosition();
+            if (sillyControls) {
+                if (inPosition){
+                    actions.aimRotatorLocal(sillyTarget, telemetry);
+                    actions.adjustShootingParams(sillyTarget);
+                }
+                else{
+                    robot.turret.setVelocity(1100);
+                }
+
             }
+
 
             // ═══════════════════════════════════════════════════
             // TELEMETRY
