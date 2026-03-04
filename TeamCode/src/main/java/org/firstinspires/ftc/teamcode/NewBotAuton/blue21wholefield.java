@@ -177,16 +177,16 @@ public class blue21wholefield extends OpMode {
 
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 15.5, 62, Math.toRadians(150));
+    private final Pose gateCollect1 = new Pose( 16.5, 62, Math.toRadians(150));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(49.15667574931882, 70);
     private final Pose shootBall3 = new Pose(58, 82.5, Math.toRadians(150));
     private final Pose inBetween2 = new Pose(44, 64, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 15.5, 62, Math.toRadians(150));
+    private final Pose gateCollect2 = new Pose( 16.5, 62, Math.toRadians(150));
     private final Pose shootBall4 = new Pose(58, 82.5, Math.toRadians(150));
-    private final Pose gateCollect3 = new Pose( 15.5, 62, Math.toRadians(150));
+    private final Pose gateCollect3 = new Pose( 16.5, 62, Math.toRadians(150));
     private final Pose shootBall5 = new Pose(58, 82.5, Math.toRadians(150));
-    private final Pose collectfar = new Pose( 16.5, 36, Math.toRadians(180));
+    private final Pose collectfar = new Pose( 20, 36, Math.toRadians(180));
     private final Pose collectfarcontrolpoint = new Pose(50, 31);
     private final Pose shootBall7 = new Pose(58, 82.5, Math.toRadians(150));
 
@@ -313,7 +313,7 @@ public class blue21wholefield extends OpMode {
             case actuallyshoot1:
                 double dist1 = getDistanceToGoal();
                 double velo1 = 1160;
-                double time1 = 1.1;
+                double time1 = 0.65;
                 launcher.setVelocity(velo1);
 
                 if (!follower.isBusy() && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC_FIRST)) {
@@ -690,8 +690,13 @@ public class blue21wholefield extends OpMode {
         opModeTimer = new Timer();
         shootingTimer = new Timer();
         follower = ConstantsNewBot.createFollower(hardwareMap);
+        if (follower == null) {
+            telemetry.addData("Error", "Follower failed to create");
+            return;
+        }
         buildPaths();
         follower.setStartingPose(startPose);
+
 
     }
 
