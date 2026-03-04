@@ -127,30 +127,30 @@ public class red18closenewbot extends OpMode {
     PathState pathState;
     // Mirrored coordinates: redX = 144 - blueX, redHeading = Math.PI - blueHeading
     private final Pose startPose = new Pose(117.3, 132, Math.toRadians(36));
-    private final Pose shootPose1 = new Pose(98, 97.5, Math.toRadians(46.6));
+    private final Pose shootPose1 = new Pose(98, 97.5, Math.toRadians(46));
     //private final Pose collect1thingstart = new Pose(88, 59, Math.toRadians(0));
     private final Pose collect1thing = new Pose(125, 60, Math.toRadians(0));
     private final Pose goToCollect1ControlPoint = new Pose(79, 58.5, Math.toRadians(0));
-    private final Pose shootPose2 = new Pose( 98, 97.5, Math.toRadians(46.6));
+    private final Pose shootPose2 = new Pose( 98, 97.5, Math.toRadians(48.5));
 
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(94.84332425068118, 76, Math.toRadians(0));
     private final Pose gateCollect1 = new Pose( 127.5, 62, Math.toRadians(33));
     //private final Pose inBetween1 = new Pose(100, 62, Math.toRadians(22.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(94, 55.801430517711175, Math.toRadians(0));
-    private final Pose shootBall3 = new Pose(98, 97.5, Math.toRadians(46.6));
+    private final Pose shootBall3 = new Pose(98, 97.5, Math.toRadians(45));
     private final Pose inBetween2 = new Pose(100, 62, Math.toRadians(22.5));
     private final Pose gateCollect2 = new Pose( 127.5, 62, Math.toRadians(33));
-    private final Pose shootBall4 = new Pose(89, 88, Math.toRadians(46.6));
+    private final Pose shootBall4 = new Pose(89, 88, Math.toRadians(47));
     private final Pose gateCollect3 = new Pose( 127.5, 62, Math.toRadians(33));
-    private final Pose shootBall5 = new Pose(89, 88, Math.toRadians(46.6));
+    private final Pose shootBall5 = new Pose(89, 88, Math.toRadians(47));
 
     //private final Pose collect3start=new Pose(87, 86, Math.toRadians(0));
     private final Pose shoot4ToCollect3ControlPoint = new Pose(102.74659400544961, 82.36784741144412, Math.toRadians(0));
 
     //
     private final Pose collect3end = new Pose(120, 86, Math.toRadians(0));
-    private final Pose shootBall6 = new Pose(95, 115, Math.toRadians(31.6));
+    private final Pose shootBall6 = new Pose(95, 115, Math.toRadians(23));
 
     private final Pose park = new Pose(103, 84, Math.toRadians(46));
 
@@ -385,7 +385,7 @@ public class red18closenewbot extends OpMode {
                     }
                     if(pathTimer.getElapsedTimeSeconds()>2.75)
                     {
-                            setPathState(red18closenewbot.PathState.GateCollectionAgain);
+                        setPathState(red18closenewbot.PathState.GateCollectionAgain);
                     }
                 }
                 break;

@@ -127,30 +127,30 @@ public class blue18closenewbot extends OpMode {
     PathState pathState;
     // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
     private final Pose startPose = new Pose(26.7, 132, Math.toRadians(144));
-    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(133.4));
+    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(134));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 60, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(65, 58.5, Math.toRadians(180));
-    private final Pose shootPose2 = new Pose( 46, 97.5, Math.toRadians(133.4));
+    private final Pose shootPose2 = new Pose( 46, 97.5, Math.toRadians(131.5));
 
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 76, Math.toRadians(180));
     private final Pose gateCollect1 = new Pose( 16.5, 62, Math.toRadians(147));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(50, 55.801430517711175, Math.toRadians(180));
-    private final Pose shootBall3 = new Pose(46, 97.5, Math.toRadians(133.4));
+    private final Pose shootBall3 = new Pose(46, 97.5, Math.toRadians(135));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose gateCollect2 = new Pose( 16.5, 62, Math.toRadians(147));
-    private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(133.5));
+    private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(133));
     private final Pose gateCollect3 = new Pose( 16.5, 62, Math.toRadians(147));
-    private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(133.5));
+    private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(133));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
     private final Pose shoot4ToCollect3ControlPoint = new Pose(41.25340599455039, 82.36784741144412, Math.toRadians(180));
 
     //
     private final Pose collect3end = new Pose(24, 86, Math.toRadians(180));
-    private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(148.4));
+    private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(157));
 
     private final Pose park = new Pose(41, 84, Math.toRadians(134));
 

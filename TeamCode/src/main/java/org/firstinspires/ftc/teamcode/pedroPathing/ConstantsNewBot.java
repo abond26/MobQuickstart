@@ -34,7 +34,7 @@ public class ConstantsNewBot {
             .useSecondaryHeadingPIDF(true)
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.2,0.0001,0.06,0))
             .useSecondaryDrivePIDF(true)
-            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.5,0.0001,0.03,0.6,0.01))
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.5,0,0.03,0.6,0.01))
             .mass(11.793);
 
 
