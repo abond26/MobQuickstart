@@ -25,8 +25,8 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "tangential Blue 21 close ", group = "new bot")
-public class blue21close extends OpMode {
+@Autonomous(name = "whole field ", group = "new bot")
+public class blue21wholefield extends OpMode {
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
@@ -73,20 +73,24 @@ public class blue21close extends OpMode {
     private static final int ROTATOR_AIM_TOLERANCE_TICKS = 7;
     /** If not aimed within this many seconds after path done, open blocker anyway so we don’t wait forever. */
     private static final double MAX_AIM_WAIT_SEC = 1.0;
+    private static final double MAX_AIM_WAIT_SEC_FIRST = 1.6;
+    private static final double MAX_AIM_WAIT_SEC_LAST = 1.5;
 
     // ─── Time tuning: reduce to save seconds; increase if rings/balls need more time ───
     /** Tree off (pause) before we allow blocker open in shoot states. Try 0.35 to save ~0.15s per shot. */
-    private static final double SHOOT_TREE_PAUSE_SEC = 0.5;
+    private static final double SHOOT_TREE_PAUSE_SEC = 0.25;
     /** Gate collection: turn on feed wheel after this many sec. Try 2.0 to save ~0.25s per gate. */
-    private static final double GATE_WHEEL_DELAY_SEC = 2.25;
+    private static final double GATE_WHEEL_DELAY_SEC = 2.65;
     /** Gate collection: wait this long before transitioning to shoot. Try 2.4 to save ~0.2s per gate. */
-    private static final double GATE_TO_SHOOT_WAIT_SEC = 2.6;
+    private static final double GATE_TO_SHOOT_WAIT_SEC = 2.65;
     /** GateCollectionAgainAgain: wait before next state. Try 2.55 to save ~0.2s. */
-    private static final double GATE_TO_SHOOT_WAIT_SEC_LONG = 2.75;
+    private static final double GATE_TO_SHOOT_WAIT_SEC_LONG = 2.65;
     /** First collection: wheel on after this sec. Try 1.0 to save ~0.25s. */
-    private static final double COLLECT_FIRST_WHEEL_SEC = 1.25;
+    private static final double COLLECT_FIRST_WHEEL_SEC = 1.0;
     /** collectAgainAgainEnd: wheel on after this sec. Try 1.2 to save ~0.3s. */
-    private static final double COLLECT_AGAIN_END_WHEEL_SEC = 1.5;
+    private static final double COLLECT_AGAIN_END_WHEEL_SEC = 1.4;
+    /** Max distance (in) for lead target; beyond this use static goal (same as BigBoyBlue / ChassisLocal.sillyTargetPose). */
+    private static final double SILLY_TARGET_MAX_DIST_IN = 120;
 
     private int y = tagHeight - limeHeight;
     //Rotator var
@@ -169,20 +173,21 @@ public class blue21close extends OpMode {
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 61, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(65, 58.5, Math.toRadians(180));
-    private final Pose shootPose2 = new Pose( 46, 97.5, Math.toRadians(150));
-    
+    private final Pose shootPose2 = new Pose( 58, 82.5, Math.toRadians(150));
+
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(49.15667574931882, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 16.5, 63, Math.toRadians(150));
+    private final Pose gateCollect1 = new Pose( 15.5, 62, Math.toRadians(150));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(49.15667574931882, 70);
     private final Pose shootBall3 = new Pose(58, 82.5, Math.toRadians(150));
     private final Pose inBetween2 = new Pose(44, 64, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 16.5, 63, Math.toRadians(150));
+    private final Pose gateCollect2 = new Pose( 15.5, 62, Math.toRadians(150));
     private final Pose shootBall4 = new Pose(58, 82.5, Math.toRadians(150));
-    private final Pose gateCollect3 = new Pose( 16.5, 63, Math.toRadians(150));
+    private final Pose gateCollect3 = new Pose( 15.5, 62, Math.toRadians(150));
     private final Pose shootBall5 = new Pose(58, 82.5, Math.toRadians(150));
-    private final Pose gateCollect4 = new Pose( 16.5, 63, Math.toRadians(150));
+    private final Pose collectfar = new Pose( 16.5, 36, Math.toRadians(180));
+    private final Pose collectfarcontrolpoint = new Pose(50, 31);
     private final Pose shootBall7 = new Pose(58, 82.5, Math.toRadians(150));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
@@ -254,12 +259,13 @@ public class blue21close extends OpMode {
                 .setConstantHeadingInterpolation(Math.toRadians(147))
                 .build();
         GateCollect4 = follower.pathBuilder()
-                .addPath(new BezierCurve(shootBall5, shootPose2ToGateControlPoint, gateCollect4))
-                .setLinearHeadingInterpolation(shootBall5.getHeading(), gateCollect4.getHeading())
+                .addPath(new BezierCurve(shootBall5, collectfarcontrolpoint, collectfar))
+                .setTangentHeadingInterpolation()
                 .build();
         shoot7 = follower.pathBuilder()
-                .addPath(new BezierCurve(gateCollect4, shootPose2ToGateControlPoint, shootBall7))
-                .setConstantHeadingInterpolation(Math.toRadians(147))
+                .addPath(new BezierCurve(collectfar, collectfarcontrolpoint, shootBall7))
+                .setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
 
         collect3 = follower.pathBuilder()
@@ -291,10 +297,10 @@ public class blue21close extends OpMode {
         switch (pathState) {
             case start:
                 theWheelOfTheOx.setPower(0);
-                launcher.setVelocity(1100);
+                launcher.setVelocity(1160);
                 tree.setPower(1);
                 blocker.setPosition(0);
-                launcher.setVelocity(1100); //1725
+                launcher.setVelocity(1160); //1725
                 hood.setPosition(1); //0.285
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
@@ -302,15 +308,15 @@ public class blue21close extends OpMode {
                     theWheelOfTheOx.setPower(-1);
                 }
 
-                setPathState(blue21close.PathState.actuallyshoot1);
+                setPathState(blue21wholefield.PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
                 double dist1 = getDistanceToGoal();
-                double velo1 = VelocityLookupTable.getVelocity(dist1);
-                double time1 = ShotTimeLookupTable.getTime(dist1);
+                double velo1 = 1160;
+                double time1 = 0.65;
                 launcher.setVelocity(velo1);
-                
-                if (!follower.isBusy() && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
+
+                if (!follower.isBusy() && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC_FIRST)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
                         tree.setPower(1);
@@ -321,9 +327,9 @@ public class blue21close extends OpMode {
                         shootingStarted = true;
                     }
                 }
-                
+
                 if (shootingStarted && shootingTimer.getElapsedTimeSeconds() > time1) {
-                    setPathState(blue21close.PathState.collection);
+                    setPathState(blue21wholefield.PathState.collection);
                 }
                 break;
 
@@ -335,7 +341,7 @@ public class blue21close extends OpMode {
                 tree.setPower(1);
                 if (!follower.isBusy() && !collectionStarted) {
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    launcher.setVelocity(1100);
+                    launcher.setVelocity(1120);
                     hood.setPosition(1);
                     tree.setPower(1);
                     follower.followPath(collect1);
@@ -346,24 +352,24 @@ public class blue21close extends OpMode {
                     }
                 }
                 if (!follower.isBusy() && collectionStarted) {
-                    setPathState((blue21close.PathState.shoot));
+                    setPathState((blue21wholefield.PathState.shoot));
 
 
                 }
                 break;
             case shoot:
                 double distS = getDistanceToGoal();
-                double veloS = VelocityLookupTable.getVelocity(distS);
-                double timeS = ShotTimeLookupTable.getTime(distS);
+                double veloS = 1140;
+                double timeS = 0.65;
                 if (!follower.isBusy() && !shoot2Started) {
                     hood.setPosition(1);
                     follower.followPath(shoot2);
                     launcher.setVelocity(veloS);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
-                    shoot2Started = true; 
+                    shoot2Started = true;
                 }
-                
+
                 if (!follower.isBusy() && shoot2Started && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
@@ -373,9 +379,9 @@ public class blue21close extends OpMode {
                         shootingStarted = true;
                     }
                 }
-                
+
                 if (shootingStarted && shootingTimer.getElapsedTimeSeconds() > timeS) {
-                    setPathState((blue21close.PathState.GateCollection));
+                    setPathState((blue21wholefield.PathState.GateCollection));
                 }
                 break;
 
@@ -384,7 +390,7 @@ public class blue21close extends OpMode {
                 theWheelOfTheOx.setPower(0);
                 if (!follower.isBusy() && !gateCollectionStarted) {
                     follower.followPath(GateCollect1);
-                    launcher.setVelocity(1120);
+                    launcher.setVelocity(1140);
                     tree.setPower(1);
                     hood.setPosition(1);
                     gateCollectionStarted = true; // Mark as started to prevent calling again
@@ -393,28 +399,28 @@ public class blue21close extends OpMode {
                     theWheelOfTheOx.setPower(-1);
                 }
                 if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds() > GATE_TO_SHOOT_WAIT_SEC) {
-                    setPathState((blue21close.PathState.shootAgain));
+                    setPathState((blue21wholefield.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
                 double distSA = getDistanceToGoal();
-                double veloSA = VelocityLookupTable.getVelocity(distSA);
-                double timeSA = ShotTimeLookupTable.getTime(distSA);
+                double veloSA = 1140;
+                double timeSA = 0.65;
                 if (!follower.isBusy() && !shoot3Started) {
                     hood.setPosition(1);
                     follower.followPath(shoot3);
                     tree.setPower(1);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    shoot3Started = true; 
+                    shoot3Started = true;
                     launcher.setVelocity(veloSA);
                 }
-                
+
                 // Keep the original logic for tree pause if needed, but relative to pathTimer
                 if (pathTimer.getElapsedTimeSeconds() > SHOOT_TREE_PAUSE_SEC && !shootingStarted)
                 {
                     tree.setPower(0);
                 }
-                
+
                 if (!follower.isBusy() && shoot3Started && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
@@ -424,9 +430,9 @@ public class blue21close extends OpMode {
                         shootingStarted = true;
                     }
                 }
-                
+
                 if (shootingStarted && shootingTimer.getElapsedTimeSeconds() > timeSA) {
-                    setPathState((blue21close.PathState.GateCollectionAgain));
+                    setPathState((blue21wholefield.PathState.GateCollectionAgain));
                 }
                 break;
 
@@ -436,7 +442,7 @@ public class blue21close extends OpMode {
                     theWheelOfTheOx.setPower(0);
                     follower.followPath(GateCollect2);
                     hood.setPosition(1);
-                    launcher.setVelocity(1120);
+                    launcher.setVelocity(1140);
                     tree.setPower(1);
                     hood.setPosition(1);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
@@ -445,13 +451,13 @@ public class blue21close extends OpMode {
                     theWheelOfTheOx.setPower(-1);
                 }
                 if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds() > GATE_TO_SHOOT_WAIT_SEC) {
-                    setPathState((blue21close.PathState.shootAgainAgain));
+                    setPathState((blue21wholefield.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
                 double distSAA = getDistanceToGoal();
-                double veloSAA = VelocityLookupTable.getVelocity(distSAA);
-                double timeSAA = ShotTimeLookupTable.getTime(distSAA);
+                double veloSAA = 1140;
+                double timeSAA = 0.65;
                 tree.setPower(1);
                 if (!follower.isBusy() && !shoot4Started) {
                     hood.setPosition(1);
@@ -459,9 +465,9 @@ public class blue21close extends OpMode {
                     tree.setPower(1);
                     launcher.setVelocity(veloSAA);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    shoot4Started = true; 
+                    shoot4Started = true;
                 }
-                
+
                 if (pathTimer.getElapsedTimeSeconds() > SHOOT_TREE_PAUSE_SEC && !shootingStarted) // preserved from original
                 {
                     tree.setPower(0);
@@ -476,9 +482,9 @@ public class blue21close extends OpMode {
                         shootingStarted = true;
                     }
                 }
-                
+
                 if (shootingStarted && shootingTimer.getElapsedTimeSeconds() > timeSAA) {
-                    setPathState((blue21close.PathState.GateCollectionAgainAgain));
+                    setPathState((blue21wholefield.PathState.GateCollectionAgainAgain));
                 }
                 break;
             case GateCollectionAgainAgain:
@@ -486,7 +492,7 @@ public class blue21close extends OpMode {
                 theWheelOfTheOx.setPower(0);
                 if (!follower.isBusy() && !gateCollectionAgainStarted) {
                     follower.followPath(GateCollect3);
-                    launcher.setVelocity(1120);
+                    launcher.setVelocity(1140);
                     tree.setPower(1);
                     hood.setPosition(1);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
@@ -502,8 +508,8 @@ public class blue21close extends OpMode {
                 break;
             case shootAgainAgainAgain:
                 double distSAAA = getDistanceToGoal();
-                double veloSAAA = VelocityLookupTable.getVelocity(distSAAA);
-                double timeSAAA = ShotTimeLookupTable.getTime(distSAAA);
+                double veloSAAA = 1140;
+                double timeSAAA = 0.65;
                 tree.setPower(1);
                 // Start path once only – use shoot5Started (was wrongly setting shoot4Started)
                 if (!follower.isBusy() && !shoot5Started) {
@@ -514,7 +520,7 @@ public class blue21close extends OpMode {
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     shoot5Started = true;
                 }
-                
+
                 if (shoot5Started && pathTimer.getElapsedTimeSeconds() > SHOOT_TREE_PAUSE_SEC && !shootingStarted) {
                     tree.setPower(0);
                 }
@@ -528,7 +534,7 @@ public class blue21close extends OpMode {
                         shootingStarted = true;
                     }
                 }
-                
+
                 if (shootingStarted && shootingTimer.getElapsedTimeSeconds() > timeSAAA) {
                     setPathState((PathState.GateCollectionAgainAgainExtra));
                 }
@@ -539,7 +545,7 @@ public class blue21close extends OpMode {
                 theWheelOfTheOx.setPower(0);
                 if (!follower.isBusy() && !gateCollectionAgainAgainExtraStarted) {
                     follower.followPath(GateCollect4);
-                    launcher.setVelocity(1120);
+                    launcher.setVelocity(1140);
                     tree.setPower(1);
                     hood.setPosition(1);
                     gateCollectionAgainAgainExtraStarted = true;
@@ -554,8 +560,8 @@ public class blue21close extends OpMode {
 
             case shootAgainAgainAgainExtra:
                 double distSAAAE = getDistanceToGoal();
-                double veloSAAAE = VelocityLookupTable.getVelocity(distSAAAE);
-                double timeSAAAE = ShotTimeLookupTable.getTime(distSAAAE);
+                double veloSAAAE = 1140;
+                double timeSAAAE = 0.65;
                 tree.setPower(1);
                 // Start path once only (no re-call when oscillating) – same pattern as other shoot states
                 if (!follower.isBusy() && !shoot6Started) {
@@ -565,7 +571,7 @@ public class blue21close extends OpMode {
                     tree.setPower(1);
                     shoot6Started = true;
                 }
-                
+
                 if (shoot6Started && pathTimer.getElapsedTimeSeconds() > SHOOT_TREE_PAUSE_SEC && !shootingStarted) {
                     tree.setPower(0);
                 }
@@ -579,9 +585,9 @@ public class blue21close extends OpMode {
                         shootingStarted = true;
                     }
                 }
-                
+
                 if (shootingStarted && shootingTimer.getElapsedTimeSeconds() > timeSAAAE) {
-                    setPathState((blue21close.PathState.collectAgainAgainEnd));
+                    setPathState((blue21wholefield.PathState.collectAgainAgainEnd));
                 }
                 break;
 
@@ -602,7 +608,7 @@ public class blue21close extends OpMode {
                 }
                 if (!follower.isBusy() && collectionStarted) {
                     theWheelOfTheOx.setPower(-1);
-                        setPathState((blue21close.PathState.shootAgainAgainAgainAgain));
+                    setPathState((blue21wholefield.PathState.shootAgainAgainAgainAgain));
 
                 }
                 break;
@@ -610,17 +616,17 @@ public class blue21close extends OpMode {
                 double distSAAAAA = getDistanceToGoal();
                 double veloSAAAAA = VelocityLookupTable.getVelocity(distSAAAAA);
                 double timeSAAAAA = ShotTimeLookupTable.getTime(distSAAAAA);
-                // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot7Started) {
                     follower.followPath(shoot6);
                     launcher.setVelocity(veloSAAAAA);
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(0);
-                    shoot7Started = true; // Mark as started to prevent calling again
+                    shoot7Started = true;
                 }
-                
-                if (!follower.isBusy() && shoot7Started && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC)) {
+                // Shooting while moving: aim at lead target (sillyTargetPose, same as BigBoyBlue); open blocker when aimed or timeout (no isRobotAtRest)
+                Pose sillyTarget = getSillyTargetPose();
+                if (shoot7Started && (isRotatorAimedAtPose(sillyTarget) && pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC_LAST)) {
                     if (!shootingStarted) {
                         blocker.setPosition(1);
                         tree.setPower(1);
@@ -629,9 +635,8 @@ public class blue21close extends OpMode {
                         shootingStarted = true;
                     }
                 }
-                
                 if (shootingStarted && shootingTimer.getElapsedTimeSeconds() > timeSAAAAA) {
-                    setPathState((blue21close.PathState.done));
+                    setPathState((blue21wholefield.PathState.done));
                 }
                 break;
             case done:
@@ -720,8 +725,14 @@ public class blue21close extends OpMode {
     public void loop() {
         follower.update();
 
-        // Rotator localization on the whole time: always aim at blue goal from current pose (while driving and when stopped)
-        if (turret != null) aimRotatorAtBlueGoal();
+        // Rotator: last shoot uses lead target (shoot while moving); all others aim at static goal
+        if (turret != null) {
+            if (pathState == PathState.shootAgainAgainAgainAgain && shoot7Started) {
+                aimRotatorAtPose(getSillyTargetPose());
+            } else {
+                aimRotatorAtBlueGoal();
+            }
+        }
 
         statePathUpdate();
 
@@ -807,6 +818,54 @@ public class blue21close extends OpMode {
         int targetTicks = getRotatorTargetTicksForBlueGoal();
         int currentTicks = turret.getRotatorPos();
         return Math.abs(currentTicks - targetTicks) <= ROTATOR_AIM_TOLERANCE_TICKS;
+    }
+
+    /** Lead target for shooting while moving (same as BigBoyBlue / ChassisLocal.sillyTargetPose, uses ShotTimeLookupTable). */
+    private Pose getSillyTargetPose() {
+        double dist = getDistanceToGoal();
+        if (dist >= SILLY_TARGET_MAX_DIST_IN) {
+            return new Pose(BLUE_GOAL_X, BLUE_GOAL_Y, 0);
+        }
+        double time = ShotTimeLookupTable.getTime(dist);
+        Vector velocity = follower.getVelocity();
+        if (velocity == null) return new Pose(BLUE_GOAL_X, BLUE_GOAL_Y, 0);
+        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
+        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
+        return new Pose(BLUE_GOAL_X - vx * time, BLUE_GOAL_Y - vy * time, 0);
+    }
+
+    /** Turret angle (deg) to aim at a point (x,y). */
+    private double getTurretAngleDegForPose(double targetX, double targetY) {
+        Pose robot = follower.getPose();
+        double dx = targetX - robot.getX();
+        double dy = targetY - robot.getY();
+        double angleToGoalDeg = Math.toDegrees(Math.atan2(dy, dx));
+        double headingDeg = Math.toDegrees(robot.getHeading());
+        double turretAngleDeg = angleToGoalDeg - headingDeg;
+        while (turretAngleDeg > 180) turretAngleDeg -= 360;
+        while (turretAngleDeg < -180) turretAngleDeg += 360;
+        return -turretAngleDeg + BLUE_AIM_OFFSET_DEG;
+    }
+
+    /** Target rotator ticks for an angle (match Turret.setRotatorToAngle). */
+    private int getRotatorTargetTicksForAngle(double angleDeg) {
+        double fracOf180 = Math.toRadians(angleDeg) / Math.PI;
+        return TurretConstants.ROTATOR_ZERO_TICKS + (int) (fracOf180 * TurretConstants.rotator180Range);
+    }
+
+    /** True if rotator is aimed at the given pose within tolerance. */
+    private boolean isRotatorAimedAtPose(Pose target) {
+        if (turret == null) return false;
+        double angle = getTurretAngleDegForPose(target.getX(), target.getY());
+        int targetTicks = getRotatorTargetTicksForAngle(angle);
+        int currentTicks = turret.getRotatorPos();
+        return Math.abs(currentTicks - targetTicks) <= ROTATOR_AIM_TOLERANCE_TICKS;
+    }
+
+    /** Aims the rotator at the given pose (for shooting while moving: pass silly target). */
+    private void aimRotatorAtPose(Pose target) {
+        if (turret == null) return;
+        turret.setRotatorToAngle(getTurretAngleDegForPose(target.getX(), target.getY()));
     }
 
     public void adjustHoodBasedOnDistance(double distance) {
