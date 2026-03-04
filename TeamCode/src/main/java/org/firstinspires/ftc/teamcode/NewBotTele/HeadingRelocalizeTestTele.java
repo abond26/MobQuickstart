@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.HeadingRelocalizeTest.ExperimentalRelocalization;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.HeadingRelocalizeTest.ExperimentalTurret;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants;
@@ -18,14 +18,15 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelo
 
 /**
  * ═══════════════════════════════════════════════════════════════════
- *  EXPERIMENTAL TELEOP — Heading Relocalization & Turret Sync
+ *  EXPERIMENTAL TELEOP — Heading Relocalization (Trusted Encoder)
  * ═══════════════════════════════════════════════════════════════════
  *
- *  This is a full copy of BigBoyBlue with advanced slippage recovery:
- *    TOUCHPAD   = Master Sync (Fixes Gear Slip AND IMU Drift)
+ *  Full copy of BigBoyBlue logic with simplified heading reset:
+ *    TOUCHPAD   = Direct Heading Reset (Vision Yaw - Turret Angle)
  *    DPAD DOWN  = Deadwheel Relocalize (Position Only)
  *
- *  All other controls match BigBoyBlue.
+ *  Since the gear does not slip, we use the raw encoder + AprilTag
+ *  to instantly correct any deadwheel/IMU heading drift.
  * ═══════════════════════════════════════════════════════════════════
  */
 @TeleOp(name = "HeadingRelocalizeTestTele", group = "test")
@@ -38,11 +39,9 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
     boolean sillyControls = false;
     private boolean lastDpadUp = false;
 
-    // ── Experimental Components ──
-    private ExperimentalRelocalization relocalization;
-    private ExperimentalTurret experimentalTurret;
+    // ── Components ──
+    private LimelightRelocalization relocalization;
     
-    private boolean autoRelocalize = false;
     private boolean lastTouchpad = false;
 
     @Override
@@ -50,15 +49,12 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
         Pose startPose = PoseStorage.loadPose(defaultPose);
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
         
-        // Use the Experimental Turret for gear-slip compensation
-        experimentalTurret = new ExperimentalTurret(hardwareMap);
-        
-        relocalization = new ExperimentalRelocalization(robot.vision.getLimelight());
+        relocalization = new LimelightRelocalization(robot.vision.getLimelight());
 
         actions = new RobotActions(
                 robot.chassisLocal,
                 robot.vision,
-                experimentalTurret, // Use experimental version!
+                robot.turret,
                 robot.gate,
                 robot.intake);
 
@@ -81,7 +77,7 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
             }
 
             // ═══════════════════════════════════════════════════
-            // EXPERIMENTAL SYNC LOGIC
+            // HEADING RELOCALIZATION LOGIC
             // ═══════════════════════════════════════════════════
 
             // 1. DPAD DOWN = Position Only (Deadwheels)
@@ -90,7 +86,7 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
                         robot.chassisLocal.getPose(),
                         cachedResult,
                         false, 
-                        experimentalTurret.getRotatorPos()
+                        robot.turret.getRotatorPos()
                 );
                 if (poseCorrection != null) {
                     robot.chassisLocal.setPose(poseCorrection);
@@ -98,29 +94,20 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
                 }
             }
 
-            // 2. TOUCHPAD = Two-Step "Master Sync" (Fixes Slip + Heading)
+            // 2. TOUCHPAD = Direct Heading Reset (Vision + Trusted Encoder)
             if (gamepad1.touchpad && !lastTouchpad && (cachedResult != null)) {
-                // Step 1: Fix Turret Encoder using IMU as baseline
-                Integer resyncTicks = relocalization.getVisualTurretTicks(
-                        Math.toDegrees(robot.chassisLocal.getPose().getHeading()),
-                        cachedResult
+                // Correct X, Y, AND Heading using the direct formula:
+                // Chassis Heading = Vision Yaw - Turret Angle
+                Pose fullCorrection = relocalization.getRelocalizationPose(
+                        robot.chassisLocal.getPose(), 
+                        cachedResult, 
+                        true, // includeHeading = true
+                        robot.turret.getRotatorPos()
                 );
                 
-                if (resyncTicks != null) {
-                    experimentalTurret.resetRotatorEncoder(resyncTicks);
-                    
-                    // Step 2: Now fix the Chassis Heading using the calibrated turret
-                    Pose finalCorrection = relocalization.getRelocalizationPose(
-                            robot.chassisLocal.getPose(), 
-                            cachedResult, 
-                            true, // Now trustworthy!
-                            experimentalTurret.getRotatorPos()
-                    );
-                    
-                    if (finalCorrection != null) {
-                        robot.chassisLocal.setPose(finalCorrection);
-                        gamepad1.rumble(1000); // Confirmed sync!
-                    }
+                if (fullCorrection != null) {
+                    robot.chassisLocal.setPose(fullCorrection);
+                    gamepad1.rumble(750); // Confirmed sync!
                 }
             }
             lastTouchpad = gamepad1.touchpad;
@@ -130,10 +117,10 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
             // ═══════════════════════════════════════════════════
 
             // Turret velocity
-            if (gamepad1.aWasPressed()) experimentalTurret.shiftVelocity(launcherSpeedIncrement);
-            if (gamepad1.yWasPressed()) experimentalTurret.shiftVelocity(-launcherSpeedIncrement);
+            if (gamepad1.aWasPressed()) robot.turret.shiftVelocity(launcherSpeedIncrement);
+            if (gamepad1.yWasPressed()) robot.turret.shiftVelocity(-launcherSpeedIncrement);
             if (gamepad1.rightStickButtonWasPressed()) {
-                experimentalTurret.presetVeloSwitch(veloSwitchNum);
+                robot.turret.presetVeloSwitch(veloSwitchNum);
                 veloSwitchNum = (veloSwitchNum % 4) + 1;
             }
 
@@ -142,11 +129,11 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
 
             // Rotator control (Manual)
             if (gamepad1.dpad_left) {
-                experimentalTurret.shiftRotator(-rotatorIncrement);
+                robot.turret.shiftRotator(-rotatorIncrement);
                 sillyControls = false;
             }
             if (gamepad1.dpad_right) {
-                experimentalTurret.shiftRotator(rotatorIncrement);
+                robot.turret.shiftRotator(rotatorIncrement);
                 sillyControls = false;
             }
 
@@ -171,12 +158,13 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
             }
 
             // TELEMETRY
-            telemetry.addLine("═══ SLIPPAGE RECOVERY (TEST) ═══");
+            telemetry.addLine("═══ HEADING RELOCALIZATION (TEST) ═══");
             telemetry.addData("Chassis Heading", "%.1f\u00b0", Math.toDegrees(robot.chassisLocal.getPose().getHeading()));
-            telemetry.addData("Turret Physical", "%d (%.1f\u00b0)", 
-                    experimentalTurret.getRotatorPos(), 
-                    (experimentalTurret.getRotatorPos() - ROTATOR_ZERO_TICKS) / TICKS_PER_DEGREE);
-            telemetry.addLine("\u2794 Press TOUCHPAD to Sync Gears + Heading");
+            telemetry.addData("Turret Angle", "%.1f\u00b0", 
+                    (robot.turret.getRotatorPos() - ROTATOR_ZERO_TICKS) / TICKS_PER_DEGREE);
+            telemetry.addLine("─── RECOVERY ───");
+            telemetry.addLine("\u2794 To fix drift: Point turret at tag, then tap TOUCHPAD");
+            telemetry.addLine("\u2794 For X/Y only: Tap DPAD DOWN");
             telemetry.update();
         }
         
