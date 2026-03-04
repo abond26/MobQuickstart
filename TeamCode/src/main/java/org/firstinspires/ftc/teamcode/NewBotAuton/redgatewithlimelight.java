@@ -58,7 +58,7 @@ public class redgatewithlimelight extends OpMode {
 
     private int y = tagHeight - limeHeight;
     //Rotator var
-    int motor180Range = 630; // Match TesterinoRed
+    int motor180Range = 624; // Standardized range
     int limelightUpAngle = 20; // Match TesterinoRed
     private int vMultiplier = 9;
     private Limelight3A limelight;

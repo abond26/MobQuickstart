@@ -80,11 +80,11 @@ public class blue21wholefield extends OpMode {
     /** Tree off (pause) before we allow blocker open in shoot states. Try 0.35 to save ~0.15s per shot. */
     private static final double SHOOT_TREE_PAUSE_SEC = 0.25;
     /** Gate collection: turn on feed wheel after this many sec. Try 2.0 to save ~0.25s per gate. */
-    private static final double GATE_WHEEL_DELAY_SEC = 2.65;
+    private static final double GATE_WHEEL_DELAY_SEC = 1.5;
     /** Gate collection: wait this long before transitioning to shoot. Try 2.4 to save ~0.2s per gate. */
-    private static final double GATE_TO_SHOOT_WAIT_SEC = 2.65;
+    private static final double GATE_TO_SHOOT_WAIT_SEC = 3.0;
     /** GateCollectionAgainAgain: wait before next state. Try 2.55 to save ~0.2s. */
-    private static final double GATE_TO_SHOOT_WAIT_SEC_LONG = 2.65;
+    private static final double GATE_TO_SHOOT_WAIT_SEC_LONG = 3.0;
     /** First collection: wheel on after this sec. Try 1.0 to save ~0.25s. */
     private static final double COLLECT_FIRST_WHEEL_SEC = 1.0;
     /** collectAgainAgainEnd: wheel on after this sec. Try 1.2 to save ~0.3s. */
@@ -169,7 +169,7 @@ public class blue21wholefield extends OpMode {
     PathState pathState;
     // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
     private final Pose startPose = new Pose(26.7, 132, Math.toRadians(144));
-    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(270));
+    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(210));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 61, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(65, 58.5, Math.toRadians(180));
@@ -313,11 +313,11 @@ public class blue21wholefield extends OpMode {
             case actuallyshoot1:
                 double dist1 = getDistanceToGoal();
                 double velo1 = 1160;
-                double time1 = 0.65;
+                double time1 = 1.1;
                 launcher.setVelocity(velo1);
 
                 if (!follower.isBusy() && isRobotAtRest() && (isRotatorAimedAtGoal() || pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC_FIRST)) {
-                    if (!shootingStarted) {
+                    if (!shootingStarted && launcher.getVelocity() >= 1120 && launcher.getVelocity() <= 1160) {
                         blocker.setPosition(1);
                         tree.setPower(1);
                         launcher.setVelocity(velo1);
@@ -625,9 +625,15 @@ public class blue21wholefield extends OpMode {
                     shoot7Started = true;
                 }
                 // Shooting while moving: aim at lead target (sillyTargetPose, same as BigBoyBlue); open blocker when aimed or timeout (no isRobotAtRest)
+                // Shooting while moving: Dynamic updates
+                double currentDist6 = getDistanceToGoal();
+                launcher.setVelocity(calcVelocity(currentDist6));
+                adjustHoodBasedOnDistance(currentDist6);
+
                 Pose sillyTarget = getSillyTargetPose();
-                if (shoot7Started && (isRotatorAimedAtPose(sillyTarget) && pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC_LAST)) {
-                    if (!shootingStarted) {
+                if (shoot7Started && isRotatorAimedAtPose(sillyTarget) && (pathTimer.getElapsedTimeSeconds() > MAX_AIM_WAIT_SEC_LAST)) {
+                    // Blocker only opens once diagonal line X+Y > 144 is crossed
+                    if (!shootingStarted && (follower.getPose().getX() + follower.getPose().getY() > 144)) {
                         blocker.setPosition(1);
                         tree.setPower(1);
                         theWheelOfTheOx.setPower(-1);
@@ -870,10 +876,15 @@ public class blue21wholefield extends OpMode {
 
     public void adjustHoodBasedOnDistance(double distance) {
         if (hood != null) {
-            if (distance > DISTANCE_THRESHOLD) {
-                hood.setPosition(FAR_HOOD_POSITION);
-            } else {
+            // Using 3-zone logic similar to BigBoyBlue/RobotActions
+            int zone = VelocityLookupTable.getZone(distance);
+            if (zone == 1) {
                 hood.setPosition(CLOSE_HOOD_POSITION);
+            } else if (zone == 2) {
+                // Approximate mid position since not explicitly defined
+                hood.setPosition((CLOSE_HOOD_POSITION + FAR_HOOD_POSITION) / 2.0);
+            } else {
+                hood.setPosition(FAR_HOOD_POSITION);
             }
         }
     }
