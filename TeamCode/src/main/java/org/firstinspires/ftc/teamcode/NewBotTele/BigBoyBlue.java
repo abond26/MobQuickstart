@@ -215,7 +215,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
 
             // Manual relocalization (DPAD UP — same as BlueTele)
             if (gamepad1.dpad_up && !lastDpadUp) {
-                actions.setRobotPose(dpadUpPose);
+                actions.HumanPLayerFix(dpadUpHeading);
             }
             lastDpadUp = gamepad1.dpad_up;
 

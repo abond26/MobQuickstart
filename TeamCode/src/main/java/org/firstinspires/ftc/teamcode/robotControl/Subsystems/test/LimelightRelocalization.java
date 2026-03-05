@@ -23,7 +23,7 @@ import java.util.List;
  * PURPOSE:
  * Correct deadwheel localization drift by using AprilTag field-position
  * to determine where the robot ACTUALLY is, then update Pedro Pathing.
- *
+ * wi
  * HOW IT WORKS WITH THE TURRET:
  * The Limelight is mounted on the turret (rotator), which can spin
  * independently of the chassis. MegaTag2 solves this elegantly:
@@ -111,7 +111,7 @@ public class LimelightRelocalization implements LimelightRelocalizationConstants
      *         rejected.
      */
     public Pose getRelocalizationPose(Pose currentPedroPose, LLResult cachedResult, boolean includeHeading,
-                                      int turretTicks) {
+            int turretTicks) {
         if (limelight == null) {
             lastResultValid = false;
             lastRejectReason = "Limelight not initialized";
@@ -184,11 +184,16 @@ public class LimelightRelocalization implements LimelightRelocalizationConstants
         // --- HEADING CALCULATION ---
         double chassisHeadingRad;
         if (includeHeading) {
-            // Limelight mt1Yaw is the visual heading of the CAMERA in field space.
+            // Limelight mt1Yaw is the visual heading of the CAMERA in field space
+            // (Limelight's coordinate system).
             // Turret angle is the rotation of the camera RELATIVE to the CHASSIS.
-            // ChassisHeading = CameraYaw - TurretAngle
+            // ChassisHeading_LLSpace = CameraYaw - TurretAngle
+            //
+            // Since Pedro Pathing's coordinate grid is rotated 90 degrees from Limelight's
+            // (Pedro X is Forward, LL Y is Forward), we must subtract 90 degrees to convert
+            // from Limelight's field-centric heading to Pedro's field-centric heading.
             double turretAngleDeg = (turretTicks - ROTATOR_ZERO_TICKS) / TICKS_PER_DEGREE;
-            double calculatedChassisHeadingDeg = mt1Yaw - turretAngleDeg;
+            double calculatedChassisHeadingDeg = mt1Yaw - turretAngleDeg - 90.0;
 
             // Normalize to [-180, 180]
             while (calculatedChassisHeadingDeg > 180)
@@ -196,7 +201,7 @@ public class LimelightRelocalization implements LimelightRelocalizationConstants
             while (calculatedChassisHeadingDeg < -180)
                 calculatedChassisHeadingDeg += 360;
 
-            chassisHeadingRad = Math.toRadians(calculatedChassisHeadingDeg) - Math.PI / 2;
+            chassisHeadingRad = Math.toRadians(calculatedChassisHeadingDeg);
         } else {
             // Default: Keep the Pedro Pathing (deadwheel/IMU) heading as the source of
             // truth.

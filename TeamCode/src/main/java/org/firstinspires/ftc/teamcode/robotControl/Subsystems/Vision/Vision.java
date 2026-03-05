@@ -7,6 +7,8 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
+
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -57,6 +59,8 @@ public class Vision implements VisionConstants{
         return (r != null) ? r.getTx() : 0;
     }
 
+
+
     public double getTy() {
         if (limelight == null) return 0;
         LLResult r = limelight.getLatestResult();
@@ -94,23 +98,11 @@ public class Vision implements VisionConstants{
         return new Pose(x, y, heading);
     }
 
-    private static double getFiducialAmbiguity(LLResultTypes.FiducialResult fr) {
-        try {
-            java.lang.reflect.Method m = fr.getClass().getMethod("getAmbiguity");
-            Object v = m.invoke(fr);
-            return v instanceof Number ? ((Number) v).doubleValue() : -1;
-        } catch (Exception e) {
-            return -1;
+    public Pose3D getRobotPosition(){
+        List<FiducialResult> fiducialResult = limelight.getLatestResult().getFiducialResults();
+        if (!fiducialResult.isEmpty() && fiducialResult.get(0).getTargetArea() >= 0.01) {
+            return fiducialResult.get(0).getRobotPoseFieldSpace();
         }
-    }
-
-    private static double getFiducialDistToCamera(LLResultTypes.FiducialResult fr) {
-        try {
-            java.lang.reflect.Method m = fr.getClass().getMethod("getDistToCamera");
-            Object v = m.invoke(fr);
-            return v instanceof Number ? ((Number) v).doubleValue() : 0;
-        } catch (Exception e) {
-            return 0;
-        }
+        return null;
     }
 }

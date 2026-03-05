@@ -217,7 +217,7 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
 
             // Manual relocalization (DPAD UP — same as BlueTele)
             if (gamepad1.dpad_up && !lastDpadUp) {
-                actions.setRobotPose(dpadUpPose);
+                actions.HumanPLayerFix(dpadUpHeading);
             }
             lastDpadUp = gamepad1.dpad_up;
 

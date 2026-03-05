@@ -216,8 +216,9 @@ public class RobotActions implements BlueUniversalConstants {
         autoAdjustHood(targ);
     }
 
-    public void adjustShootingParamsTest(Pose targ) {
-        autoAdjustVelo(targ);
+    public void HumanPLayerFix(double headingDegrees) {
+        Pose currentPose = chassisLocal.getPose();
+        chassisLocal.setPose(new Pose(currentPose.getX(), currentPose.getY(), Math.toRadians(headingDegrees)));
     }
 
     public void aimRotatorLocal(Pose targ, @NonNull Telemetry telemetry) {
@@ -265,6 +266,7 @@ public class RobotActions implements BlueUniversalConstants {
     public void aim() {
 
     }
+
 
     // public void relocalize() {
     // Pose pose = vision.getEstimatedPose();
