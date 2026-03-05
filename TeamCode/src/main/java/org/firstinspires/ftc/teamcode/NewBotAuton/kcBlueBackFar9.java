@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.kiera;
+package org.firstinspires.ftc.teamcode.NewBotAuton;
 
 import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -13,19 +13,18 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
-//import org.firstinspires.ftc.teamcode.Kishen.close9blue;
+
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 
+//changed location
 
 
-
-@Autonomous(name = "kc 9 blue back", group = "kc auton")
-public class kcBlueBack9 extends OpMode {
+@Autonomous(name = "kc 9 blue back", group = "NewBotAuton")
+public class kcBlueBackFar9 extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
@@ -41,7 +40,7 @@ public class kcBlueBack9 extends OpMode {
     private boolean opengateStarted = false;
     private boolean parkingStarted = false;
 
-    private Servo hood;
+    private Servo hood,blocker;
     private int limeHeight = 33;
     private int offset = 28;
     private int tagHeight = 75;
@@ -92,15 +91,15 @@ public class kcBlueBack9 extends OpMode {
     private final Pose startPose= new Pose(60.734693877551024, 8.620408163265303,Math.toRadians(90));
     private final Pose shootPose = new Pose(60.53877551020408,15.12653061224489,Math.toRadians(110));
 
-    private final Pose beforeIntakeOne= new Pose(60.5591836734694,32.66530612244898,Math.toRadians(180));
-    private final Pose afterIntakeOne= new Pose(16.068954955554815,32.93200386190365,Math.toRadians(180));
+    private final Pose beforeIntakeOne= new Pose(45.5591836734694,28.66530612244898,Math.toRadians(180));
+    private final Pose afterIntakeOne= new Pose(5.068954955554815,32.93200386190365,Math.toRadians(180));
 
    //go back to shooting position
-    private final Pose beforeIntakeTwo =new Pose(60.599999999999994,55,Math.toRadians(180));
-    private final Pose afterIntakeTwo =new Pose(16.387755102040824,55,Math.toRadians(180));
+    private final Pose beforeIntakeTwo =new Pose(45.599999999999994,55,Math.toRadians(180));
+    private final Pose afterIntakeTwo =new Pose(5.387755102040824,55,Math.toRadians(180));
     //back to shooting position
 
-    private final Pose recordIntake=new Pose(18.069387755102042,55.420408163265314,Math.toRadians(155));
+    private final Pose recordIntake=new Pose(17.069387755102042,58.420408163265314,Math.toRadians(155));
 //if it were in a good tuned robot it would be 55
 
     private PathChain firstShot,goToIntakeOne,intakeOne,backToShootOne,goToIntakeTwo,intakeTwo,backToShootTwo,goToIntakeRec;
@@ -150,76 +149,86 @@ public class kcBlueBack9 extends OpMode {
     public void statePathUpdate(){
         switch(pathState) {
             case START:
-                launcher.setVelocity(2810);
-                hood.setPosition(0.15);
+                blocker.setPosition(0);
+                launcher.setVelocity(2450);
+                hood.setPosition(0.19);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(firstShot);
-                setPathState(kcBlueBack9.PathState.SHOOT);
+                setPathState(kcBlueBackFar9.PathState.SHOOT);
                 break;
 
             case SHOOT:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2.5){
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>3){
+                    blocker.setPosition(1);
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(-1);
-                }if (pathTimer.getElapsedTimeSeconds()>3.5){
+
+                }if (pathTimer.getElapsedTimeSeconds()>4){
                     follower.followPath(goToIntakeOne);
-                    setPathState(kcBlueBack9.PathState.INTAKE);
+                    setPathState(kcBlueBackFar9.PathState.INTAKE);
                     tree.setPower(0);
                     theWheelOfTheOx.setPower(0);
                     launcher.setVelocity(0);
+                    blocker.setPosition(0);
             }break;
 
             case INTAKE:
-                if(!follower.isBusy()&&pathTimer.getElapsedTimeSeconds()>0.5){
+                if(!follower.isBusy()&&pathTimer.getElapsedTimeSeconds()>2){
                     launcher.setVelocity(0);
                     tree.setPower(1);
-                }if(pathTimer.getElapsedTimeSeconds()>1) {
+                }if(pathTimer.getElapsedTimeSeconds()>2) {
                 follower.followPath(intakeOne);
             }
-                if(pathTimer.getElapsedTimeSeconds()>4){
+                if(pathTimer.getElapsedTimeSeconds()>5){
                     tree.setPower(0);
-                    if (pathTimer.getElapsedTimeSeconds()>5) {
-                        launcher.setVelocity(2600);
+                    if (pathTimer.getElapsedTimeSeconds()>6) {
+                        launcher.setVelocity(2550);
                         follower.followPath(backToShootOne);
-                        setPathState(kcBlueBack9.PathState.SHOOT1);
+                        setPathState(kcBlueBackFar9.PathState.SHOOT1);
                     }
             } break;
 
             case SHOOT1:
-                if(!follower.isBusy()&& pathTimer.getElapsedTimeSeconds()>2.5){
+                if(!follower.isBusy()&& pathTimer.getElapsedTimeSeconds()>3){
+
                     tree.setPower(1);
                     theWheelOfTheOx.setPower(-1);
+                    blocker.setPosition(1);
                 }if (pathTimer.getElapsedTimeSeconds()>4){
                     follower.followPath(goToIntakeTwo);
-                    setPathState(kcBlueBack9.PathState.INTAKE2);
+                    setPathState(kcBlueBackFar9.PathState.INTAKE2);
 
                     theWheelOfTheOx.setPower(0);
                     launcher.setVelocity(0);
             }break;
 
             case INTAKE2:
-                if(!follower.isBusy()&&pathTimer.getElapsedTimeSeconds()>1){
+                if(!follower.isBusy()&&pathTimer.getElapsedTimeSeconds()>2){
                     launcher.setVelocity(0);
                     tree.setPower(1);
-            }if(pathTimer.getElapsedTimeSeconds()>1.5) {
+                    blocker.setPosition(0);
+            }if(pathTimer.getElapsedTimeSeconds()>2.5) {
                     follower.followPath(intakeTwo);
             }
-                if (pathTimer.getElapsedTimeSeconds()>4) {
+                if (pathTimer.getElapsedTimeSeconds()>5) {
                     tree.setPower(0);
-                    launcher.setVelocity(2610);
+                    launcher.setVelocity(2620);
                     follower.followPath(backToShootTwo);
-                    setPathState(kcBlueBack9.PathState.SHOOT2);
+                    setPathState(kcBlueBackFar9.PathState.SHOOT2);
             }break;
 
             case SHOOT2:
-                if(!follower.isBusy()&&pathTimer.getElapsedTimeSeconds()>1) {
-                    tree.setPower(1);
+                if(!follower.isBusy()&&pathTimer.getElapsedTimeSeconds()>2) {
                     theWheelOfTheOx.setPower(-1);
-                    if (pathTimer.getElapsedTimeSeconds() > 3.5) {
+                    tree.setPower(1);
+                    blocker.setPosition(1);
+                    theWheelOfTheOx.setPower(-1);
+                    if (pathTimer.getElapsedTimeSeconds() > 4) {
                         follower.followPath(goToIntakeRec);
-                        setPathState(kcBlueBack9.PathState.PARK);
+                        setPathState(kcBlueBackFar9.PathState.PARK);
                         theWheelOfTheOx.setPower(0);
                         launcher.setVelocity(0);
+                        blocker.setPosition(1);
                     }
                 }break;
 

@@ -17,13 +17,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 
 @Autonomous(name="BlueBackAuton")
-public class BlueBackAuton extends OpMode {
+public class BlueBackAutonFar extends OpMode {
     private Follower follower;
 
-    private Servo hood;
+    private Servo hood, blocker;
     private int limeHeight = 33;
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 0.75;
@@ -171,10 +171,10 @@ public class BlueBackAuton extends OpMode {
         switch (pathState) {
             case LINEUP_FOR_FIRST_SHOT:
 
-
+                blocker.setPosition(1);
                 launcher.setVelocity(2560);
 
-                hood.setPosition(0.0110);
+                hood.setPosition(0.19);
 
                 follower.followPath(lineUpForFirstShot, true);
 
@@ -185,8 +185,7 @@ public class BlueBackAuton extends OpMode {
 
             case SHOOT_ONE:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
-
-
+                    blocker.setPosition(0);
                     theWheelOfTheOx.setPower(-1);
                     tree.setPower(1);
                     setPathState(PathState.INTAKE_LINEUP_ONE);
@@ -199,8 +198,9 @@ public class BlueBackAuton extends OpMode {
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
 
                     follower.followPath(goingToIntakeOne, true);
-                    hood.setPosition(0.0139);
+
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
+                    blocker.setPosition(1);
 
 
                     launcher.setVelocity(0);
@@ -270,8 +270,7 @@ public class BlueBackAuton extends OpMode {
 
             case LINEUP_TO_SHOOT:
                 if (!follower.isBusy()) {
-
-
+                    blocker.setPosition(0);
                     launcher.setVelocity(2520);
 
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
@@ -293,7 +292,7 @@ public class BlueBackAuton extends OpMode {
 
             case LINEUP_TO_INTAKE:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
-
+                    blocker.setPosition(0);
                     launcher.setVelocity(0);
 
                     theWheelOfTheOx.setPower(0);
@@ -363,15 +362,22 @@ public class BlueBackAuton extends OpMode {
         pathState = PathState.LINEUP_FOR_FIRST_SHOT;
         pathTimer = new Timer();
         opModeTimer = new Timer();
-        follower = Constants.createFollower(hardwareMap);
+        follower = ConstantsNewBot.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+
+        blocker = hardwareMap.get(Servo.class, "blocker");
+        blocker.scaleRange(0, 0.362);
+        blocker.setPosition(0);
 
     }
 
     public void start() {
         opModeTimer.resetTimer();
         setPathState(pathState);
+
+        blocker = hardwareMap.get(Servo.class, "blocker");
+        blocker.scaleRange(0, 0.4);
 
 //intake
         tree = hardwareMap.get(DcMotor.class, "tree");

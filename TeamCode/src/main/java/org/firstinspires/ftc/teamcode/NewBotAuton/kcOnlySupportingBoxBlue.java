@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.kiera;
+package org.firstinspires.ftc.teamcode.NewBotAuton;
 import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -17,10 +17,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "kc blue back box", group = "kc auton")
-public class kcBlueBackBox extends OpMode{
-
-
+//changed location
+@Autonomous(name = "kc supporting box", group = "kc auton")
+public class kcOnlySupportingBoxBlue extends OpMode{
 
 
     private int rotatorStartPosition=0;
@@ -38,7 +37,7 @@ public class kcBlueBackBox extends OpMode{
     private boolean opengateStarted = false;
     private boolean parkingStarted = false;
 
-    private Servo hood;
+    private Servo hood,blocker;
     private int limeHeight = 33;
     private int offset = 28;
     private int tagHeight = 75;
@@ -73,184 +72,131 @@ public class kcBlueBackBox extends OpMode{
     public enum PathState {
         START,
         SHOOT,
-        INTAKE,
-        GOINGTOINTAKE,
-        GONNASHOOT1,
-        GOINGSHOOT,
-        GOINGINTAKE,
-        GONNATOBOX,
-        GONNASHOOT2,
-        GONNATOBOX2,
-        GONNASHOOT3,
-        SNORLAX
+        BOX1,
+        SHOOT1,
+        BOX2,
+        SHOOT2
+
+
 
 
     }
 
-    PathState pathState;
+    kcOnlySupportingBoxBlue.PathState pathState;
 
-    private final Pose startPose= new Pose(60.734693877551024, 8.620408163265303, Math.toRadians(90));
-    private final Pose shootPose=new Pose(60.53877551020408,19.12653061224489,Math.toRadians(110));
 
-    private final Pose beforeIntakeOne =new Pose(41.22680412371134, 35.1958762886598,Math.toRadians(180));
-    private final Pose afterIntakeOne= new Pose(13.126530612244897, 35.461224489795924,Math.toRadians(180));
+    private final Pose startPose= new Pose( 60.734693877551024,8.620408163265303,Math.toRadians(90));
+    private final Pose shootPose=new Pose(60.53877551020408,19.12653061224489,Math.toRadians(115));
 
-    //go to shootPose
+    private final Pose intakeBoxPose=new Pose(9,11.575510204081633,Math.toRadians(180));
 
-    private final Pose intakeInTheBoxOne=new Pose(12.930612244897961,9.012244897959185,Math.toRadians(180));
 
-    //keeo repeating shoot pose and intake
+    private PathChain lineupShotOne,intakeBox,goToShoot;
 
-    private PathChain firstShot,goToIntake,intake,goBackToShootOne, goToBoxOne,returnFromBoxOne,goToBoxTwo,returnFromBoxTwo;
-
-    public void buildPaths(){
-        firstShot=follower.pathBuilder()
-                .addPath(new BezierLine(startPose, shootPose))
+    public void buildPaths() {
+        lineupShotOne= follower.pathBuilder()
+                .addPath(new BezierLine(startPose,shootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
-        goToIntake=follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, beforeIntakeOne))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), beforeIntakeOne.getHeading())
+        intakeBox=follower.pathBuilder()
+                .addPath(new BezierLine(shootPose,intakeBoxPose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), intakeBoxPose.getHeading())
                 .build();
-        intake= follower.pathBuilder()
-                .addPath(new BezierLine(beforeIntakeOne, afterIntakeOne))
-                .setLinearHeadingInterpolation(beforeIntakeOne.getHeading(), afterIntakeOne.getHeading())
+        goToShoot=follower.pathBuilder()
+                .addPath(new BezierLine(intakeBoxPose,shootPose))
+                .setLinearHeadingInterpolation(intakeBoxPose.getHeading(), shootPose.getHeading())
                 .build();
-        goBackToShootOne= follower.pathBuilder()
-                .addPath(new BezierLine(afterIntakeOne, shootPose))
-                .setLinearHeadingInterpolation(afterIntakeOne.getHeading(), shootPose.getHeading())
-                .build();
-        goToBoxOne= follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, intakeInTheBoxOne ))
-                .setLinearHeadingInterpolation(afterIntakeOne.getHeading(), intakeInTheBoxOne.getHeading())
-                .build();
-        returnFromBoxOne=follower.pathBuilder()
-                .addPath(new BezierLine(intakeInTheBoxOne, shootPose))
-                .setLinearHeadingInterpolation(intakeInTheBoxOne.getHeading(), shootPose.getHeading())
-                .build();
-        goToBoxTwo=follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, intakeInTheBoxOne))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), intakeInTheBoxOne.getHeading())
-                .build();
-        returnFromBoxTwo=follower.pathBuilder()
-                .addPath(new BezierLine(intakeInTheBoxOne, shootPose))
-                .setLinearHeadingInterpolation(intakeInTheBoxOne.getHeading(), shootPose.getHeading())
-                .build();
+
+
 
     }
 
+
     public void statePathUpdate(){
-        switch (pathState){
+        switch(pathState){
             case START:
-                launcher.setVelocity(2559);
-                hood.setPosition(0.0110);
+                blocker.setPosition(0);
+                launcher.setVelocity(2600);
+                hood.setPosition(0.19);
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
-                follower.followPath(firstShot);
-                setPathState(kcBlueBackBox.PathState.SHOOT);
+                follower.followPath(lineupShotOne);
+                setPathState(kcOnlySupportingBoxBlue.PathState.SHOOT);
                 break;
 
             case SHOOT:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
+                if(!follower.isBusy()&&pathTimer.getElapsedTimeSeconds()>3){
                     tree.setPower(1);
+                    blocker.setPosition(1);
                     theWheelOfTheOx.setPower(-1);
-                    if (pathTimer.getElapsedTimeSeconds() > 4) {
-                        setPathState(kcBlueBackBox.PathState.GOINGINTAKE);
+                    setPathState(kcOnlySupportingBoxBlue.PathState.BOX1);
+                }break;
+
+            case BOX1:
+                if(!follower.isBusy()&&pathTimer.getElapsedTimeSeconds()>1){
+                    launcher.setVelocity(0);
+                    theWheelOfTheOx.setPower(0);
+                    if(pathTimer.getElapsedTimeSeconds()>2) {
+                        follower.followPath(intakeBox);
+                        setPathState(kcOnlySupportingBoxBlue.PathState.SHOOT1);
                         tree.setPower(0);
-                        theWheelOfTheOx.setPower(0);
-                        launcher.setVelocity(0);
                     }
                 }break;
 
-            case GOINGINTAKE:
-                    if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1) {
-                        follower.followPath(goToIntake);
+            case SHOOT1:
+                if(!follower.isBusy()){
+                    launcher.setVelocity(2600);
+                    follower.followPath(goToShoot);
+                    if(pathTimer.getElapsedTimeSeconds()>3){
                         tree.setPower(1);
-
-                    if (pathTimer.getElapsedTimeSeconds()>3){
-                        follower.followPath(intake);
-
-                        if (pathTimer.getElapsedTimeSeconds()>5) {
+                        theWheelOfTheOx.setPower(-1);
+                        if(pathTimer.getElapsedTimeSeconds()>2){
+                            theWheelOfTheOx.setPower(0);
+                            launcher.setVelocity(0);
                             tree.setPower(0);
-                            setPathState(PathState.GONNASHOOT1);
+
+                            setPathState(kcOnlySupportingBoxBlue.PathState.BOX2);
+
+                        }
+
+                    }
+                }break;
+
+            case BOX2:
+                if(!follower.isBusy()){
+                    tree.setPower(1);
+
+                    if(pathTimer.getElapsedTimeSeconds()>2){
+                        follower.followPath(intakeBox);
+                        setPathState(kcOnlySupportingBoxBlue.PathState.SHOOT2);
+                        tree.setPower(0);
+                    }
+                }break;
+
+            case SHOOT2:
+                if(!follower.isBusy()){
+                    launcher.setVelocity(2610);
+                    follower.followPath(goToShoot);
+                    if(pathTimer.getElapsedTimeSeconds()>3){
+                        tree.setPower(1);
+                        theWheelOfTheOx.setPower(-1);
+                        if(pathTimer.getElapsedTimeSeconds()>2){
+                            theWheelOfTheOx.setPower(0);
+                            launcher.setVelocity(0);
+                            tree.setPower(0);
+
                         }
 
                     }
 
+
                 }break;
-
-            case GONNASHOOT1:
-                if (!follower.isBusy()) {
-                    launcher.setVelocity(2559);
-                    follower.followPath(goBackToShootOne);
-                    if (pathTimer.getElapsedTimeSeconds() > 2.5) {
-                        tree.setPower(1);
-                        theWheelOfTheOx.setPower(-1);
-                        setPathState(PathState.GONNATOBOX);
-                    }
-                }break;
-                case GONNATOBOX:
-                    if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>3){
-                            launcher.setVelocity(0);
-                            tree.setPower(1);
-                            theWheelOfTheOx.setPower(0);
-                            follower.followPath(goToBoxOne);
-                            if (pathTimer.getElapsedTimeSeconds()> 3.5){
-                                launcher.setVelocity(2559);
-                                setPathState(PathState.GONNASHOOT2);
-                            }
-                    }break;
-
-                    case GONNASHOOT2:
-                        if(!follower.isBusy()&& pathTimer.getElapsedTimeSeconds()>3){
-                            follower.followPath(returnFromBoxOne);
-                            if (pathTimer.getElapsedTimeSeconds() > 4) {
-                                tree.setPower(1);
-                                theWheelOfTheOx.setPower(-1);
-
-                            }
-                            setPathState(PathState.GONNATOBOX2);
-
-                        }break;
-
-
-                        case GONNATOBOX2:
-                            if(!follower.isBusy()&& pathTimer.getElapsedTimeSeconds() >3){
-                                theWheelOfTheOx.setPower(0);
-                                launcher.setVelocity(0);
-                                follower.followPath(goToBoxTwo);
-                                if (pathTimer.getElapsedTimeSeconds()> 3.5){
-                                    launcher.setVelocity(2559);
-                                    setPathState(PathState.GONNASHOOT3);
-                                }
-
-
-                            }break;
-
-                            case GONNASHOOT3:
-                                    if(!follower.isBusy()&& pathTimer.getElapsedTimeSeconds()>3){
-                                        tree.setPower(1);
-                                        theWheelOfTheOx.setPower(-1);
-                                        follower.followPath(returnFromBoxTwo);
-                                        setPathState(PathState.SNORLAX);
-
-                                }break;
-
-                                    case SNORLAX:
-                                        if(!follower.isBusy()){
-                                            tree.setPower(0);
-                                            launcher.setVelocity(0);
-                                            theWheelOfTheOx.setPower(0);
-
-
-                                        }break;
-
 
 
         }
     }
 
 
-    public void setPathState(kcBlueBackBox.PathState newState) {
+    public void setPathState(kcOnlySupportingBoxBlue.PathState newState) {
         pathState = newState;
         pathTimer.resetTimer();
         // Reset flags when state changes to allow paths to be called again in new state
@@ -260,9 +206,14 @@ public class kcBlueBackBox extends OpMode{
         shoot5Started = false;
     }
 
+
     @Override
     public void init() {
-        pathState = kcBlueBackBox.PathState.START;
+        blocker = hardwareMap.get(Servo.class, "blocker");
+        blocker.scaleRange(0, 0.362);
+        blocker.setPosition(0);
+
+        pathState = kcOnlySupportingBoxBlue.PathState.START;
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = ConstantsNewBot.createFollower(hardwareMap);
@@ -271,9 +222,15 @@ public class kcBlueBackBox extends OpMode{
 
     }
 
+
     public void start() {
         opModeTimer.resetTimer();
         setPathState(pathState);
+
+
+        blocker = hardwareMap.get(Servo.class, "blocker");
+        blocker.scaleRange(0, 0.4);
+
 
 
         tree = hardwareMap.get(DcMotor.class, "tree");
@@ -299,6 +256,7 @@ public class kcBlueBackBox extends OpMode{
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
+
     @Override
     public void loop() {
         follower.update();
@@ -311,6 +269,7 @@ public class kcBlueBackBox extends OpMode{
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("jolly crusader velocity", launcher.getVelocity());
     }
+
 
     public double getDist(double tyDeg) {
         // Use corrected distance formula from TesterinoBlue
@@ -398,5 +357,10 @@ public class kcBlueBackBox extends OpMode{
 
 
 
+
+
+
+
 }
+
 
