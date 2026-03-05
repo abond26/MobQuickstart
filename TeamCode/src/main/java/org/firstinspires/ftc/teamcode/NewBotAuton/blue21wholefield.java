@@ -94,7 +94,7 @@ public class blue21wholefield extends OpMode {
 
     private int y = tagHeight - limeHeight;
     //Rotator var
-    int motor180Range = 624;
+    int motor180Range = 610;
     int limelightUpAngle = 25;
     private int vMultiplier = 9;
     private Limelight3A limelight;
