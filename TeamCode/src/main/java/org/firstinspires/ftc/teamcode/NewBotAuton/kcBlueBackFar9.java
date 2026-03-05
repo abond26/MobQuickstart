@@ -232,7 +232,7 @@ public class kcBlueBack9 extends OpMode {
         }
     }
 
-    public void setPathState(kcBlueBack9.PathState newState) {
+    public void setPathState(kcBlueBackFar9.PathState newState) {
         pathState = newState;
         pathTimer.resetTimer();
         // Reset flags when state changes to allow paths to be called again in new state
