@@ -262,6 +262,8 @@ public class kcBlueBack9 extends OpMode {
         opModeTimer.resetTimer();
         setPathState(pathState);
 
+        blocker = hardwareMap.get(Servo.class, "blocker");
+        blocker.scaleRange(0, 0.4);
 
         tree = hardwareMap.get(DcMotor.class, "tree");
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
