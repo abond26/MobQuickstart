@@ -244,7 +244,12 @@ public class kcBlueBack9 extends OpMode {
 
     @Override
     public void init() {
-        pathState = kcBlueBack9.PathState.START;
+        blocker = hardwareMap.get(Servo.class, "blocker");
+        blocker.scaleRange(0, 0.362);
+        blocker.setPosition(0);
+
+
+        pathState = kcBlueBackFar9.PathState.START;
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = ConstantsNewBot.createFollower(hardwareMap);
