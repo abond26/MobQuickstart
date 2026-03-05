@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants;
 
 /**
  * ═══════════════════════════════════════════════════════════════════
@@ -20,8 +21,9 @@ import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
  * the Pedro Pathing deadwheel pose to fix localization drift.
  *
  * NEW CONTROLS (in addition to all BlueTele controls):
- * TOUCHPAD = Toggle auto-relocalization ON/OFF
- * DPAD DOWN = Force single relocalization
+ *    LEFT BUMPER = Toggle auto-relocalization ON/OFF
+ *    TOUCHPAD   = Force full heading + position relocalization
+ *    DPAD DOWN  = Force position-only relocalization
  *
  * All original BlueTele controls still work:
  * Left stick = drive
@@ -34,7 +36,7 @@ import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
  * ═══════════════════════════════════════════════════════════════════
  */
 @TeleOp(name = "BigBoyBlue", group = "test")
-public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
+public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants, TurretConstants {
     Pose sillyTarget;
     Robot robot;
     RobotActions actions;
@@ -46,8 +48,8 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
     // ── Relocalization ──
     private boolean autoRelocalize = false;
     private boolean lastDpadDown = false;
-    private boolean lastLeftBumper = false;
     private boolean lastTouchpad = false;
+    private boolean lastLeftBumper = false;
 
     // Limelight pipeline for AprilTag 3D (must match your Limelight config)
     private static final int APRILTAG_PIPELINE = 0;
@@ -80,18 +82,19 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
 
             actions.updateLimelight();
 
-            if (gamepad1.touchpad && !lastTouchpad) {
+            if (gamepad1.left_bumper && !lastLeftBumper) {
                 autoRelocalize = !autoRelocalize;
             }
-            lastTouchpad = gamepad1.touchpad;
+            lastLeftBumper = gamepad1.left_bumper;
 
             if (gamepad1.dpad_down) {
                 actions.relocalizePositionOnly();
             }
 
-            if (gamepad1.left_bumper) {
+            if (gamepad1.touchpad && !lastTouchpad) {
                 actions.relocalizeFull(telemetry);
             }
+            lastTouchpad = gamepad1.touchpad;
 
             if (autoRelocalize) {
                 actions.relocalizePositionOnly();
@@ -181,7 +184,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
             telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
             telemetry.addData("Rotator", "%d (%.1f°)",
                     robot.turret.getRotatorPos(),
-                    LimelightRelocalization.rotatorTicksToDegrees(robot.turret.getRotatorPos()));
+                    (robot.turret.getRotatorPos() - ROTATOR_ZERO_TICKS) / TICKS_PER_DEGREE);
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
             telemetry.addData("Launcher velocity", robot.turret.getVelocity());
             telemetry.update();

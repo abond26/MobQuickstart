@@ -112,6 +112,8 @@ public Limelight3A getLimelight() {
         } catch (Exception e) {
             return 0;
         }
+    }
+
     public void updateRobotOrientation(double headingDegrees) {
         if (limelight != null) {
             limelight.updateRobotOrientation(headingDegrees);

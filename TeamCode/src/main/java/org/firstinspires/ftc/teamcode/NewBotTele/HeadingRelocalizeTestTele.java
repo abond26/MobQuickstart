@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalizationConstants;
+
 
 /**
  * ═══════════════════════════════════════════════════════════════════
@@ -30,7 +30,7 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelo
  */
 @TeleOp(name = "HeadingRelocalizeTestTele", group = "test")
 public class HeadingRelocalizeTestTele extends LinearOpMode
-        implements BlueUniversalConstants, TurretConstants, LimelightRelocalizationConstants {
+        implements BlueUniversalConstants, TurretConstants {
     Pose sillyTarget;
     Robot robot;
     RobotActions actions;

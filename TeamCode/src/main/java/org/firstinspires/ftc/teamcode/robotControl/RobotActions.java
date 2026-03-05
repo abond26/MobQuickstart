@@ -10,11 +10,11 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalizationConstants;
-
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import java.util.List;
 
-public class RobotActions implements BlueUniversalConstants, LimelightRelocalizationConstants, org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants {
+public class RobotActions implements BlueUniversalConstants, org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants {
 
     private ChassisLocal chassisLocal;
     private Turret turret;
@@ -323,7 +323,7 @@ public class RobotActions implements BlueUniversalConstants, LimelightRelocaliza
         List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
         if (fiducials == null || fiducials.isEmpty()) return false;
 
-        com.qualcomm.hardware.limelightvision.LLResultTypes.Pose3D botposeMT1 = result.getBotpose();
+        Pose3D botposeMT1 = result.getBotpose();
         if (botposeMT1 == null) return false;
 
         // Position Conversion
@@ -336,7 +336,7 @@ public class RobotActions implements BlueUniversalConstants, LimelightRelocaliza
 
         // Heading Calculation
         double mt1Yaw = botposeMT1.getOrientation().getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES);
-        double turretAngleDeg = (turret.getRotatorPos() - 0) / TICKS_PER_DEGREE; // Using 0 as default reset for now
+        double turretAngleDeg = (turret.getRotatorPos() - ROTATOR_ZERO_TICKS) / TICKS_PER_DEGREE; 
         double calculatedChassisHeadingDeg = mt1Yaw - turretAngleDeg;
 
         while (calculatedChassisHeadingDeg > 180) calculatedChassisHeadingDeg -= 360;
@@ -354,7 +354,7 @@ public class RobotActions implements BlueUniversalConstants, LimelightRelocaliza
         LLResult result = vision.getLatestResult();
         if (result == null || !result.isValid()) return false;
 
-        com.qualcomm.hardware.limelightvision.LLResultTypes.Pose3D botposeMT1 = result.getBotpose();
+        Pose3D botposeMT1 = result.getBotpose();
         if (botposeMT1 == null) return false;
 
         double invertedLLX = botposeMT1.getPosition().y * METERS_TO_INCHES;

@@ -23,4 +23,9 @@ public interface BlueUniversalConstants {
     double CLOSE_VELO = 1100; // Hood position for close shots
     double MID_VELO = 1350;
     double FAR_VELO = 1600;
+
+    // ── Localization Constants ──
+    double METERS_TO_INCHES = 39.3701;
+    double FIELD_OFFSET_X = 72.0;
+    double FIELD_OFFSET_Y = 72.0;
 }
