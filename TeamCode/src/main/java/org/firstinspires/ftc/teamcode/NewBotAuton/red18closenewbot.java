@@ -135,14 +135,14 @@ public class red18closenewbot extends OpMode {
 
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(94.84332425068118, 76, Math.toRadians(0));
-    private final Pose gateCollect1 = new Pose( 127.5, 62, Math.toRadians(33));
+    private final Pose gateCollect1 = new Pose( 128, 61, Math.toRadians(33));
     //private final Pose inBetween1 = new Pose(100, 62, Math.toRadians(22.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(94, 55.801430517711175, Math.toRadians(0));
     private final Pose shootBall3 = new Pose(98, 97.5, Math.toRadians(45));
     private final Pose inBetween2 = new Pose(100, 62, Math.toRadians(22.5));
-    private final Pose gateCollect2 = new Pose( 127.5, 62, Math.toRadians(33));
+    private final Pose gateCollect2 = new Pose( 128, 61, Math.toRadians(33));
     private final Pose shootBall4 = new Pose(89, 88, Math.toRadians(47));
-    private final Pose gateCollect3 = new Pose( 127.5, 62, Math.toRadians(33));
+    private final Pose gateCollect3 = new Pose( 128.5, 61, Math.toRadians(33));
     private final Pose shootBall5 = new Pose(89, 88, Math.toRadians(47));
 
     //private final Pose collect3start=new Pose(87, 86, Math.toRadians(0));
@@ -420,11 +420,11 @@ public class red18closenewbot extends OpMode {
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
+                if(pathTimer.getElapsedTimeSeconds()>1)
+                {
+                    tree.setPower(0);
+                }
                 if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>0.9)
-                    {
-                        tree.setPower(0);
-                    }
                     if(pathTimer.getElapsedTimeSeconds()>1.45)
                     {
                         tree.setPower(1);
@@ -455,7 +455,7 @@ public class red18closenewbot extends OpMode {
                 if (pathTimer.getElapsedTimeSeconds()>2.25) {
                     theWheelOfTheOx.setPower(-1);
                 }
-                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.55) {
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.15) {
                     setPathState(red18closenewbot.PathState.shootAgainAgainAgain);
                 }
                 break;
@@ -470,11 +470,11 @@ public class red18closenewbot extends OpMode {
                     tree.setPower(1);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
+                if(pathTimer.getElapsedTimeSeconds()>1)
+                {
+                    tree.setPower(0);
+                }
                 if (!follower.isBusy() && shoot4Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>0.9)
-                    {
-                        tree.setPower(0);
-                    }
                     if (pathTimer.getElapsedTimeSeconds()>1.35)
                     {
                         tree.setPower(1);
