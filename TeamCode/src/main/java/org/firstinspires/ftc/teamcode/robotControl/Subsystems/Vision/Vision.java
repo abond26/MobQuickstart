@@ -14,16 +14,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
 
 import java.util.List;
 
 public class Vision implements VisionConstants{
 
     private Limelight3A limelight;
-public Limelight3A getLimelight() {
-    return limelight;
-}
+    public Limelight3A getLimelight() {
+        return limelight;
+    }
     public Vision(@NonNull HardwareMap hardwareMap, int pipeline) {
 
         // Try common config names (Driver Station lets you rename the device)
@@ -112,15 +112,5 @@ public Limelight3A getLimelight() {
         } catch (Exception e) {
             return 0;
         }
-    }
-
-    public void updateRobotOrientation(double headingDegrees) {
-        if (limelight != null) {
-            limelight.updateRobotOrientation(headingDegrees);
-        }
-    }
-
-    public LLResult getLatestResult() {
-        return (limelight != null) ? limelight.getLatestResult() : null;
     }
 }

@@ -10,11 +10,8 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import java.util.List;
 
-public class RobotActions implements BlueUniversalConstants, org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants {
+public class RobotActions implements BlueUniversalConstants {
 
     private ChassisLocal chassisLocal;
     private Turret turret;
@@ -224,42 +221,10 @@ public class RobotActions implements BlueUniversalConstants, org.firstinspires.f
     }
 
     public void aimRotatorLocal(Pose targ, @NonNull Telemetry telemetry) {
-        double currentHeading = chassisLocal.getPose().getHeading();
-        long currentTime = System.currentTimeMillis();
-
-        if (lastAimTime != 0) {
-            double dtSeconds = (currentTime - lastAimTime) / 1000.0;
-            if (dtSeconds > 0) {
-                double headingDiff = currentHeading - lastHeadingForAim;
-                while (headingDiff > Math.PI)
-                    headingDiff -= 2 * Math.PI;
-                while (headingDiff < -Math.PI)
-                    headingDiff += 2 * Math.PI;
-
-                double angularVelocity = Math.abs(headingDiff) / dtSeconds;
-
-                if (angularVelocity > FREEZE_THRESHOLD_RAD_PER_SEC) {
-                    isTurretFrozen = true;
-                } else if (angularVelocity < UNFREEZE_THRESHOLD_RAD_PER_SEC) {
-                    isTurretFrozen = false;
-                }
-            }
-        }
-
-        lastHeadingForAim = currentHeading;
-        lastAimTime = currentTime;
-
-        if (!isTurretFrozen) {
-            double angle = chassisLocal.calculateTurretAngle(targ);
-            telemetry.addData("Angle with localization", angle);
-            turret.setRotatorToAngle(angle);
-            telemetry.addData("Turret Status", "Aiming");
-        } else {
-            telemetry.addData("Turret Status", "Frozen (Turning too fast)");
-            telemetry.addData("Angle with localization", "Frozen");
-        }
+        double angle = chassisLocal.calculateTurretAngle(targ);
+        telemetry.addData("Angle with localization", angle);
+        turret.setRotatorToAngle(angle);
     }
-
     public void aimRotatorLocalOld(Pose targ, @NonNull Telemetry telemetry) {
         double currentHeading = chassisLocal.getPose().getHeading();
         long currentTime = System.currentTimeMillis();
@@ -306,64 +271,8 @@ public class RobotActions implements BlueUniversalConstants, org.firstinspires.f
     // drive.setPoseEstimate(pose);
     // }
     //
-    public void updateLimelight() {
-        if (vision != null) {
-            // MT2 logic requires the chassis heading
-            vision.updateRobotOrientation(Math.toDegrees(chassisLocal.getPose().getHeading()));
-        }
-    }
-
-    /**
-     * Performs a full heading + position snap using the "Vision Yaw - Turret Angle" formula.
-     */
-    public boolean relocalizeFull(Telemetry telemetry) {
-        LLResult result = vision.getLatestResult();
-        if (result == null || !result.isValid()) return false;
-
-        List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
-        if (fiducials == null || fiducials.isEmpty()) return false;
-
-        Pose3D botposeMT1 = result.getBotpose();
-        if (botposeMT1 == null) return false;
-
-        // Position Conversion
-        org.firstinspires.ftc.robotcore.external.navigation.Position posInches = botposeMT1.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH);
-        double invertedLLX = botposeMT1.getPosition().y * METERS_TO_INCHES; 
-        double invertedLLY = -botposeMT1.getPosition().x * METERS_TO_INCHES;
-
-        double pedroX = invertedLLX + FIELD_OFFSET_X;
-        double pedroY = invertedLLY + FIELD_OFFSET_Y;
-
-        // Heading Calculation
-        double mt1Yaw = botposeMT1.getOrientation().getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES);
-        double turretAngleDeg = (turret.getRotatorPos() - ROTATOR_ZERO_TICKS) / TICKS_PER_DEGREE; 
-        double calculatedChassisHeadingDeg = mt1Yaw - turretAngleDeg;
-
-        while (calculatedChassisHeadingDeg > 180) calculatedChassisHeadingDeg -= 360;
-        while (calculatedChassisHeadingDeg < -180) calculatedChassisHeadingDeg += 360;
-
-        double headingRad = Math.toRadians(calculatedChassisHeadingDeg) - Math.PI / 2;
-        chassisLocal.setPose(new Pose(pedroX, pedroY, headingRad));
-        return true;
-    }
-
-    /**
-     * Resets only the (x, y) position based on AprilTag data, maintaining current heading.
-     */
-    public boolean relocalizePositionOnly() {
-        LLResult result = vision.getLatestResult();
-        if (result == null || !result.isValid()) return false;
-
-        Pose3D botposeMT1 = result.getBotpose();
-        if (botposeMT1 == null) return false;
-
-        double invertedLLX = botposeMT1.getPosition().y * METERS_TO_INCHES;
-        double invertedLLY = -botposeMT1.getPosition().x * METERS_TO_INCHES;
-
-        double pedroX = invertedLLX + FIELD_OFFSET_X;
-        double pedroY = invertedLLY + FIELD_OFFSET_Y;
-
-        chassisLocal.setPose(new Pose(pedroX, pedroY, chassisLocal.getPose().getHeading()));
-        return true;
-    }
+    // public void autoAdjustShooter() {
+    // double distance = vision.getTargetDistance();
+    // shooter.setVelocityFromDistance(distance);
+    // }
 }
