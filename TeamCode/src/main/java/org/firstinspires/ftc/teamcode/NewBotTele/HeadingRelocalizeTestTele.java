@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants;
@@ -41,7 +40,6 @@ public class HeadingRelocalizeTestTele extends LinearOpMode
     private boolean lastDpadUp = false;
 
     // ── Components ──
-    private LimelightRelocalization relocalization;
 
     private boolean lastTouchpad = false;
 
@@ -49,8 +47,6 @@ public class HeadingRelocalizeTestTele extends LinearOpMode
     public void runOpMode() throws InterruptedException {
         Pose startPose = PoseStorage.loadPose(defaultPose);
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
-
-        relocalization = new LimelightRelocalization(robot.vision.getLimelight());
 
         actions = new RobotActions(
                 robot.chassisLocal,
@@ -62,50 +58,29 @@ public class HeadingRelocalizeTestTele extends LinearOpMode
         waitForStart();
         robot.chassisLocal.startTeleop();
 
-        double lastLimelightPollTime = 0;
-        com.qualcomm.hardware.limelightvision.LLResult cachedResult = null;
-
         while (opModeIsActive()) {
             // DRIVING
             robot.chassisLocal.update();
             robot.chassisLocal.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            // POLL LIMELIGHT
-            double currentTime = getRuntime();
-            if (currentTime - lastLimelightPollTime > 0.05) {
-                cachedResult = robot.vision.getLimelight().getLatestResult();
-                lastLimelightPollTime = currentTime;
-            }
-
             // ═══════════════════════════════════════════════════
-            // HEADING RELOCALIZATION LOGIC
+            // HEADING RELOCALIZATION LOGIC (Using Subsystems)
             // ═══════════════════════════════════════════════════
+            
+            // Periodically update Limelight orientation with latest IMU heading
+            actions.updateLimelight();
 
             // 1. DPAD DOWN = Position Only (Deadwheels)
-            if (gamepad1.dpad_down && (cachedResult != null)) {
-                Pose poseCorrection = relocalization.getRelocalizationPose(
-                        robot.chassisLocal.getPose(),
-                        cachedResult,
-                        false,
-                        robot.turret.getRotatorPos());
-                if (poseCorrection != null) {
-                    robot.chassisLocal.setPose(poseCorrection);
+            if (gamepad1.dpad_down) {
+                if (actions.relocalizePositionOnly()) {
                     gamepad1.rumble(250);
                 }
             }
 
             // 2. TOUCHPAD = Direct Heading Reset (Vision + Trusted Encoder)
-            if (gamepad1.touchpad && !lastTouchpad && (cachedResult != null)) {
-                // Correct X, Y, AND Heading using the direct formula:
-                // Chassis Heading = Vision Yaw - Turret Angle
-                Pose fullCorrection = relocalization.getRelocalizationPose(
-                        robot.chassisLocal.getPose(),
-                        cachedResult,
-                        true, // includeHeading = true
-                        robot.turret.getRotatorPos());
-
-                if (fullCorrection != null) {
-                    robot.chassisLocal.setPose(fullCorrection);
+            if (gamepad1.touchpad && !lastTouchpad) {
+                // Correct X, Y, AND Heading using the direct formula in RobotActions
+                if (actions.relocalizeFull(telemetry)) {
                     gamepad1.rumble(750); // Confirmed sync!
                 }
             }

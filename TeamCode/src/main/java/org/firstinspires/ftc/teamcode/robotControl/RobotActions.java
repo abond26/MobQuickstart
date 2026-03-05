@@ -10,8 +10,11 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalizationConstants;
 
-public class RobotActions implements BlueUniversalConstants {
+import java.util.List;
+
+public class RobotActions implements BlueUniversalConstants, LimelightRelocalizationConstants, org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants {
 
     private ChassisLocal chassisLocal;
     private Turret turret;
@@ -303,8 +306,64 @@ public class RobotActions implements BlueUniversalConstants {
     // drive.setPoseEstimate(pose);
     // }
     //
-    // public void autoAdjustShooter() {
-    // double distance = vision.getTargetDistance();
-    // shooter.setVelocityFromDistance(distance);
-    // }
+    public void updateLimelight() {
+        if (vision != null) {
+            // MT2 logic requires the chassis heading
+            vision.updateRobotOrientation(Math.toDegrees(chassisLocal.getPose().getHeading()));
+        }
+    }
+
+    /**
+     * Performs a full heading + position snap using the "Vision Yaw - Turret Angle" formula.
+     */
+    public boolean relocalizeFull(Telemetry telemetry) {
+        LLResult result = vision.getLatestResult();
+        if (result == null || !result.isValid()) return false;
+
+        List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+        if (fiducials == null || fiducials.isEmpty()) return false;
+
+        com.qualcomm.hardware.limelightvision.LLResultTypes.Pose3D botposeMT1 = result.getBotpose();
+        if (botposeMT1 == null) return false;
+
+        // Position Conversion
+        org.firstinspires.ftc.robotcore.external.navigation.Position posInches = botposeMT1.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH);
+        double invertedLLX = botposeMT1.getPosition().y * METERS_TO_INCHES; 
+        double invertedLLY = -botposeMT1.getPosition().x * METERS_TO_INCHES;
+
+        double pedroX = invertedLLX + FIELD_OFFSET_X;
+        double pedroY = invertedLLY + FIELD_OFFSET_Y;
+
+        // Heading Calculation
+        double mt1Yaw = botposeMT1.getOrientation().getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES);
+        double turretAngleDeg = (turret.getRotatorPos() - 0) / TICKS_PER_DEGREE; // Using 0 as default reset for now
+        double calculatedChassisHeadingDeg = mt1Yaw - turretAngleDeg;
+
+        while (calculatedChassisHeadingDeg > 180) calculatedChassisHeadingDeg -= 360;
+        while (calculatedChassisHeadingDeg < -180) calculatedChassisHeadingDeg += 360;
+
+        double headingRad = Math.toRadians(calculatedChassisHeadingDeg) - Math.PI / 2;
+        chassisLocal.setPose(new Pose(pedroX, pedroY, headingRad));
+        return true;
+    }
+
+    /**
+     * Resets only the (x, y) position based on AprilTag data, maintaining current heading.
+     */
+    public boolean relocalizePositionOnly() {
+        LLResult result = vision.getLatestResult();
+        if (result == null || !result.isValid()) return false;
+
+        com.qualcomm.hardware.limelightvision.LLResultTypes.Pose3D botposeMT1 = result.getBotpose();
+        if (botposeMT1 == null) return false;
+
+        double invertedLLX = botposeMT1.getPosition().y * METERS_TO_INCHES;
+        double invertedLLY = -botposeMT1.getPosition().x * METERS_TO_INCHES;
+
+        double pedroX = invertedLLX + FIELD_OFFSET_X;
+        double pedroY = invertedLLY + FIELD_OFFSET_Y;
+
+        chassisLocal.setPose(new Pose(pedroX, pedroY, chassisLocal.getPose().getHeading()));
+        return true;
+    }
 }

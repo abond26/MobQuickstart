@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import java.util.List;
 
@@ -112,5 +112,13 @@ public Limelight3A getLimelight() {
         } catch (Exception e) {
             return 0;
         }
+    public void updateRobotOrientation(double headingDegrees) {
+        if (limelight != null) {
+            limelight.updateRobotOrientation(headingDegrees);
+        }
+    }
+
+    public LLResult getLatestResult() {
+        return (limelight != null) ? limelight.getLatestResult() : null;
     }
 }
