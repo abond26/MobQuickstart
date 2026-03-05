@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @Autonomous(name = "Reliable 9 red close new bot", group = "new bot")
-public class red9closenewbot extends OpMode {
+public class  red9closenewbot extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg

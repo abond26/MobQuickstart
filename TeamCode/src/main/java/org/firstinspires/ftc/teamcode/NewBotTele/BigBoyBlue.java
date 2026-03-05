@@ -13,25 +13,25 @@ import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 
 /**
  * ═══════════════════════════════════════════════════════════════════
- *  TEST TELEOP — BlueTele + Limelight AprilTag Relocalization
+ * TEST TELEOP — BlueTele + Limelight AprilTag Relocalization
  * ═══════════════════════════════════════════════════════════════════
  *
- *  This is a copy of BlueTele with MegaTag2 AprilTag relocalization
- *  added on top. When the Limelight sees an AprilTag, it corrects
- *  the Pedro Pathing deadwheel pose to fix localization drift.
+ * This is a copy of BlueTele with MegaTag2 AprilTag relocalization
+ * added on top. When the Limelight sees an AprilTag, it corrects
+ * the Pedro Pathing deadwheel pose to fix localization drift.
  *
- *  NEW CONTROLS (in addition to all BlueTele controls):
- *    TOUCHPAD   = Toggle auto-relocalization ON/OFF
- *    DPAD DOWN  = Force single relocalization
+ * NEW CONTROLS (in addition to all BlueTele controls):
+ * TOUCHPAD = Toggle auto-relocalization ON/OFF
+ * DPAD DOWN = Force single relocalization
  *
- *  All original BlueTele controls still work:
- *    Left stick   = drive
- *    Right stick  = rotate
- *    X / B        = hood control
- *    DPAD L/R     = manual rotator
- *    Triggers     = intake
- *    Left stick button  = toggle silly (dynamic) auto-aim
- *    DPAD UP      = relocalize to dpadUpPose (manual override)
+ * All original BlueTele controls still work:
+ * Left stick = drive
+ * Right stick = rotate
+ * X / B = hood control
+ * DPAD L/R = manual rotator
+ * Triggers = intake
+ * Left stick button = toggle silly (dynamic) auto-aim
+ * DPAD UP = relocalize to dpadUpPose (manual override)
  * ═══════════════════════════════════════════════════════════════════
  */
 @TeleOp(name = "BigBoyBlue", group = "test")
@@ -50,8 +50,6 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
     private boolean lastDpadDown = false;
     private boolean lastLeftBumper = false;
     private boolean lastTouchpad = false;
-
-
 
     // Limelight pipeline for AprilTag 3D (must match your Limelight config)
     private static final int APRILTAG_PIPELINE = 0;
@@ -104,12 +102,14 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
             lastTouchpad = gamepad1.touchpad;
 
             // DPAD DOWN or LEFT BUMPER: Force single relocalization
-            boolean forceRelocalize = (gamepad1.dpad_down && !lastDpadDown) || (gamepad1.left_bumper && !lastLeftBumper);
+            boolean forceRelocalize = (gamepad1.dpad_down && !lastDpadDown)
+                    || (gamepad1.left_bumper && !lastLeftBumper);
             lastDpadDown = gamepad1.dpad_down;
             lastLeftBumper = gamepad1.left_bumper;
 
             // 2. Poll Limelight asynchronously to prevent massive input lag
-            // The camera runs at ~30 FPS (33ms). If we poll it every loop, we throttle the drive loop!
+            // The camera runs at ~30 FPS (33ms). If we poll it every loop, we throttle the
+            // drive loop!
             // We only ask for new data at most every 50ms, or immediately if forced.
             double currentTime = getRuntime();
             if (forceRelocalize || (autoRelocalize && (currentTime - lastLimelightPollTime > 0.05))) {
@@ -128,8 +128,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
                         robot.chassisLocal.getPose(),
                         cachedResult,
                         false, // includeHeading = false
-                        robot.turret.getRotatorPos()
-                );
+                        robot.turret.getRotatorPos());
                 if (poseCorrection != null) {
                     robot.chassisLocal.setPose(poseCorrection);
                     lastLimelightPose = poseCorrection; // Store for telemetry
@@ -143,8 +142,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
                         robot.chassisLocal.getPose(),
                         cachedResult,
                         true, // includeHeading = true
-                        robot.turret.getRotatorPos()
-                );
+                        robot.turret.getRotatorPos());
                 if (fullResnap != null) {
                     robot.chassisLocal.setPose(fullResnap);
                     lastLimelightPose = fullResnap; // Store for telemetry
@@ -158,8 +156,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
                         robot.chassisLocal.getPose(),
                         cachedResult,
                         false, // includeHeading = false
-                        robot.turret.getRotatorPos()
-                );
+                        robot.turret.getRotatorPos());
                 if (poseCorrection != null) {
                     robot.chassisLocal.setPose(poseCorrection);
                     lastLimelightPose = poseCorrection; // Store for telemetry
@@ -180,6 +177,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
             if (gamepad1.rightStickButtonWasPressed()) {
                 robot.turret.presetVeloSwitch(veloSwitchNum);
                 veloSwitchNum += 1;
+                sillyControls = false;
             }
 
             // Hood control
@@ -225,16 +223,14 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);
             inPosition = robot.chassisLocal.isShootingPosition();
             if (sillyControls) {
-                if (inPosition){
+                if (inPosition) {
                     actions.aimRotatorLocal(sillyTarget, telemetry);
                     actions.adjustShootingParams(sillyTarget);
-                }
-                else{
+                } else {
                     robot.turret.setVelocity(1100);
                 }
 
             }
-
 
             // ═══════════════════════════════════════════════════
             // TELEMETRY
@@ -251,25 +247,32 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
             telemetry.addLine("LIMELIGHT DATA");
             boolean bool = (cachedResult != null && cachedResult.isValid());
             if (bool) {
-                // To get true distance to the AprilTag, we use the camera-to-target 3D translation vector.
-                java.util.List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> fiducials = cachedResult.getFiducialResults();
+                // To get true distance to the AprilTag, we use the camera-to-target 3D
+                // translation vector.
+                java.util.List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> fiducials = cachedResult
+                        .getFiducialResults();
                 if (fiducials != null && !fiducials.isEmpty()) {
                     com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult topTag = fiducials.get(0);
-                    org.firstinspires.ftc.robotcore.external.navigation.Pose3D camPose = topTag.getCameraPoseTargetSpace();
+                    org.firstinspires.ftc.robotcore.external.navigation.Pose3D camPose = topTag
+                            .getCameraPoseTargetSpace();
 
                     telemetry.addData("Tag ID Seen", topTag.getFiducialId());
 
                     if (camPose != null) {
-                        double xMeters = camPose.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).x;
-                        double yMeters = camPose.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).y;
-                        double zMeters = camPose.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).z;
+                        double xMeters = camPose.getPosition()
+                                .toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).x;
+                        double yMeters = camPose.getPosition()
+                                .toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).y;
+                        double zMeters = camPose.getPosition()
+                                .toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).z;
 
                         // 3D Distance (the hypotenuse in space, like a tape measure from lens to tag)
-                        double distance3DMeters = Math.sqrt(xMeters*xMeters + yMeters*yMeters + zMeters*zMeters);
+                        double distance3DMeters = Math.sqrt(xMeters * xMeters + yMeters * yMeters + zMeters * zMeters);
                         double distance3DInches = distance3DMeters * 39.3701;
 
-                        // 2D Ground Distance (ignoring height differences, matching the Pedro Pathing flat plane)
-                        double dist2D = Math.sqrt(xMeters*xMeters + zMeters*zMeters) * 39.3701;
+                        // 2D Ground Distance (ignoring height differences, matching the Pedro Pathing
+                        // flat plane)
+                        double dist2D = Math.sqrt(xMeters * xMeters + zMeters * zMeters) * 39.3701;
 
                         telemetry.addData("Limelight 3D Dist (Tape Measure)", "%.1f in", distance3DInches);
                         telemetry.addData("Limelight 2D Dist (Flat Floor)", "%.1f in", dist2D);
@@ -318,4 +321,3 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
         }
     }
 }
-

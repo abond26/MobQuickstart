@@ -29,6 +29,12 @@ public class RobotActions implements BlueUniversalConstants {
     private int shotCount = 0;
     private boolean farShootingActive = false;
 
+    private double lastHeadingForAim = 0;
+    private long lastAimTime = 0;
+    private boolean isTurretFrozen = false;
+    private final double FREEZE_THRESHOLD_RAD_PER_SEC = 1.5;
+    private final double UNFREEZE_THRESHOLD_RAD_PER_SEC = 0.5;
+
     public RobotActions(ChassisLocal chassis, Vision vision, Turret turret, TransferGate gate, Intake intake) {
         this.chassisLocal = chassis;
         this.turret = turret;
@@ -171,7 +177,8 @@ public class RobotActions implements BlueUniversalConstants {
 
     public void autoAdjustHood(Pose targ) {
         // If launch() is actively controlling the hood for far shots, skip
-        if (farShootingActive) return;
+        if (farShootingActive)
+            return;
         double dist = chassisLocal.getDistance(targ);
         int zone = VelocityLookupTable.getZone(dist);
         if (zone == 1) {
@@ -183,6 +190,20 @@ public class RobotActions implements BlueUniversalConstants {
         }
     }
 
+    public void autoAdjustVelo(Pose targ) {
+        // If launch() is actively controlling the hood for far shots, skip
+        if (farShootingActive)
+            return;
+        double dist = chassisLocal.getDistance(targ);
+        int zone = ServoLookupTable.getZone(dist);
+        if (zone == 1) {
+            turret.setVelocity(CLOSE_VELO);
+        } else if (zone == 2) {
+            turret.setVelocity(MID_VELO);
+        } else {
+            turret.setVelocity(FAR_VELO);
+        }
+    }
 
     public void autoVelocity(Pose targ) {
         double dist = chassisLocal.getDistance(targ);
@@ -195,16 +216,82 @@ public class RobotActions implements BlueUniversalConstants {
         autoAdjustHood(targ);
     }
 
+    public void adjustShootingParamsTest(Pose targ) {
+        autoAdjustVelo(targ);
+    }
+
     public void aimRotatorLocal(Pose targ, @NonNull Telemetry telemetry) {
-        double angle = chassisLocal.calculateTurretAngle(targ);
-        telemetry.addData("Angle with localization", angle);
-        turret.setRotatorToAngle(angle);
+        double currentHeading = chassisLocal.getPose().getHeading();
+        long currentTime = System.currentTimeMillis();
+
+        if (lastAimTime != 0) {
+            double dtSeconds = (currentTime - lastAimTime) / 1000.0;
+            if (dtSeconds > 0) {
+                double headingDiff = currentHeading - lastHeadingForAim;
+                while (headingDiff > Math.PI)
+                    headingDiff -= 2 * Math.PI;
+                while (headingDiff < -Math.PI)
+                    headingDiff += 2 * Math.PI;
+
+                double angularVelocity = Math.abs(headingDiff) / dtSeconds;
+
+                if (angularVelocity > FREEZE_THRESHOLD_RAD_PER_SEC) {
+                    isTurretFrozen = true;
+                } else if (angularVelocity < UNFREEZE_THRESHOLD_RAD_PER_SEC) {
+                    isTurretFrozen = false;
+                }
+            }
+        }
+
+        lastHeadingForAim = currentHeading;
+        lastAimTime = currentTime;
+
+        if (!isTurretFrozen) {
+            double angle = chassisLocal.calculateTurretAngle(targ);
+            telemetry.addData("Angle with localization", angle);
+            turret.setRotatorToAngle(angle);
+            telemetry.addData("Turret Status", "Aiming");
+        } else {
+            telemetry.addData("Turret Status", "Frozen (Turning too fast)");
+            telemetry.addData("Angle with localization", "Frozen");
+        }
     }
 
     public void aimRotatorLocalOld(Pose targ, @NonNull Telemetry telemetry) {
-        double angle = chassisLocal.getTurretAngle(targ);
-        telemetry.addData("Angle with localization", angle);
-        turret.setRotatorToAngle(angle);
+        double currentHeading = chassisLocal.getPose().getHeading();
+        long currentTime = System.currentTimeMillis();
+
+        if (lastAimTime != 0) {
+            double dtSeconds = (currentTime - lastAimTime) / 1000.0;
+            if (dtSeconds > 0) {
+                double headingDiff = currentHeading - lastHeadingForAim;
+                while (headingDiff > Math.PI)
+                    headingDiff -= 2 * Math.PI;
+                while (headingDiff < -Math.PI)
+                    headingDiff += 2 * Math.PI;
+
+                double angularVelocity = Math.abs(headingDiff) / dtSeconds;
+
+                if (angularVelocity > FREEZE_THRESHOLD_RAD_PER_SEC) {
+                    isTurretFrozen = true;
+                } else if (angularVelocity < UNFREEZE_THRESHOLD_RAD_PER_SEC) {
+                    isTurretFrozen = false;
+                }
+            }
+        }
+
+        lastHeadingForAim = currentHeading;
+        lastAimTime = currentTime;
+
+        if (!isTurretFrozen) {
+            double angle = chassisLocal.getTurretAngle(targ);
+            telemetry.addData("Angle with localization", angle);
+            turret.setRotatorToAngle(angle);
+            telemetry.addData("Turret Status", "Aiming");
+        } else {
+            telemetry.addData("Turret Status", "Frozen (Turning too fast)");
+            telemetry.addData("Angle with localization", "Frozen");
+        }
     }
 
     public void aim() {

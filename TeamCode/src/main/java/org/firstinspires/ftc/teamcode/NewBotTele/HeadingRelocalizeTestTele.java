@@ -18,19 +18,20 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelo
 
 /**
  * ═══════════════════════════════════════════════════════════════════
- *  EXPERIMENTAL TELEOP — Heading Relocalization (Trusted Encoder)
+ * EXPERIMENTAL TELEOP — Heading Relocalization (Trusted Encoder)
  * ═══════════════════════════════════════════════════════════════════
  *
- *  Full copy of BigBoyBlue logic with simplified heading reset:
- *    TOUCHPAD   = Direct Heading Reset (Vision Yaw - Turret Angle)
- *    DPAD DOWN  = Deadwheel Relocalize (Position Only)
+ * Full copy of BigBoyBlue logic with simplified heading reset:
+ * TOUCHPAD = Direct Heading Reset (Vision Yaw - Turret Angle)
+ * DPAD DOWN = Deadwheel Relocalize (Position Only)
  *
- *  Since the gear does not slip, we use the raw encoder + AprilTag
- *  to instantly correct any deadwheel/IMU heading drift.
+ * Since the gear does not slip, we use the raw encoder + AprilTag
+ * to instantly correct any deadwheel/IMU heading drift.
  * ═══════════════════════════════════════════════════════════════════
  */
 @TeleOp(name = "HeadingRelocalizeTestTele", group = "test")
-public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUniversalConstants, TurretConstants, LimelightRelocalizationConstants {
+public class HeadingRelocalizeTestTele extends LinearOpMode
+        implements BlueUniversalConstants, TurretConstants, LimelightRelocalizationConstants {
     Pose sillyTarget;
     Robot robot;
     RobotActions actions;
@@ -41,14 +42,14 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
 
     // ── Components ──
     private LimelightRelocalization relocalization;
-    
+
     private boolean lastTouchpad = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
         Pose startPose = PoseStorage.loadPose(defaultPose);
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
-        
+
         relocalization = new LimelightRelocalization(robot.vision.getLimelight());
 
         actions = new RobotActions(
@@ -85,9 +86,8 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
                 Pose poseCorrection = relocalization.getRelocalizationPose(
                         robot.chassisLocal.getPose(),
                         cachedResult,
-                        false, 
-                        robot.turret.getRotatorPos()
-                );
+                        false,
+                        robot.turret.getRotatorPos());
                 if (poseCorrection != null) {
                     robot.chassisLocal.setPose(poseCorrection);
                     gamepad1.rumble(250);
@@ -99,12 +99,11 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
                 // Correct X, Y, AND Heading using the direct formula:
                 // Chassis Heading = Vision Yaw - Turret Angle
                 Pose fullCorrection = relocalization.getRelocalizationPose(
-                        robot.chassisLocal.getPose(), 
-                        cachedResult, 
+                        robot.chassisLocal.getPose(),
+                        cachedResult,
                         true, // includeHeading = true
-                        robot.turret.getRotatorPos()
-                );
-                
+                        robot.turret.getRotatorPos());
+
                 if (fullCorrection != null) {
                     robot.chassisLocal.setPose(fullCorrection);
                     gamepad1.rumble(750); // Confirmed sync!
@@ -117,8 +116,10 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
             // ═══════════════════════════════════════════════════
 
             // Turret velocity
-            if (gamepad1.aWasPressed()) robot.turret.shiftVelocity(launcherSpeedIncrement);
-            if (gamepad1.yWasPressed()) robot.turret.shiftVelocity(-launcherSpeedIncrement);
+            if (gamepad1.aWasPressed())
+                robot.turret.shiftVelocity(launcherSpeedIncrement);
+            if (gamepad1.yWasPressed())
+                robot.turret.shiftVelocity(-launcherSpeedIncrement);
             if (gamepad1.rightStickButtonWasPressed()) {
                 robot.turret.presetVeloSwitch(veloSwitchNum);
                 veloSwitchNum = (veloSwitchNum % 4) + 1;
@@ -144,10 +145,12 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
             }
 
             // Auto-aim toggle
-            if (gamepad1.leftStickButtonWasPressed()) sillyControls = !sillyControls;
+            if (gamepad1.leftStickButtonWasPressed())
+                sillyControls = !sillyControls;
 
             // Manual Pose Reset (Dpad Up)
-            if (gamepad1.dpad_up && !lastDpadUp) actions.setRobotPose(dpadUpPose);
+            if (gamepad1.dpad_up && !lastDpadUp)
+                actions.setRobotPose(dpadUpPose);
             lastDpadUp = gamepad1.dpad_up;
 
             // Run Auto-Aim
@@ -159,16 +162,21 @@ public class HeadingRelocalizeTestTele extends LinearOpMode implements BlueUnive
 
             // TELEMETRY
             telemetry.addLine("═══ HEADING RELOCALIZATION (TEST) ═══");
-            telemetry.addData("Chassis Heading", "%.1f\u00b0", Math.toDegrees(robot.chassisLocal.getPose().getHeading()));
-            telemetry.addData("Turret Angle", "%.1f\u00b0", 
+            telemetry.addData("Chassis Heading", "%.1f\u00b0",
+                    Math.toDegrees(robot.chassisLocal.getPose().getHeading()));
+            telemetry.addData("Turret Angle", "%.1f\u00b0",
                     (robot.turret.getRotatorPos() - ROTATOR_ZERO_TICKS) / TICKS_PER_DEGREE);
             telemetry.addLine("─── RECOVERY ───");
             telemetry.addLine("\u2794 To fix drift: Point turret at tag, then tap TOUCHPAD");
             telemetry.addLine("\u2794 For X/Y only: Tap DPAD DOWN");
             telemetry.update();
         }
-        
+
         // Cleanup Limelight
-        try { if (robot.vision.getLimelight() != null) robot.vision.getLimelight().stop(); } catch (Exception e) {}
+        try {
+            if (robot.vision.getLimelight() != null)
+                robot.vision.getLimelight().stop();
+        } catch (Exception e) {
+        }
     }
 }

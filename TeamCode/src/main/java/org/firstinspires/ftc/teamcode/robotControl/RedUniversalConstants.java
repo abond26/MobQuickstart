@@ -9,7 +9,7 @@ public interface RedUniversalConstants {
     int PIPELINENUM = 0;
     //Pose defaultPose = new Pose(24.4, 126.7, Math.toRadians(143));
     Pose defaultPose = new Pose(117.3, 132, Math.toRadians(36));
-    Pose target = new Pose(140, 144, 36);
+    Pose target = new Pose(140, 144, Math.toRadians(36));
     Pose aprilTagPose = new Pose(16, 132, Math.toRadians(145));
     Pose dpadUpPose = new Pose(136, 9, Math.toRadians(0));
 
