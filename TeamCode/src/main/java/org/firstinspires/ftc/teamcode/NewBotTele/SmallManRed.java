@@ -190,6 +190,7 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
             if (gamepad1.dpad_up && !lastDpadUp) {
                 actions.HumanPLayerFix(dpadUpHeading);
             }
+            //
             lastDpadUp = gamepad1.dpad_up;
 
             // Dynamic shooting
