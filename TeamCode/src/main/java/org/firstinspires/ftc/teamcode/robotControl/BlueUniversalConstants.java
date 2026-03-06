@@ -9,11 +9,11 @@ public interface BlueUniversalConstants {
     int PIPELINENUM = 1;
     //Pose defaultPose = new Pose(24.4, 126.7, Math.toRadians(143));
     Pose defaultPose = new Pose(26.7, 132, Math.toRadians(144));
-    Pose target = new Pose(6, 144, Math.toRadians(144));
+    Pose target = new Pose(4, 144, Math.toRadians(144));
     Pose aprilTagPose = new Pose(16, 132, Math.toRadians(145));
     //Pose dpadUpPose = new Pose(130.8, 24.08, Math.toRadians(0)); //change for every auton close
     Double dpadUpHeading = 0.0;
-
+//
 
 
 

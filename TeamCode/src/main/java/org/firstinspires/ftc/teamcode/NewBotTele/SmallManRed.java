@@ -267,7 +267,7 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
         // ── CLEANUP (Crucial for preventing stop() hangs in LinearOpMode) ──
         // The Limelight runs a background VisionPortal thread. If we don't explicitly
         // stop it when the OpMode ends, the FTC SDK gets stuck waiting for that thread
-        // to die, causing the "stuck in stop()" error.
+        // // to die, causing the "stuck in stop()" error.
 
         telemetry.addLine("Stopping Limelight...");
         telemetry.update();
