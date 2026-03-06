@@ -266,6 +266,11 @@ public class RobotActions implements BlueUniversalConstants {
     public void aim() {
 
     }
+    public void targetFixX(boolean increase) {
+        Pose current = getShootingTarget();
+        double delta = increase ? Fix : -Fix;
+        shootingTargetOverride = new Pose(current.getX() + delta, current.getY(), current.getHeading());
+    }
 
 
     // public void relocalize() {

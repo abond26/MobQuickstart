@@ -189,6 +189,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
             if (gamepad1.dpad_up && !lastDpadUp) {
                 actions.HumanPLayerFix(dpadUpHeading);
             }
+            //
             lastDpadUp = gamepad1.dpad_up;
 
             // Dynamic shooting

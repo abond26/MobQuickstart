@@ -21,6 +21,8 @@ public interface RedUniversalConstants {
     double CLOSE_VELO = 1100;
     double MID_VELO = 1350;
     double FAR_VELO = 1600;
+    double Fix = 1.0;
+
 
     // ── Localization Constants ──
     double METERS_TO_INCHES = 39.3701;

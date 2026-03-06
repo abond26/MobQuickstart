@@ -34,8 +34,8 @@ import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
  * DPAD UP = relocalize to dpadUpPose (manual override)
  * ═══════════════════════════════════════════════════════════════════
  */
-@TeleOp(name = "BigBoyBlue", group = "test")
-public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
+@TeleOp(name = "Testerino", group = "test")
+public class Testerino extends LinearOpMode implements BlueUniversalConstants {
     Pose sillyTarget;
     Robot robot;
     RobotActions actions;
