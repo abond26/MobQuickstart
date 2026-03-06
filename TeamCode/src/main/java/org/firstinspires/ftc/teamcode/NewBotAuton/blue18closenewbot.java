@@ -605,7 +605,7 @@ public class blue18closenewbot extends OpMode {
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotatorStartPosition=0;
+        rotatorStartPosition=  0;
         rotator.setTargetPosition(rotatorStartPosition);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setPower(1);

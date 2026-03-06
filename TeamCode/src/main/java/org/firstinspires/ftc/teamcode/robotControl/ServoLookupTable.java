@@ -77,7 +77,7 @@ public class ServoLookupTable {
         double t = (distance - dist1) / (dist2 - dist1);
         return vel1 + (vel2 - vel1) * t;
     }
-
+//
     /**
      * Gets which zone (1, 2, or 3) a distance falls into.
      * Zone 1: Close (< 145), Zone 2: Mid (145-180), Zone 3: Far (>= 200)

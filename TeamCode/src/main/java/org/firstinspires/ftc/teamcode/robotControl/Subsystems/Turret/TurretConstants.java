@@ -12,4 +12,5 @@ public interface TurretConstants {
     double FAR_VELOCITY = 1800;
     double SCALE_RANGE_LOWER = 0;
     double SCALE_RANGE_UPPER = 0.0761;
+    //
 }

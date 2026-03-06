@@ -17,6 +17,7 @@ public class TransferGate implements TransferGConstants {
     public void block() {
         blocker.setPosition(BLOCK_POSITION);
     }
+    //
 
     public void open() {
         blocker.setPosition(OPEN_POSITION);

@@ -17,6 +17,7 @@ public interface RedUniversalConstants {
 
     double CLOSE_HOOD_POSITION = 1; // Hood position for close shots
     double MID_HOOD_POSITION = 0.5;
+    //
     double FAR_HOOD_POSITION = 0;
     double CLOSE_VELO = 1100;
     double MID_VELO = 1350;

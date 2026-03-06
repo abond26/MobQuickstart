@@ -83,5 +83,6 @@ import com.pedropathing.geometry.Pose;
 
 public class PoseStorageExample {
     // This is just documentation - see comments above for usage
+    //
 }
 //asfasdf

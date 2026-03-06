@@ -20,7 +20,7 @@ public class idk extends OpMode {
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
-
+//
     private Servo hood;
     private int limeHeight = 33;
     private int tagHeight = 75;

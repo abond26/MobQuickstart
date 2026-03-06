@@ -20,6 +20,7 @@ public class Robot {
     public Robot(HardwareMap hardwareMap, Pose startingPose, int pipeline) {
 
         chassisLocal = new ChassisLocal(hardwareMap, startingPose);
+        //
         turret = new Turret(hardwareMap);
         intake = new Intake(hardwareMap);
         gate = new TransferGate(hardwareMap);

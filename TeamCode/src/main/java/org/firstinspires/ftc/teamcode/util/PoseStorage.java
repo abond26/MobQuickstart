@@ -17,6 +17,7 @@ import com.pedropathing.geometry.Pose;
  */
 //aorjas
 public class PoseStorage {
+    //
     private static Pose savedPose = null;
     private static boolean poseSaved = false;
     private static Integer savedRotatorPosition = null;

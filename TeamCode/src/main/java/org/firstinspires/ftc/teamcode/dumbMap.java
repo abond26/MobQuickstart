@@ -27,6 +27,7 @@ public class dumbMap {
     public static final double SERVO_INTAKE_POSITION = 0.22;    // Updated intake position
     public static final double HOOD_START_POSITION = 0.08;
 
+    //
     // Hardware objects
     public DcMotor leftFront, leftBack, rightFront, rightBack, shooter, spinner, intake;
     public Servo transfer, hood, flicker;

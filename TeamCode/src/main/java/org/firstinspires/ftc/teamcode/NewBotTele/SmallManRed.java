@@ -201,7 +201,7 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
                 actions.aimRotatorLocal(sillyTarget, telemetry);
                 actions.adjustShootingParams(sillyTarget);
             }
-
+//
             // ═══════════════════════════════════════════════════
             // TELEMETRY
             // ═══════════════════════════════════════════════════
