@@ -96,8 +96,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
 
             // One-time relocalization: poll only when a button is pressed
             boolean wantRelocalize = (gamepad1.dpad_down && !lastDpadDown)
-                    || (gamepad1.touchpad && !lastTouchpad)
-                    || (gamepad1.left_bumper && !lastLeftBumper);
+                    || (gamepad1.touchpad && !lastTouchpad);
             if (wantRelocalize) {
                 cachedResult = robot.vision.getLimelight().getLatestResult();
                 lastLimelightPollTime = getRuntime();
@@ -117,8 +116,8 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
                 }
             }
 
-            if ((gamepad1.touchpad && !lastTouchpad || gamepad1.left_bumper && !lastLeftBumper) && (cachedResult != null)) {
-                // TOUCHPAD or LEFT BUMPER = Position + heading (one-time full snap)
+            if ((gamepad1.touchpad && !lastTouchpad) && (cachedResult != null)) {
+                // TOUCHPAD = Position + heading (one-time full snap)
                 com.pedropathing.geometry.Pose fullResnap = relocalization.getRelocalizationPose(
                         robot.chassisLocal.getPose(),
                         cachedResult,
@@ -129,6 +128,11 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
                     lastLimelightPose = fullResnap;
                     gamepad1.rumble(500);
                 }
+            }
+
+            if (gamepad1.left_bumper && !lastLeftBumper) {
+                actions.resetEncoders();
+                gamepad1.rumble(500);
             }
 
             lastDpadDown = gamepad1.dpad_down;
@@ -274,7 +278,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
             telemetry.addData("Launcher velocity", robot.turret.getVelocity());
             telemetry.update();
-//
+            //
         }
 
         // ── CLEANUP (Crucial for preventing stop() hangs in LinearOpMode) ──

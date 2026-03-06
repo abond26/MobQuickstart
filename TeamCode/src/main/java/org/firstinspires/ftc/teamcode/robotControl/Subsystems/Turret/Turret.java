@@ -14,15 +14,15 @@ public class Turret implements TurretConstants {
     private DcMotor rotator, theWheelOfTheOx;
     private Servo hood;
     public static int timesCalled = 0;
+
     public enum ShotType {
         CLOSE,
         MID,
         FAR
     }
 
-
     public Turret(@NonNull HardwareMap hardwareMap) {
-        //Launcher motor
+        // Launcher motor
         jollyCrusader = hardwareMap.get(DcMotorEx.class, "launcher");
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -31,7 +31,7 @@ public class Turret implements TurretConstants {
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(shooterP, 0, 0, shooterF);
         jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
-        //X direction motor
+        // X direction motor
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -39,38 +39,49 @@ public class Turret implements TurretConstants {
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setPower(rotatorPower);
 
-        //This means counterclockwise is negative
+        // This means counterclockwise is negative
         rotator.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        //Motor that pushes balls into launcher
+        // Motor that pushes balls into launcher
         theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
         theWheelOfTheOx.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         theWheelOfTheOx.setPower(0);
         theWheelOfTheOx.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        //Our precious lil hoody hood
+        // Our precious lil hoody hood
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(SCALE_RANGE_LOWER, SCALE_RANGE_UPPER);
     }
 
-
-
-    //FUNCTIONS FOR ROTATOR
-    /** Set rotator motor power (e.g. 1.0 for full speed). Use in auton for faster aiming. */
+    // FUNCTIONS FOR ROTATOR
+    /**
+     * Set rotator motor power (e.g. 1.0 for full speed). Use in auton for faster
+     * aiming.
+     */
     public void setRotatorPower(double power) {
         rotator.setPower(power);
     }
-    public void setRotatorPos(int ticks){
+
+    public void resetEncoders() {
+        rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotator.setTargetPosition(0);
+        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void setRotatorPos(int ticks) {
         rotator.setTargetPosition(ticks);
     }
-    public int getRotatorPos(){
+
+    public int getRotatorPos() {
         return rotator.getCurrentPosition();
     }
-    public void shiftRotator(int ticks){
-        int newPos = getRotatorPos()+ticks;
+
+    public void shiftRotator(int ticks) {
+        int newPos = getRotatorPos() + ticks;
         setRotatorPos(newPos);
     }
-    //Renamed from setRotatorToTurretAngle to make more sense
+
+    // Renamed from setRotatorToTurretAngle to make more sense
     public void setRotatorToAngle(double turretAngleDeg) {
         double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
         int targetTicks = ROTATOR_ZERO_TICKS + (int) (fracOf180 * rotator180Range);
@@ -78,23 +89,22 @@ public class Turret implements TurretConstants {
         setRotatorPos(targetTicks);
     }
 
-
-
-
-
-    //FUNCTIONS FOR LAUNCHER
-    public void setVelocity(double velocity){
+    // FUNCTIONS FOR LAUNCHER
+    public void setVelocity(double velocity) {
         jollyCrusader.setVelocity(velocity);
     }
-    public double getVelocity(){
+
+    public double getVelocity() {
         return jollyCrusader.getVelocity();
     }
-    public void shiftVelocity(double ticksPerSec){
-        double newVelo = getVelocity()+ticksPerSec;
+
+    public void shiftVelocity(double ticksPerSec) {
+        double newVelo = getVelocity() + ticksPerSec;
         setVelocity(newVelo);
     }
-    public void presetVelo(@NonNull ShotType dist){
-        switch (dist){
+
+    public void presetVelo(@NonNull ShotType dist) {
+        switch (dist) {
             case CLOSE:
                 setVelocity(CLOSE_VELOCITY);
                 break;
@@ -107,14 +117,16 @@ public class Turret implements TurretConstants {
         }
     }
 
-    /*Difference between this function and the
-    last one is that this is much easier to iterate through
-    whereas the presetVelo is more readable*/
-    public void presetVeloSwitch(int dist){
+    /*
+     * Difference between this function and the
+     * last one is that this is much easier to iterate through
+     * whereas the presetVelo is more readable
+     */
+    public void presetVeloSwitch(int dist) {
         while (dist > 4) {
-            dist-=4;
+            dist -= 4;
         }
-        switch (dist){
+        switch (dist) {
             case 1:
                 setVelocity(CLOSE_VELOCITY);
                 break;
@@ -130,26 +142,22 @@ public class Turret implements TurretConstants {
         }
     }
 
-
-
-
-    //FUNCTIONS FOR HOOD
-    public void setHoodPos(double pos){
+    // FUNCTIONS FOR HOOD
+    public void setHoodPos(double pos) {
         hood.setPosition(pos);
     }
-    public double getHoodPos(){
+
+    public double getHoodPos() {
         return hood.getPosition();
     }
-    public void shiftHood(double ticks){
-        double newPos = getHoodPos()+ticks;
+
+    public void shiftHood(double ticks) {
+        double newPos = getHoodPos() + ticks;
         setHoodPos(newPos);
     }
 
-
-
-
-    //FUNCTIONS FOR WHEEL OF THE OX
-    public void setFeedPower(double power){
+    // FUNCTIONS FOR WHEEL OF THE OX
+    public void setFeedPower(double power) {
         theWheelOfTheOx.setPower(power);
     }
 }

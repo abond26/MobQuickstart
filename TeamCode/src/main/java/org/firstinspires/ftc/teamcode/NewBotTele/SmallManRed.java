@@ -13,25 +13,25 @@ import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 
 /**
  * ═══════════════════════════════════════════════════════════════════
- *  TEST TELEOP — BlueTele + Limelight AprilTag Relocalization
+ * TEST TELEOP — BlueTele + Limelight AprilTag Relocalization
  * ═══════════════════════════════════════════════════════════════════
  *
- *  This is a copy of BlueTele with MegaTag2 AprilTag relocalization
- *  added on top. When the Limelight sees an AprilTag, it corrects
- *  the Pedro Pathing deadwheel pose to fix localization drift.
+ * This is a copy of BlueTele with MegaTag2 AprilTag relocalization
+ * added on top. When the Limelight sees an AprilTag, it corrects
+ * the Pedro Pathing deadwheel pose to fix localization drift.
  *
- *  NEW CONTROLS (in addition to all BlueTele controls):
- *    DPAD DOWN  = Position only (one-time)
- *    TOUCHPAD   = Position + heading (one-time full snap). No auto-relocalization.
+ * NEW CONTROLS (in addition to all BlueTele controls):
+ * DPAD DOWN = Position only (one-time)
+ * TOUCHPAD = Position + heading (one-time full snap). No auto-relocalization.
  *
- *  All original BlueTele controls still work:
- *    Left stick   = drive
- *    Right stick  = rotate
- *    X / B        = hood control
- *    DPAD L/R     = manual rotator
- *    Triggers     = intake
- *    Left stick button  = toggle silly (dynamic) auto-aim
- *    DPAD UP      = relocalize to dpadUpPose (manual override)
+ * All original BlueTele controls still work:
+ * Left stick = drive
+ * Right stick = rotate
+ * X / B = hood control
+ * DPAD L/R = manual rotator
+ * Triggers = intake
+ * Left stick button = toggle silly (dynamic) auto-aim
+ * DPAD UP = relocalize to dpadUpPose (manual override)
  * ═══════════════════════════════════════════════════════════════════
  */
 @TeleOp(name = "SmallManRed", group = "test")
@@ -49,8 +49,6 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
     private boolean lastDpadDown = false;
     private boolean lastLeftBumper = false;
     private boolean lastTouchpad = false;
-
-
 
     // Limelight pipeline for AprilTag 3D (must match your Limelight config)
     private static final int APRILTAG_PIPELINE = 0;
@@ -98,8 +96,7 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
 
             // One-time relocalization: poll only when a button is pressed
             boolean wantRelocalize = (gamepad1.dpad_down && !lastDpadDown)
-                    || (gamepad1.touchpad && !lastTouchpad)
-                    || (gamepad1.left_bumper && !lastLeftBumper);
+                    || (gamepad1.touchpad && !lastTouchpad);
             if (wantRelocalize) {
                 cachedResult = robot.vision.getLimelight().getLatestResult();
                 lastLimelightPollTime = getRuntime();
@@ -119,8 +116,8 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
                 }
             }
 
-            if ((gamepad1.touchpad && !lastTouchpad || gamepad1.left_bumper && !lastLeftBumper) && (cachedResult != null)) {
-                // TOUCHPAD or LEFT BUMPER = Position + heading (one-time full snap)
+            if ((gamepad1.touchpad && !lastTouchpad) && (cachedResult != null)) {
+                // TOUCHPAD = Position + heading (one-time full snap)
                 com.pedropathing.geometry.Pose fullResnap = relocalization.getRelocalizationPose(
                         robot.chassisLocal.getPose(),
                         cachedResult,
@@ -131,6 +128,11 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
                     lastLimelightPose = fullResnap;
                     gamepad1.rumble(500);
                 }
+            }
+
+            if (gamepad1.left_bumper && !lastLeftBumper) {
+                actions.resetEncoders();
+                gamepad1.rumble(500);
             }
 
             lastDpadDown = gamepad1.dpad_down;
@@ -214,25 +216,32 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
             telemetry.addLine("LIMELIGHT DATA");
             boolean bool = (cachedResult != null && cachedResult.isValid());
             if (bool) {
-                // To get true distance to the AprilTag, we use the camera-to-target 3D translation vector.
-                java.util.List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> fiducials = cachedResult.getFiducialResults();
+                // To get true distance to the AprilTag, we use the camera-to-target 3D
+                // translation vector.
+                java.util.List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> fiducials = cachedResult
+                        .getFiducialResults();
                 if (fiducials != null && !fiducials.isEmpty()) {
                     com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult topTag = fiducials.get(0);
-                    org.firstinspires.ftc.robotcore.external.navigation.Pose3D camPose = topTag.getCameraPoseTargetSpace();
+                    org.firstinspires.ftc.robotcore.external.navigation.Pose3D camPose = topTag
+                            .getCameraPoseTargetSpace();
 
                     telemetry.addData("Tag ID Seen", topTag.getFiducialId());
 
                     if (camPose != null) {
-                        double xMeters = camPose.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).x;
-                        double yMeters = camPose.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).y;
-                        double zMeters = camPose.getPosition().toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).z;
+                        double xMeters = camPose.getPosition()
+                                .toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).x;
+                        double yMeters = camPose.getPosition()
+                                .toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).y;
+                        double zMeters = camPose.getPosition()
+                                .toUnit(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.METER).z;
 
                         // 3D Distance (the hypotenuse in space, like a tape measure from lens to tag)
-                        double distance3DMeters = Math.sqrt(xMeters*xMeters + yMeters*yMeters + zMeters*zMeters);
+                        double distance3DMeters = Math.sqrt(xMeters * xMeters + yMeters * yMeters + zMeters * zMeters);
                         double distance3DInches = distance3DMeters * 39.3701;
 
-                        // 2D Ground Distance (ignoring height differences, matching the Pedro Pathing flat plane)
-                        double dist2D = Math.sqrt(xMeters*xMeters + zMeters*zMeters) * 39.3701;
+                        // 2D Ground Distance (ignoring height differences, matching the Pedro Pathing
+                        // flat plane)
+                        double dist2D = Math.sqrt(xMeters * xMeters + zMeters * zMeters) * 39.3701;
 
                         telemetry.addData("Limelight 3D Dist (Tape Measure)", "%.1f in", distance3DInches);
                         telemetry.addData("Limelight 2D Dist (Flat Floor)", "%.1f in", dist2D);

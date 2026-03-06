@@ -220,13 +220,17 @@ public class RobotActions implements BlueUniversalConstants {
         Pose currentPose = chassisLocal.getPose();
         chassisLocal.setPose(new Pose(currentPose.getX(), currentPose.getY(), Math.toRadians(headingDegrees)));
     }
-    //
-//
+
+    public void resetEncoders() {
+        turret.resetEncoders();
+    }
+
     public void aimRotatorLocal(Pose targ, @NonNull Telemetry telemetry) {
         double angle = chassisLocal.calculateTurretAngle(targ);
         telemetry.addData("Angle with localization", angle);
         turret.setRotatorToAngle(angle);
     }
+
     public void aimRotatorLocalOld(Pose targ, @NonNull Telemetry telemetry) {
         double currentHeading = chassisLocal.getPose().getHeading();
         long currentTime = System.currentTimeMillis();
@@ -267,12 +271,12 @@ public class RobotActions implements BlueUniversalConstants {
     public void aim() {
 
     }
+
     public void targetFixX(boolean increase) {
         Pose current = getShootingTarget();
         double delta = increase ? Fix : -Fix;
         shootingTargetOverride = new Pose(current.getX() + delta, current.getY(), current.getHeading());
     }
-
 
     // public void relocalize() {
     // Pose pose = vision.getEstimatedPose();
