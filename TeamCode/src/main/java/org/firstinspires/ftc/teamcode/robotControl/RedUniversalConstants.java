@@ -28,4 +28,5 @@ public interface RedUniversalConstants {
     double METERS_TO_INCHES = 39.3701;
     double FIELD_OFFSET_X = 72.0;
     double FIELD_OFFSET_Y = 72.0;
+    //
 }
