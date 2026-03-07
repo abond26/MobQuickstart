@@ -71,6 +71,19 @@ public class RobotActions implements BlueUniversalConstants {
                 double hoodPos = FAR_HOOD_POSITION + (shotCount * 0.3);
                 hoodPos = Math.min(hoodPos, MID_HOOD_POSITION);
                 turret.setHoodPos(hoodPos);
+            } else if (zone == 2) {
+                intake.simpleIntake(-speed * 0.85);
+                farShootingActive = true;
+                // How many balls have been fed based on elapsed time
+                long elapsed = System.currentTimeMillis() - launchStartTime;
+                int expectedBalls = (int) (elapsed / 50);
+                if (expectedBalls > shotCount) {
+                    shotCount = expectedBalls;
+                }
+                // Shift hood down per ball, clamped to close position max
+                double hoodPos = MID_HOOD_POSITION + (shotCount * 0.1);
+                hoodPos = Math.min(hoodPos, CLOSE_HOOD_POSITION);
+                turret.setHoodPos(hoodPos);
             } else {
                 turret.setFeedPower(speed);
                 intake.simpleIntake(-speed);
@@ -273,10 +286,9 @@ public class RobotActions implements BlueUniversalConstants {
 
     }
 
-    public void targetFixX(boolean increase) {
+    public void targetFixX(double amount) {
         Pose current = getShootingTarget();
-        double delta = increase ? Fix : -Fix;
-        shootingTargetOverride = new Pose(current.getX() + delta, current.getY(), current.getHeading());
+        shootingTargetOverride = new Pose(current.getX() + amount, current.getY(), current.getHeading());
     }
 
     // public void relocalize() {
