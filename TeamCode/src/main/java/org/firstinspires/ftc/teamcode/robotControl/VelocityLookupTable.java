@@ -36,7 +36,7 @@ public class VelocityLookupTable {
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
     private static final double[] VELOCITIES = {
-            1070, 1110, 1135, 1150, 1160, 1165, 1200, 1250, 1240, 1300, 1320, 1330, 1355, 1440, 1450, 1460, 1480, 1520, 1540
+            1070, 1110, 1135, 1150, 1160, 1165, 1200, 1250, 1260, 1300, 1320, 1330, 1355, 1440, 1450, 1460, 1480, 1520, 1540
     };
     //
     // Minimum and maximum distances in the table

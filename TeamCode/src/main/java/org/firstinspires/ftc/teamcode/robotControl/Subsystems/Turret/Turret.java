@@ -86,7 +86,6 @@ public class Turret implements TurretConstants {
     public void setRotatorToAngle(double turretAngleDeg) {
         double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
         int targetTicks = ROTATOR_ZERO_TICKS + (int) (fracOf180 * rotator180Range);
-        // Optional: clamp to physical limits (e.g. ±270°)
         setRotatorPos(targetTicks);
     }
 

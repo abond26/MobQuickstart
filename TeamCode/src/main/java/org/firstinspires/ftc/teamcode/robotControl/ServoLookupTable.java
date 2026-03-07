@@ -35,7 +35,7 @@ public class ServoLookupTable {
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
     private static final double[] HOOD = {
-            
+
     };
 
     // Minimum and maximum distances in the table

@@ -127,7 +127,7 @@ public class blue18closenewbot extends OpMode {
     PathState pathState;
     // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
     private final Pose startPose = new Pose(26.7, 132, Math.toRadians(144));
-    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(134));
+    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(132));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 60, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(65, 58.5, Math.toRadians(180));
@@ -135,22 +135,22 @@ public class blue18closenewbot extends OpMode {
 
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(51, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 12, 61, Math.toRadians(150));
+    private final Pose gateCollect1 = new Pose( 15.5, 61.5, Math.toRadians(155));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(50, 55.801430517711175, Math.toRadians(180));
     private final Pose shootBall3 = new Pose(46, 97.5, Math.toRadians(135));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 12, 61, Math.toRadians(150));
+    private final Pose gateCollect2 = new Pose( 15.25, 61.5, Math.toRadians(155));
     private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(133));
-    private final Pose gateCollect3 = new Pose( 12, 61, Math.toRadians(150));
-    private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(133));
+    private final Pose gateCollect3 = new Pose( 15.25, 61.5, Math.toRadians(155));
+    private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(130));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
     private final Pose shoot4ToCollect3ControlPoint = new Pose(41.25340599455039, 82.36784741144412, Math.toRadians(180));
 
     //
     private final Pose collect3end = new Pose(24, 86, Math.toRadians(180));
-    private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(157));
+    private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(153));
 
     private final Pose park = new Pose(41, 84, Math.toRadians(134));
 
@@ -396,7 +396,7 @@ public class blue18closenewbot extends OpMode {
                     follower.followPath(GateCollect2);
                     hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1120);
+                    launcher.setVelocity(1140);
                     tree.setPower(1);
                     hood.setPosition(1);
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
@@ -446,7 +446,7 @@ public class blue18closenewbot extends OpMode {
                 if (!follower.isBusy() && !gateCollectionAgainStarted) {
                     follower.followPath(GateCollect3);
                     rotator.setTargetPosition(rotatorStartPosition);
-                    launcher.setVelocity(1120);
+                    launcher.setVelocity(1140);
                     tree.setPower(1);
                     hood.setPosition(1);
                     rotator.setTargetPosition(rotatorStartPosition);
@@ -605,7 +605,7 @@ public class blue18closenewbot extends OpMode {
         rotator = hardwareMap.get(DcMotor.class, "rotator");
         rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotatorStartPosition=  0;
+        rotatorStartPosition=0;
         rotator.setTargetPosition(rotatorStartPosition);
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setPower(1);
