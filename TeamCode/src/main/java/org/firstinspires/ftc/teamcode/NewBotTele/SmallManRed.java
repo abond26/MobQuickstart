@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis.ChassisLocal;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
@@ -40,8 +41,8 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
     Robot robot;
     RobotActions actions;
     private int veloSwitchNum = 1;
-    boolean autoControls = false;
     boolean sillyControls = false;
+    boolean inPosition;
     private boolean lastDpadUp = false;
 
     // ── Relocalization ──
@@ -93,7 +94,7 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
             // ═══════════════════════════════════════════════════
             // LIMELIGHT MEGATAG1 RELOCALIZATION
             // ═══════════════════════════════════════════════════
-
+//
             // One-time relocalization: poll only when a button is pressed
             boolean wantRelocalize = (gamepad1.dpad_down && !lastDpadDown)
                     || (gamepad1.touchpad && !lastTouchpad);
@@ -153,6 +154,7 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
             if (gamepad1.rightStickButtonWasPressed()) {
                 robot.turret.presetVeloSwitch(veloSwitchNum);
                 veloSwitchNum += 1;
+                sillyControls = false;
             }
 
             // Hood control
@@ -197,11 +199,17 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
 
             // Dynamic shooting
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);
-            if (sillyControls & !autoControls) {
-                actions.aimRotatorLocal(sillyTarget, telemetry);
-                actions.adjustShootingParams(sillyTarget);
+            inPosition = robot.chassisLocal.isShootingPosition();
+            if (sillyControls) {
+                if (inPosition) {
+                    actions.aimRotatorLocal(sillyTarget, telemetry);
+                    actions.adjustShootingParams(sillyTarget);
+                } else {
+                    robot.turret.setVelocity(1100);
+                }
+
             }
-//
+
             // ═══════════════════════════════════════════════════
             // TELEMETRY
             // ═══════════════════════════════════════════════════
@@ -270,15 +278,15 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
                     LimelightRelocalization.rotatorTicksToDegrees(robot.turret.getRotatorPos()));
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
             telemetry.addData("Launcher velocity", robot.turret.getVelocity());
+            telemetry.addData("Distance", robot.chassisLocal.getDistance(target));
             telemetry.update();
-
+            //
         }
-        //
 
         // ── CLEANUP (Crucial for preventing stop() hangs in LinearOpMode) ──
         // The Limelight runs a background VisionPortal thread. If we don't explicitly
         // stop it when the OpMode ends, the FTC SDK gets stuck waiting for that thread
-        // // to die, causing the "stuck in stop()" error.
+        // to die, causing the "stuck in stop()" error.
 
         telemetry.addLine("Stopping Limelight...");
         telemetry.update();

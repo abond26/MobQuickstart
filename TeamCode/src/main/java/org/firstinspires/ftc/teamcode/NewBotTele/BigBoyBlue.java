@@ -278,6 +278,7 @@ public class BigBoyBlue extends LinearOpMode implements BlueUniversalConstants {
                     LimelightRelocalization.rotatorTicksToDegrees(robot.turret.getRotatorPos()));
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
             telemetry.addData("Launcher velocity", robot.turret.getVelocity());
+            telemetry.addData("Distance", robot.chassisLocal.getDistance(target));
             telemetry.update();
             //
         }

@@ -15,7 +15,7 @@ package org.firstinspires.ftc.teamcode.robotControl;
 public class VelocityLookupTable {
 
     // Distance thresholds matching hood zones
-    private static final double CLOSE_THRESHOLD = 95;  // Zone 1: Close hood
+    private static final double CLOSE_THRESHOLD = 85;  // Zone 1: Close hood
     private static final double MID_THRESHOLD = 120;      // Zone 2: Mid hood, Zone 3: Far hood
 
     // Distance entries (in inches) - must be in ascending order
@@ -29,14 +29,14 @@ public class VelocityLookupTable {
 //        210.5,  205.2,  221.5,
 //    };
     private static final double[] DISTANCES = {
-            55.3, 57.8585, 64.2, 72, 77.59, 81.8, 88.33, 92.4, 97.81, 102.22, 109.17, 112.02, 118.4, 123.81, 129.02, 135.07, 142.99, 147.6, 157.18
+            55.3, 57.8585, 64.2, 72, 77.59,76.4, 81.88, 92.4, 97.81, 102.22, 109.17, 112.02, 118.4, 123.81, 129.02, 135.07, 142.99, 147.6, 157.18
     };
     
     // Corresponding velocity values (in encoder ticks per second)
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
     private static final double[] VELOCITIES = {
-            1070, 1110, 1135, 1150, 1160, 1165, 1200, 1250, 1260, 1300, 1320, 1330, 1355, 1440, 1450, 1460, 1480, 1520, 1540
+            1070, 1110, 1135, 1150, 1160,1180, 1200, 1250, 1260, 1300, 1320, 1330, 1355, 1440, 1450, 1460, 1480, 1520, 1540
     };
     //
     // Minimum and maximum distances in the table

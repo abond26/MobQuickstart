@@ -72,11 +72,11 @@ public class RobotActions implements BlueUniversalConstants {
                 hoodPos = Math.min(hoodPos, MID_HOOD_POSITION);
                 turret.setHoodPos(hoodPos);
             } else if (zone == 2) {
-                intake.simpleIntake(-speed * 0.85);
+                intake.simpleIntake(-speed);
                 farShootingActive = true;
                 // How many balls have been fed based on elapsed time
                 long elapsed = System.currentTimeMillis() - launchStartTime;
-                int expectedBalls = (int) (elapsed / 50);
+                int expectedBalls = (int) (elapsed / 30);
                 if (expectedBalls > shotCount) {
                     shotCount = expectedBalls;
                 }
