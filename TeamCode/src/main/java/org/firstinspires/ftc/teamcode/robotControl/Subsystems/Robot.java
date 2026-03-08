@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotControl.Subsystems;
 
+import android.util.Log;
+
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -20,11 +22,20 @@ public class Robot {
     public Robot(HardwareMap hardwareMap, Pose startingPose, int pipeline) {
 
         chassisLocal = new ChassisLocal(hardwareMap, startingPose);
+        Log.w("Chassis", "Chassis Loaded");
         //
         turret = new Turret(hardwareMap);
+        Log.w("Turret", "Turret Loaded");
+
         intake = new Intake(hardwareMap);
+        Log.w("Intake", "Intake Loaded");
+
         gate = new TransferGate(hardwareMap);
+        Log.w("TransferGate", "TransferGate Loaded");
+
         vision = new Vision(hardwareMap, pipeline);
+        Log.w("Vision", "Vision Loaded");
+
 
     }
 }

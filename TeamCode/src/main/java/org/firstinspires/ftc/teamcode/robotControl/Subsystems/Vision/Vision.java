@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -24,22 +26,20 @@ public class Vision implements VisionConstants{
 
     private Limelight3A limelight;
     public Limelight3A getLimelight() {
+        Log.w("get limelight: ", limelight.toString());
         return limelight;
     }
     public Vision(@NonNull HardwareMap hardwareMap, int pipeline) {
 
         // Try common config names (Driver Station lets you rename the device)
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        if (limelight == null) {
-            limelight = hardwareMap.get(Limelight3A.class, "Limelight");
-        }
-        if (limelight == null) {
-            limelight = hardwareMap.get(Limelight3A.class, "limelight3a");
-        }
+        Log.w("Vision", "Limelight Loaded");
 
         if (limelight != null) {
             limelight.pipelineSwitch(pipeline);
+            Log.w("Vision", "Pipeline switched");
             limelight.start();
+            Log.w("Vision", "Pipeline inited");
         }
     }
 

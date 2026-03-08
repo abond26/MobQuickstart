@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.NewBotTele;
 
+import android.util.Log;
+
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,6 +13,8 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
+
+import java.sql.Time;
 
 /**
  * ═══════════════════════════════════════════════════════════════════
@@ -37,6 +41,7 @@ import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
  */
 @TeleOp(name = "SmallManRed", group = "test")
 public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
+    long loopTime;
     Pose sillyTarget;
     Robot robot;
     RobotActions actions;
@@ -56,9 +61,13 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        Log.w("opmode start: ", "start");
         Pose startPose = PoseStorage.loadPose(defaultPose);
+        Log.w("loaded start pose: ", startPose.toString());
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
+        Log.w("robot object inited ", robot.toString());
         robot.chassisLocal.update();
+        Log.w("chassisLocal updated: ", robot.chassisLocal.toString());
 
         actions = new RobotActions(
                 robot.chassisLocal,
@@ -70,19 +79,27 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
         // ── Initialize Limelight relocalization (shares Limelight with Vision) ──
         relocalization = new LimelightRelocalization(robot.vision.getLimelight());
 
+        Log.w("limelight", "limelight recieved");
         telemetry.addData("Status", "Initialized");
         telemetry.addData("LL Relocalization", relocalization.isConnected() ? "READY" : "NOT CONNECTED");
         telemetry.addData("Start Pose", "%.1f, %.1f, %.1f°",
                 startPose.getX(), startPose.getY(), Math.toDegrees(startPose.getHeading()));
         telemetry.update();
 
+        Log.w("current pose: ", startPose.toString());
+
         waitForStart();
         robot.chassisLocal.startTeleop();
+
+        Log.w("teleop", "started teleop");
+
 
         int loopCount = 0;
         double lastLimelightPollTime = 0;
         com.qualcomm.hardware.limelightvision.LLResult cachedResult = null;
         Pose lastLimelightPose = null; // To store the last successfully calculated pose from Limelight
+
+        boolean firstRun = true;
 
         while (opModeIsActive()) {
             // ═══════════════════════════════════════════════════
@@ -90,7 +107,9 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
             // ═══════════════════════════════════════════════════
             robot.chassisLocal.update();
             robot.chassisLocal.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
-
+            if(firstRun) {
+                Log.w("robot", "chassis localization has been updated");
+            }
             // ═══════════════════════════════════════════════════
             // LIMELIGHT MEGATAG1 RELOCALIZATION
             // ═══════════════════════════════════════════════════
@@ -101,6 +120,10 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
             if (wantRelocalize) {
                 cachedResult = robot.vision.getLimelight().getLatestResult();
                 lastLimelightPollTime = getRuntime();
+            }
+
+            if(firstRun) {
+                Log.w("localiztion", "relocalized completed");
             }
 
             if (gamepad1.dpad_down && !lastDpadDown && (cachedResult != null)) {
@@ -224,6 +247,8 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
             telemetry.addLine("LIMELIGHT DATA");
             boolean bool = (cachedResult != null && cachedResult.isValid());
             if (bool) {
+                telemetry.addLine("Passed boolean");
+                telemetry.update();
                 // To get true distance to the AprilTag, we use the camera-to-target 3D
                 // translation vector.
                 java.util.List<com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult> fiducials = cachedResult
@@ -281,6 +306,12 @@ public class SmallManRed extends LinearOpMode implements RedUniversalConstants {
             telemetry.addData("Distance", robot.chassisLocal.getDistance(target));
             telemetry.update();
             //
+
+            if(firstRun) {
+                Log.w("teleop", "teleop loop completed");
+            }
+
+            firstRun = false;
         }
 
         // ── CLEANUP (Crucial for preventing stop() hangs in LinearOpMode) ──

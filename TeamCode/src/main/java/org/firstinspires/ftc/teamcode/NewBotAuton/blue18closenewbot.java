@@ -127,7 +127,7 @@ public class blue18closenewbot extends OpMode {
     PathState pathState;
     // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
     private final Pose startPose = new Pose(26.7, 132, Math.toRadians(144));
-    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(132));
+    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(130));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 60, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(65, 58.5, Math.toRadians(180));
@@ -135,14 +135,14 @@ public class blue18closenewbot extends OpMode {
 
     // Control points for shoot2 path
     private final Pose shoot2ControlPoint1 = new Pose(51, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 15.5, 61.5, Math.toRadians(155));
+    private final Pose gateCollect1 = new Pose( 15.5, 62, Math.toRadians(155));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(50, 55.801430517711175, Math.toRadians(180));
-    private final Pose shootBall3 = new Pose(46, 97.5, Math.toRadians(135));
+    private final Pose shootBall3 = new Pose(46, 97.5, Math.toRadians(130));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose gateCollect2 = new Pose( 15.25, 61.5, Math.toRadians(155));
-    private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(133));
-    private final Pose gateCollect3 = new Pose( 15.25, 61.5, Math.toRadians(155));
+    private final Pose gateCollect2 = new Pose( 15.375, 62, Math.toRadians(155));
+    private final Pose shootBall4 = new Pose(55, 88, Math.toRadians(130));
+    private final Pose gateCollect3 = new Pose( 15.25, 62, Math.toRadians(155));
     private final Pose shootBall5 = new Pose(55, 88, Math.toRadians(130));
 
     //private final Pose collect3start=new Pose(57, 86, Math.toRadians(180));
@@ -150,7 +150,7 @@ public class blue18closenewbot extends OpMode {
 
     //
     private final Pose collect3end = new Pose(24, 86, Math.toRadians(180));
-    private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(153));
+    private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(147));
 
     private final Pose park = new Pose(41, 84, Math.toRadians(134));
 
@@ -370,7 +370,7 @@ public class blue18closenewbot extends OpMode {
                     //tree.setPower(1);
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
-                if(pathTimer.getElapsedTimeSeconds()>1)
+                if(pathTimer.getElapsedTimeSeconds()>0.25)
                 {
                     tree.setPower(0);
                 }
@@ -409,7 +409,6 @@ public class blue18closenewbot extends OpMode {
                 }
                 break;
             case shootAgainAgain:
-                tree.setPower(1);
                 rotator.setTargetPosition(rotatorStartPosition);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot4Started) {
@@ -420,7 +419,7 @@ public class blue18closenewbot extends OpMode {
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
-                if(pathTimer.getElapsedTimeSeconds()>1)
+                if(pathTimer.getElapsedTimeSeconds()>0.25)
                 {
                     tree.setPower(0);
                 }
@@ -455,12 +454,11 @@ public class blue18closenewbot extends OpMode {
                 if (pathTimer.getElapsedTimeSeconds()>2.25) {
                     theWheelOfTheOx.setPower(-1);
                 }
-                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.15) {
+                if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.35) {
                     setPathState((blue18closenewbot.PathState.shootAgainAgainAgain));
                 }
                 break;
             case shootAgainAgainAgain:
-                tree.setPower(1);
                 rotator.setTargetPosition(rotatorStartPosition);
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot4Started) {
@@ -470,7 +468,7 @@ public class blue18closenewbot extends OpMode {
                     tree.setPower(1);
                     shoot4Started = true; // Mark as started to prevent calling again
                 }
-                if(pathTimer.getElapsedTimeSeconds()>1)
+                if(pathTimer.getElapsedTimeSeconds()>0.25)
                 {
                     tree.setPower(0);
                 }

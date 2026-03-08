@@ -20,8 +20,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "tangential Red 18 close ", group = "new bot")
-public class red18closenewbot extends OpMode {
+@Autonomous(name = "Solar flare red", group = "new bot")
+public class SolarFlareRed extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
@@ -127,10 +127,10 @@ public class red18closenewbot extends OpMode {
     PathState pathState;
     // Mirrored coordinates: redX = 144 - blueX, redHeading = Math.PI - blueHeading
     private final Pose startPose = new Pose(117.3, 132, Math.toRadians(36));
-    private final Pose shootPose1 = new Pose(98, 97.5, Math.toRadians(50));
+    private final Pose shootPose1 = new Pose(98, 97.5, Math.toRadians(45));
     //private final Pose collect1thingstart = new Pose(88, 59, Math.toRadians(0));
-    private final Pose collect1thing = new Pose(125, 60, Math.toRadians(0));
-    private final Pose goToCollect1ControlPoint = new Pose(79, 58.5, Math.toRadians(0));
+    private final Pose collect1thing = new Pose(125, 65, Math.toRadians(0));
+    private final Pose goToCollect1ControlPoint = new Pose(79.7847411444142, 64.92370572207085, Math.toRadians(0));
     private final Pose shootPose2 = new Pose( 98, 97.5, Math.toRadians(48.5));
 
     // Control points for shoot2 path
@@ -225,7 +225,7 @@ public class red18closenewbot extends OpMode {
                     theWheelOfTheOx.setPower(-1);
                 }
                 rotator.setTargetPosition(rotatorStartPosition);
-                setPathState(red18closenewbot.PathState.actuallyshoot1);
+                setPathState(SolarFlareRed.PathState.actuallyshoot1);
                 break;
             case actuallyshoot1:
                 rotator.setTargetPosition(rotatorStartPosition);
@@ -245,7 +245,7 @@ public class red18closenewbot extends OpMode {
                         launcher.setVelocity(1100);
                     }
                     if (pathTimer.getElapsedTimeSeconds()>2.7) {
-                        setPathState(red18closenewbot.PathState.collection);
+                        setPathState(SolarFlareRed.PathState.collection);
                     }
                 }
                 break;
@@ -272,7 +272,7 @@ public class red18closenewbot extends OpMode {
                     }
                 }
                 if (!follower.isBusy() && collectionStarted) {
-                    setPathState((red18closenewbot.PathState.shoot));
+                    setPathState((SolarFlareRed.PathState.shoot));
                 }
                 break;
             case shoot:
@@ -297,7 +297,7 @@ public class red18closenewbot extends OpMode {
                         theWheelOfTheOx.setPower(-1);
                     }
                     if(pathTimer.getElapsedTimeSeconds()>2.95) {
-                        setPathState((red18closenewbot.PathState.GateCollection));
+                        setPathState((SolarFlareRed.PathState.GateCollection));
                     }
                 }
                 break;
@@ -319,7 +319,7 @@ public class red18closenewbot extends OpMode {
                     theWheelOfTheOx.setPower(-1);
                 }
                 if (!follower.isBusy() && gateCollectionStarted && pathTimer.getElapsedTimeSeconds()>3.15) {
-                    setPathState((red18closenewbot.PathState.shootAgain));
+                    setPathState((SolarFlareRed.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
@@ -332,7 +332,7 @@ public class red18closenewbot extends OpMode {
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     shoot3Started = true;
                 }
-                if(pathTimer.getElapsedTimeSeconds()>0.25)
+                if(pathTimer.getElapsedTimeSeconds()>1)
                 {
                     tree.setPower(0);
                 }
@@ -347,7 +347,7 @@ public class red18closenewbot extends OpMode {
                     }
                     if(pathTimer.getElapsedTimeSeconds()>2.75)
                     {
-                        setPathState((red18closenewbot.PathState.GateCollectionAgain));
+                        setPathState((SolarFlareRed.PathState.GateCollectionAgain));
                     }
                 }
                 break;
@@ -367,11 +367,11 @@ public class red18closenewbot extends OpMode {
                     theWheelOfTheOx.setPower(-1);
                 }
                 if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.35) {
-                    setPathState((red18closenewbot.PathState.shootAgainAgain));
+                    setPathState((SolarFlareRed.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
-                tree.setPower(0);
+                tree.setPower(1);
                 rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && !shoot4Started) {
                     hood.setPosition(1);
@@ -381,7 +381,7 @@ public class red18closenewbot extends OpMode {
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     shoot4Started = true;
                 }
-                if(pathTimer.getElapsedTimeSeconds()>0.25)
+                if(pathTimer.getElapsedTimeSeconds()>1)
                 {
                     tree.setPower(0);
                 }
@@ -397,7 +397,7 @@ public class red18closenewbot extends OpMode {
                     }
                     if(pathTimer.getElapsedTimeSeconds()>2.75)
                     {
-                        setPathState((red18closenewbot.PathState.GateCollectionAgainAgain));
+                        setPathState((SolarFlareRed.PathState.GateCollectionAgainAgain));
                     }
                 }
                 break;
@@ -417,11 +417,11 @@ public class red18closenewbot extends OpMode {
                     theWheelOfTheOx.setPower(-1);
                 }
                 if (!follower.isBusy() && gateCollectionAgainStarted && pathTimer.getElapsedTimeSeconds()>3.35) {
-                    setPathState((red18closenewbot.PathState.shootAgainAgainAgain));
+                    setPathState((SolarFlareRed.PathState.shootAgainAgainAgain));
                 }
                 break;
             case shootAgainAgainAgain:
-                tree.setPower(0);
+                tree.setPower(1);
                 rotator.setTargetPosition(rotatorStartPosition);
                 if (!follower.isBusy() && !shoot4Started) {
                     rotator.setTargetPosition(rotatorStartPosition);
@@ -430,7 +430,7 @@ public class red18closenewbot extends OpMode {
                     tree.setPower(1);
                     shoot4Started = true;
                 }
-                if(pathTimer.getElapsedTimeSeconds()>0.25)
+                if(pathTimer.getElapsedTimeSeconds()>1)
                 {
                     tree.setPower(0);
                 }
@@ -446,7 +446,7 @@ public class red18closenewbot extends OpMode {
                     }
                     if(pathTimer.getElapsedTimeSeconds()>2.75)
                     {
-                        setPathState((red18closenewbot.PathState.collectAgainAgainEnd));
+                        setPathState((SolarFlareRed.PathState.collectAgainAgainEnd));
                     }
                 }
                 break;
@@ -471,7 +471,7 @@ public class red18closenewbot extends OpMode {
                 if (!follower.isBusy() && collectionStarted) {
                     theWheelOfTheOx.setPower(-1);
                     if (pathTimer.getElapsedTimeSeconds()>0.25) {
-                        setPathState((red18closenewbot.PathState.shootAgainAgainAgainAgain));
+                        setPathState((SolarFlareRed.PathState.shootAgainAgainAgainAgain));
                     }
                 }
                 break;
@@ -495,7 +495,7 @@ public class red18closenewbot extends OpMode {
                         theWheelOfTheOx.setPower(-1);
                     }
                     if(pathTimer.getElapsedTimeSeconds()>2.95) {
-                        setPathState((red18closenewbot.PathState.done));
+                        setPathState((SolarFlareRed.PathState.done));
                     }
                 }
                 break;

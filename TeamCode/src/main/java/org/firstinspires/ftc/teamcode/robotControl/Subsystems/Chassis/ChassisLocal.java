@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.pedropathing.follower.Follower;
@@ -25,7 +27,9 @@ public class ChassisLocal implements DriveConstants{
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
+
         follower.update();
+
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
