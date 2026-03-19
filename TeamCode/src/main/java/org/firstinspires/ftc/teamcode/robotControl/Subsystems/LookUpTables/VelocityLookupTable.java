@@ -1,21 +1,21 @@
-package org.firstinspires.ftc.teamcode.robotControl;
+package org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables;
 
 /**
  * Pure lookup table for distance to velocity conversion.
- *
+ * 
  * NO FORMULAS - All values are empirically tuned and stored in the table.
  * Three distinct zones matching hood positions:
  * - Zone 1 (Close): < 140 inches
- * - Zone 2 (Mid): 140-200 inches
+ * - Zone 2 (Mid): 140-200 inches  
  * - Zone 3 (Far): >= 200 inches
- *
+ * 
  * Velocity changes smoothly as distance changes through linear interpolation.
- * Tune the HOOD array by testing actual distances - no formulas needed!
+ * Tune the VELOCITIES array by testing actual distances - no formulas needed!
  */
-public class ServoLookupTable {
+public class VelocityLookupTable {
 
     // Distance thresholds matching hood zones
-    private static final double CLOSE_THRESHOLD = 95;  // Zone 1: Close hood
+    private static final double CLOSE_THRESHOLD = 85;  // Zone 1: Close hood
     private static final double MID_THRESHOLD = 120;      // Zone 2: Mid hood, Zone 3: Far hood
 
     // Distance entries (in inches) - must be in ascending order
@@ -29,35 +29,36 @@ public class ServoLookupTable {
 //        210.5,  205.2,  221.5,
 //    };
     private static final double[] DISTANCES = {
+            55.3, 57.8585, 64.2, 72, 77.59,76.4, 81.88, 92.4, 97.81, 102.22, 109.17, 112.02, 118.4, 123.81, 129.02, 135.07, 142.99, 147.6, 157.18
     };
-
+    
     // Corresponding velocity values (in encoder ticks per second)
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
-    private static final double[] HOOD = {
-
+    private static final double[] VELOCITIES = {
+            1070, 1110, 1135, 1150, 1160,1180, 1200, 1250, 1260, 1300, 1320, 1330, 1355, 1440, 1450, 1460, 1480, 1520, 1540
     };
-
+    //
     // Minimum and maximum distances in the table
     private static final double MIN_DISTANCE = 55.3;
     private static final double MAX_DISTANCE = 157.18;
-
+    
     /**
      * Gets the velocity for a given distance using pure lookup table with linear interpolation.
      * NO FORMULAS - just looks up the value and interpolates between table entries.
-     *
+     * 
      * @param distance Distance to target in inches
      * @return Velocity in encoder ticks per second
      */
     public static double getVelocity(double distance) {
         // Clamp distance to table range
         if (distance <= MIN_DISTANCE) {
-            return HOOD[0];
+            return VELOCITIES[0];
         }
         if (distance >= MAX_DISTANCE) {
-            return HOOD[HOOD.length - 1];
+            return VELOCITIES[VELOCITIES.length - 1];
         }
-
+        
         // Find the two table entries to interpolate between
         int index = 0;
         for (int i = 0; i < DISTANCES.length - 1; i++) {
@@ -66,22 +67,22 @@ public class ServoLookupTable {
                 break;
             }
         }
-
+        
         // Pure linear interpolation between the two entries (no formula)
         double dist1 = DISTANCES[index];
         double dist2 = DISTANCES[index + 1];
-        double vel1 = HOOD[index];
-        double vel2 = HOOD[index + 1];
-
+        double vel1 = VELOCITIES[index];
+        double vel2 = VELOCITIES[index + 1];
+        
         // Linear interpolation: smooth transition between table entries
         double t = (distance - dist1) / (dist2 - dist1);
         return vel1 + (vel2 - vel1) * t;
     }
-//
+    
     /**
      * Gets which zone (1, 2, or 3) a distance falls into.
      * Zone 1: Close (< 145), Zone 2: Mid (145-180), Zone 3: Far (>= 200)
-     *
+     * 
      * @param distance Distance to target in inches
      * @return Zone number (1, 2, or 3)
      */
@@ -94,28 +95,28 @@ public class ServoLookupTable {
             return 3; // Far zone (>= 120)
         }
     }
-
+    
     /**
      * Gets the minimum distance in the lookup table.
      */
     public static double getMinDistance() {
         return MIN_DISTANCE;
     }
-
+    
     /**
      * Gets the maximum distance in the lookup table.
      */
     public static double getMaxDistance() {
         return MAX_DISTANCE;
     }
-
+    
     /**
      * Gets the close/mid threshold (145 inches).
      */
     public static double getCloseThreshold() {
         return CLOSE_THRESHOLD;
     }
-
+    
     /**
      * Gets the mid/far threshold (200 inches).
      */

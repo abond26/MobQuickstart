@@ -7,6 +7,7 @@ import com.pedropathing.geometry.Pose;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis.ChassisLocal;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
@@ -203,20 +204,20 @@ public class RobotActions implements BlueUniversalConstants {
         }
     }
 
-    public void autoAdjustVelo(Pose targ) {
-        // If launch() is actively controlling the hood for far shots, skip
-        if (farShootingActive)
-            return;
-        double dist = chassisLocal.getDistance(targ);
-        int zone = ServoLookupTable.getZone(dist);
-        if (zone == 1) {
-            turret.setVelocity(CLOSE_VELO);
-        } else if (zone == 2) {
-            turret.setVelocity(MID_VELO);
-        } else {
-            turret.setVelocity(FAR_VELO);
-        }
-    }
+//    public void autoAdjustVelo(Pose targ) {
+//        // If launch() is actively controlling the hood for far shots, skip
+//        if (farShootingActive)
+//            return;
+//        double dist = chassisLocal.getDistance(targ);
+//        int zone = ServoLookupTable.getZone(dist);
+//        if (zone == 1) {
+//            turret.setVelocity(CLOSE_VELO);
+//        } else if (zone == 2) {
+//            turret.setVelocity(MID_VELO);
+//        } else {
+//            turret.setVelocity(FAR_VELO);
+//        }
+//    }
 
     public void autoVelocity(Pose targ) {
         double dist = chassisLocal.getDistance(targ);

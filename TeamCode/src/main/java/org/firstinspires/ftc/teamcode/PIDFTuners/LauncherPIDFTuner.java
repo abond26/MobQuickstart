@@ -13,14 +13,14 @@ public class LauncherPIDFTuner extends OpMode {
     public double highVelocity = 1500;
     public double lowVelocity = 901;
     double curTargetVelocity = highVelocity;
-    double F = 12.35;
-    double P = 282.0;
+    double F = 0;
+    double P = 0;
     double[] stepSizes = {10.0, 1.0, 0.1, 0.001, 0.0001};
     int stepIndex = 1;
 
     @Override
     public void init(){
-        flywheelMotor = hardwareMap.get(DcMotorEx.class, "launcher");
+        flywheelMotor = hardwareMap.get(DcMotorEx.class, "launcherL");
         flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //changed to Ex
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         flywheelMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);

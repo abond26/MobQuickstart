@@ -19,8 +19,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
-import org.firstinspires.ftc.teamcode.robotControl.ShotTimeLookupTable;
-import org.firstinspires.ftc.teamcode.robotControl.VelocityLookupTable;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.ShotTimeLookupTable;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
