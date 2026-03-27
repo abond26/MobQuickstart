@@ -27,6 +27,7 @@ public class SolarFlareBlue extends OpMode {
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
 
+
     // Flags to prevent path oscillation - ensure paths are only called once per state
     private boolean shoot2Started = false;
     private boolean shoot3Started = false;

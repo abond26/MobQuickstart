@@ -37,7 +37,7 @@ public class dumbMap {
     public VoltageSensor batteryVoltageSensor;
     public WebcamName bonoboCam;
     public HuskyLens huskyLens;
-    public RevColorSensorV3 ColorSensor;
+    public RevColorSensorV3 color_sensor;
     public Limelight3A limelight;
     public DistanceSensor distanceSensor;
     public BHI260IMU gyro;

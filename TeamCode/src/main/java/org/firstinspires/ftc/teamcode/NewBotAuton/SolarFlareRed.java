@@ -18,14 +18,17 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
+import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "Solar flare red", group = "new bot")
+@Autonomous(name = "Solar flare red", group = "new bot", preselectTeleOp = "SmallManRed")
 public class SolarFlareRed extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
+    private Vision vision = null;
 
     // Flags to prevent path oscillation - ensure paths are only called once per state
     private boolean shoot2Started = false;
@@ -535,6 +538,9 @@ public class SolarFlareRed extends OpMode {
         follower = ConstantsNewBot.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+        vision = new Vision(hardwareMap, RedUniversalConstants.PIPELINENUM);
+        telemetry.addLine("Good to go RED");
+        telemetry.update();
     }
 
     public void start() {

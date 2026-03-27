@@ -17,15 +17,20 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
+import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "tangential Blue 18 close ", group = "new bot")
+@Autonomous(name = "tangential Blue 18 close ", group = "new bot", preselectTeleOp = "BigBoyBlue")
 public class blue18closenewbot extends OpMode {
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
     private Follower follower;
+
+    private Vision vision = null;
 
     // Flags to prevent path oscillation - ensure paths are only called once per state
     private boolean shoot2Started = false;
@@ -127,7 +132,7 @@ public class blue18closenewbot extends OpMode {
     PathState pathState;
     // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
     private final Pose startPose = new Pose(26.7, 132, Math.toRadians(144));
-    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(130));
+    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(135));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
     private final Pose collect1thing = new Pose(19, 60, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(65, 58.5, Math.toRadians(180));
@@ -583,6 +588,10 @@ public class blue18closenewbot extends OpMode {
         follower = ConstantsNewBot.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+
+        vision = new Vision(hardwareMap, BlueUniversalConstants.PIPELINENUM);
+        telemetry.addLine("Good to go BLUE");
+        telemetry.update();
 
     }
 
