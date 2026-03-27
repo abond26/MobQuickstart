@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.*;
 
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.ShotTimeLookupTable;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 public class ChassisLocal implements DriveConstants{
 
     private Follower follower;
@@ -23,7 +23,7 @@ public class ChassisLocal implements DriveConstants{
 
     public ChassisLocal(HardwareMap hardwareMap, Pose startPose) {
 
-        follower = Constants.createFollower(hardwareMap);
+        follower = ConstantsNewBot.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
 
         follower.update();
@@ -63,22 +63,22 @@ public class ChassisLocal implements DriveConstants{
         rightRear.setPower((y + x - r) / denominator);
     }
 
-    public Pose sillyTargetPose(Pose target){
-        double dist = getDistance(target);
-
-        Vector velocity = getVelocity();
-        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
-        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
-        Pose sillyTarget = new Pose(
-                target.getX() - vx * ShotTimeLookupTable.getTime(dist),
-                target.getY() - vy * ShotTimeLookupTable.getTime(dist)
-        );
-        if (dist < 120){
-            return sillyTarget;
-        }else{
-            return target;
-        }
-    }
+//    public Pose sillyTargetPose(Pose target){
+//        double dist = getDistance(target);
+//
+//        Vector velocity = getVelocity();
+//        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
+//        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
+//        Pose sillyTarget = new Pose(
+//                target.getX() - vx * ShotTimeLookupTable.getTime(dist),
+//                target.getY() - vy * ShotTimeLookupTable.getTime(dist)
+//        );
+//        if (dist < 120){
+//            return sillyTarget;
+//        }else{
+//            return target;
+//        }
+//    }
 
 
     public double getDistance(@NonNull Pose target){
@@ -113,8 +113,7 @@ public class ChassisLocal implements DriveConstants{
     }
 
 
-    //----------------------------------------------------------------
-    //TO CHANGE? The below code is chat code
+    //kishens great code//
     public double calculateTurretAngle(@NonNull Pose target) {
         Pose robotPose = getPose();
         double dx = target.getX() - robotPose.getX();

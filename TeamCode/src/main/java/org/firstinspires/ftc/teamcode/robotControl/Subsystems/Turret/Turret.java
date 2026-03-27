@@ -10,10 +10,12 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Turret implements TurretConstants {
-    private DcMotorEx jollyCrusader;
-    private DcMotor rotator, theWheelOfTheOx;
+    private DcMotorEx jollyCrusader, gloomyCrusader;
+    private DcMotor rotator;
     private Servo hood;
     public static int timesCalled = 0;
+    
+    private double targetVelocity = 0;
 
     public enum ShotType {
         CLOSE,
@@ -22,14 +24,20 @@ public class Turret implements TurretConstants {
     }
 
     public Turret(@NonNull HardwareMap hardwareMap) {
-        // Launcher motor
-        jollyCrusader = hardwareMap.get(DcMotorEx.class, "launcher");
+        // LEFTm
+        jollyCrusader = hardwareMap.get(DcMotorEx.class, "launcherL");
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         jollyCrusader.setDirection(DcMotorSimple.Direction.FORWARD);
-        jollyCrusader.setVelocity(0);
+        jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(shooterP, 0, 0, shooterF);
         jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+
+        gloomyCrusader = hardwareMap.get(DcMotorEx.class, "launcherR");
+        gloomyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        gloomyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
+        gloomyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        PIDFCoefficients pidfCoefficients2 = new PIDFCoefficients(shooterP, 0, 0, shooterF);
+        gloomyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients2);
 
         // X direction motor
         rotator = hardwareMap.get(DcMotor.class, "rotator");
@@ -39,14 +47,9 @@ public class Turret implements TurretConstants {
         rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotator.setPower(rotatorPower);
 
-        // This means counterclockwise is negative
+        // This means counterclockwise movement on the rotator (not the motor) is
+        // negative
         rotator.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        // Motor that pushes balls into launcher
-        theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
-        theWheelOfTheOx.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        theWheelOfTheOx.setPower(0);
-        theWheelOfTheOx.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Our precious lil hoody hood
         hood = hardwareMap.get(Servo.class, "hood");
@@ -91,15 +94,22 @@ public class Turret implements TurretConstants {
 
     // FUNCTIONS FOR LAUNCHER
     public void setVelocity(double velocity) {
+        targetVelocity = velocity;
         jollyCrusader.setVelocity(velocity);
+        gloomyCrusader.setVelocity(velocity);
     }
 
-    public double getVelocity() {
-        return jollyCrusader.getVelocity();
+    public double[] getVelocity() {
+        double velos[] = { jollyCrusader.getVelocity(), gloomyCrusader.getVelocity() };
+        return velos;
+    }
+
+    public double getTargetVelocity() {
+        return targetVelocity;
     }
 
     public void shiftVelocity(double ticksPerSec) {
-        double newVelo = getVelocity() + ticksPerSec;
+        double newVelo = targetVelocity + ticksPerSec;
         setVelocity(newVelo);
     }
 
@@ -154,10 +164,5 @@ public class Turret implements TurretConstants {
     public void shiftHood(double ticks) {
         double newPos = getHoodPos() + ticks;
         setHoodPos(newPos);
-    }
-
-    // FUNCTIONS FOR WHEEL OF THE OX
-    public void setFeedPower(double power) {
-        theWheelOfTheOx.setPower(power);
     }
 }

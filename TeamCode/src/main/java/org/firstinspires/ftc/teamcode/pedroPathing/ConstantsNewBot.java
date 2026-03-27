@@ -65,8 +65,8 @@ public class ConstantsNewBot {
     //right front changed right front
     //right rear
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-2.5)
-            .strafePodX(-7.5)
+            .forwardPodY(3)
+            .strafePodX(2)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)

@@ -13,7 +13,7 @@ public class LauncherVeloTest extends LinearOpMode {
     DcMotorEx launcherL, launcherR;
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
 
-    private DcMotor intake,theWheelOfTheOx;
+    private DcMotor intake;
     private Servo hood;
     double shooterP = 164;
     double shooterF = 19.8;
@@ -39,10 +39,6 @@ public class LauncherVeloTest extends LinearOpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setPower(0);
 
-        theWheelOfTheOx = hardwareMap.get(DcMotor.class, "theWheelOfTheOx");
-        theWheelOfTheOx.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        theWheelOfTheOx.setPower(0);
-        theWheelOfTheOx.setDirection(DcMotorSimple.Direction.REVERSE);
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
@@ -107,19 +103,10 @@ public class LauncherVeloTest extends LinearOpMode {
                 intake.setPower(0);
             }
 
-            // The Wheel Of The Ox control (buttons)
-            if (gamepad1.y) {
-                theWheelOfTheOx.setPower(1.0); // Forward
-            } else if (gamepad1.a) {
-                theWheelOfTheOx.setPower(-1.0); // Reverse
-            } else {
-                theWheelOfTheOx.setPower(0); // Stop
-            }
 
             telemetry.addData("LauncherL power", launcherL.getVelocity());
             telemetry.addData("LauncherR power", launcherR.getVelocity());
             telemetry.addData("Intake power", intake.getPower());
-            telemetry.addData("WheelOfTheOx power", theWheelOfTheOx.getPower());
             telemetry.addData("Hood Postion" , hood.getPosition());
             telemetry.update();
 

@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResultTypes.FiducialResult;
 
@@ -18,7 +17,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.test.LimelightRelocalization;
 
 import java.util.List;
 
@@ -32,7 +30,7 @@ public class Vision implements VisionConstants{
     public Vision(@NonNull HardwareMap hardwareMap, int pipeline) {
 
         // Try common config names (Driver Station lets you rename the device)
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        //limelight = hardwareMap.get(Limelight3A.class, "limelight");
         Log.w("Vision", "Limelight Loaded");
 
         if (limelight != null) {

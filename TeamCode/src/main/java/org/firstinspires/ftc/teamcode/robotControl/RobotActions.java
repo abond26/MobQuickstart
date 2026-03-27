@@ -45,103 +45,16 @@ public class RobotActions implements BlueUniversalConstants {
 
     }
 
-    public void launch(double speed, boolean bumperPressed, Pose targ) {
-        boolean justPressed = bumperPressed && !lastBumper;
-        boolean justReleased = !bumperPressed && lastBumper;
-        lastBumper = bumperPressed;
-        if (justPressed) {
-            launchStartTime = System.currentTimeMillis();
-            shotCount = 0;
-        }
+    public void launch(double speed, boolean bumperPressed){
         if (bumperPressed) {
             gate.open();
-            turret.setFeedPower(speed);
-            // Check if we're in far zone
-            double dist = chassisLocal.getDistance(targ);
-            int zone = VelocityLookupTable.getZone(dist);
-            if (zone == 3) {
-                intake.simpleIntake(-speed * 0.7);
-                farShootingActive = true;
-                // How many balls have been fed based on elapsed time
-                long elapsed = System.currentTimeMillis() - launchStartTime;
-                int expectedBalls = (int) (elapsed / 50);
-                if (expectedBalls > shotCount) {
-                    shotCount = expectedBalls;
-                }
-                // Shift hood down per ball, clamped to mid position max
-                double hoodPos = FAR_HOOD_POSITION + (shotCount * 0.3);
-                hoodPos = Math.min(hoodPos, MID_HOOD_POSITION);
-                turret.setHoodPos(hoodPos);
-            } else if (zone == 2) {
-                intake.simpleIntake(-speed);
-                farShootingActive = true;
-                // How many balls have been fed based on elapsed time
-                long elapsed = System.currentTimeMillis() - launchStartTime;
-                int expectedBalls = (int) (elapsed / 30);
-                if (expectedBalls > shotCount) {
-                    shotCount = expectedBalls;
-                }
-                // Shift hood down per ball, clamped to close position max
-                double hoodPos = MID_HOOD_POSITION + (shotCount * 0.1);
-                hoodPos = Math.min(hoodPos, CLOSE_HOOD_POSITION);
-                turret.setHoodPos(hoodPos);
-            } else {
-                turret.setFeedPower(speed);
-                intake.simpleIntake(-speed);
-                farShootingActive = false;
-            }
+            intake.simpleIntake(-speed);
         }
-        if (justReleased || !bumperPressed) {
+        else{
             gate.block();
-            turret.setFeedPower(0);
-            farShootingActive = false;
-            shotCount = 0;
         }
     }
 
-    // To be tested
-    public void relocalizeBlue(Pose target, Telemetry telemetry) {
-        if (!vision.hasTarget())
-            return;
-
-        double tx = vision.getTx();
-        double dist = vision.getDistance();
-        telemetry.addData("Dist", dist);
-
-        // Calculate robot position relative to target using tx and distance
-        double angleRad = Math.toRadians(tx);
-        double dx = dist * Math.sin(angleRad);
-        double dy = dist * Math.cos(angleRad);
-
-        double newX = target.getX() + dx;
-        double newY = target.getY() - dy;
-
-        Pose newPose = new Pose(newX, newY, chassisLocal.getPose().getHeading());
-
-        telemetry.addData("New Position", newPose);
-
-        // maybe add heading?
-        chassisLocal.setPose(newPose);
-    }
-
-    public void relocalizeRed(Pose target) {
-        if (!vision.hasTarget())
-            return;
-
-        double tx = vision.getTx();
-        double dist = vision.getDistance();
-
-        // Calculate robot position relative to target using tx and distance
-        double angleRad = Math.toRadians(tx);
-        double dx = dist * Math.sin(angleRad);
-        double dy = dist * Math.cos(angleRad);
-
-        double newX = target.getX() - dx;
-        double newY = target.getY() - dy;
-
-        // maybe add heading?
-        chassisLocal.setPose(new Pose(newX, newY, chassisLocal.getPose().getHeading()));
-    }
 
     // Manual hood Control
     public void hoodControl(boolean xPressed, boolean bPressed) {
@@ -169,25 +82,13 @@ public class RobotActions implements BlueUniversalConstants {
         return shootingTargetOverride != null ? shootingTargetOverride : target;
     }
 
-    public void LimelightRelocal(Telemetry telemetry) {
-        Pose llPose = vision.getPoseLimelight();
-        if (llPose == null) {
-            telemetry.addData("Limelight relocal", "No valid pose (no target or limelight)");
-            return;
-        }
-        chassisLocal.setPose(llPose);
-        telemetry.addData("Limelight relocal", "OK (%.1f, %.1f, %.0f°)",
-                llPose.getX(), llPose.getY(), Math.toDegrees(llPose.getHeading()));
-    }
 
     // we have a control for intake in this class in case intaking becomes more
     // complex
     public void intake(double power) {
         intake.simpleIntake(power);
-        if (power > 0) {
-            turret.setFeedPower(-power);
-        }
     }
+
 
     public void autoAdjustHood(Pose targ) {
         // If launch() is actively controlling the hood for far shots, skip
@@ -226,19 +127,10 @@ public class RobotActions implements BlueUniversalConstants {
     }
 
     public void adjustShootingParams(Pose targ) {
-        autoVelocity(targ);
+//        autoVelocity(targ);
         autoAdjustHood(targ);
     }
 
-    public void HumanPLayerFix(double headingDegrees) {
-        Pose currentPose = chassisLocal.getPose();
-        chassisLocal.setPose(new Pose(currentPose.getX(), currentPose.getY(), Math.toRadians(headingDegrees)));
-    }
-    //
-
-    public void resetEncoders() {
-        turret.resetEncoders();
-    }
 
     public void aimRotatorLocal(Pose targ, @NonNull Telemetry telemetry) {
         double angle = chassisLocal.calculateTurretAngle(targ);
@@ -246,42 +138,6 @@ public class RobotActions implements BlueUniversalConstants {
         turret.setRotatorToAngle(angle);
     }
 
-    public void aimRotatorLocalOld(Pose targ, @NonNull Telemetry telemetry) {
-        double currentHeading = chassisLocal.getPose().getHeading();
-        long currentTime = System.currentTimeMillis();
-
-        if (lastAimTime != 0) {
-            double dtSeconds = (currentTime - lastAimTime) / 1000.0;
-            if (dtSeconds > 0) {
-                double headingDiff = currentHeading - lastHeadingForAim;
-                while (headingDiff > Math.PI)
-                    headingDiff -= 2 * Math.PI;
-                while (headingDiff < -Math.PI)
-                    headingDiff += 2 * Math.PI;
-
-                double angularVelocity = Math.abs(headingDiff) / dtSeconds;
-
-                if (angularVelocity > FREEZE_THRESHOLD_RAD_PER_SEC) {
-                    isTurretFrozen = true;
-                } else if (angularVelocity < UNFREEZE_THRESHOLD_RAD_PER_SEC) {
-                    isTurretFrozen = false;
-                }
-            }
-        }
-
-        lastHeadingForAim = currentHeading;
-        lastAimTime = currentTime;
-
-        if (!isTurretFrozen) {
-            double angle = chassisLocal.getTurretAngle(targ);
-            telemetry.addData("Angle with localization", angle);
-            turret.setRotatorToAngle(angle);
-            telemetry.addData("Turret Status", "Aiming");
-        } else {
-            telemetry.addData("Turret Status", "Frozen (Turning too fast)");
-            telemetry.addData("Angle with localization", "Frozen");
-        }
-    }
 
     public void aim() {
 
