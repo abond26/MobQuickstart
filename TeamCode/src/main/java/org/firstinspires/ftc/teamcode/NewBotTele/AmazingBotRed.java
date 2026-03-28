@@ -122,12 +122,12 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
 
             // Intake Shifted towards the top
             if (gamepad1.dpad_up && !lastDpadUp) {
-                robot.intake.shift(0);
+                robot.intake.down();
             }
             lastDpadUp = gamepad1.dpad_up;
             // Intake Shifted towards the intakePos
             if (gamepad1.left_bumper){
-                robot.intake.shift(0.54);
+                robot.intake.shift();
             }
 
             // Dynamic shooting
