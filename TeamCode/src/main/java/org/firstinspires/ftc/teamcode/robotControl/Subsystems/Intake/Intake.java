@@ -45,7 +45,7 @@ public class Intake implements IntakeConstants{
         intakeShifterL.setDirection(Servo.Direction.REVERSE);
 
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "color_sensor");
-        colorSensor.setGain(10);
+//        colorSensor.setGain(10);
 
         colorTimer.reset();
     }

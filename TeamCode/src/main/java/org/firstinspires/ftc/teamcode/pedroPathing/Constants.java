@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 
@@ -23,29 +24,30 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-//            .centripetalScaling(0.00035)
-//            .headingPIDFCoefficients(new PIDFCoefficients(1.5, 0.01, 0.09, 0.01))
-//            .translationalPIDFCoefficients(new PIDFCoefficients(0.3, 0.01, 0.05, 0.01))
-//            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.009, 0.001, 0.000015, 0.01, 0.03)))
-//            .forwardZeroPowerAcceleration(-35.10634166681744)
-//            .lateralZeroPowerAcceleration(-69.08488597190241)
+            .centripetalScaling(0)
+            .headingPIDFCoefficients(new PIDFCoefficients(0.846, 0.01, 0.095, 0.0846))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.22, 0, 0.015, 0.0085))
+           .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.0075, 0.001, 0.00003, 0.03, 0.0095)))
+            .forwardZeroPowerAcceleration(-73.2273364)
+            .lateralZeroPowerAcceleration(-89.668392299)
 //            .useSecondaryTranslationalPIDF(false)
 //            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1,0.0001,0.06,0))
 //            .useSecondaryHeadingPIDF(false)
 //            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.2,0.0001,0.06,0))
 //            .useSecondaryDrivePIDF(false)
 //            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.75,0.000075,0.03,0.6,0.01))
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.2, 0.04, 0.0016))
             .mass(9.979);
 
 
 
-//    public static PathConstraints pathConstraints = new PathConstraints(100,
-//            100,
-//            1,
-//            1);
+    public static PathConstraints pathConstraints = new PathConstraints(100,
+            100,
+            1,
+            1);
     public static MecanumConstants driveConstants = new MecanumConstants()
-//            .xVelocity(77.01509682963214)
-//            .yVelocity(59.316786398099154)
+            .xVelocity(87.113686869)
+            .yVelocity(68.083442748)
 
 
 
@@ -65,8 +67,8 @@ public class Constants {
     //right front changed right front
     //right rear
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(0)
-            .strafePodX(0)
+            .forwardPodY(3)
+            .strafePodX(2)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
@@ -77,7 +79,7 @@ public class Constants {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(localizerConstants)
                 .mecanumDrivetrain(driveConstants)
-                //.pathConstraints(pathConstraints)
+                .pathConstraints(pathConstraints)
                 .build();
     }
 }

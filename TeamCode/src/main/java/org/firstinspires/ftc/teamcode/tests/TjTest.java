@@ -77,9 +77,7 @@ public class TjTest extends LinearOpMode {
             // The Wheel Of The Ox control (buttons)
 
 
-            telemetry.addData("LauncherL power", launcherL.getVelocity());
-            telemetry.addData("LauncherR power", launcherR.getVelocity());
-            telemetry.addData("Intake power", intake.getPower());
+
             telemetry.update();
 
         }

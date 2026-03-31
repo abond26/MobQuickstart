@@ -85,9 +85,9 @@ public class dumbMap {
             rightBack = opMode.hardwareMap.get(DcMotor.class, "backRight");
 
             // Set motor directions (adjust if needed)
-            leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+            leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
             leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
-            rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+            rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
             rightBack.setDirection(DcMotorSimple.Direction.FORWARD);
 
             // Set motor modes for velocity control
