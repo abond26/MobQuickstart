@@ -13,6 +13,7 @@ public class ColorSensorTest extends OpMode {
     public void init() {
         bench.init(hardwareMap);
     }
+    //
 
     @Override
     public void loop() {

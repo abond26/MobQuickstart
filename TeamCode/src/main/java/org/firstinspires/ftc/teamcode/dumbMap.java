@@ -35,6 +35,7 @@ public class dumbMap {
 
     // Sensors and other hardware
     public VoltageSensor batteryVoltageSensor;
+    //
     public WebcamName bonoboCam;
     public HuskyLens huskyLens;
     public RevColorSensorV3 color_sensor;
