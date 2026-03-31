@@ -20,7 +20,7 @@ public class ColorTesting {
     ElapsedTime colorTimer = new ElapsedTime();
     DetectedColor currentlyDetectedColor = DetectedColor.UNKNOWN;
     //how long should i hold this b all
-    public double requiredDetectionTimeSeconds = 3;
+    public double requiredDetectionTimeSeconds = 0.3;
 
     public enum DetectedColor {
         PURPLE,
@@ -51,10 +51,10 @@ public class ColorTesting {
         telemetry.addData("blue", normBlue);
         
         DetectedColor detectedThisFrame = DetectedColor.UNKNOWN;
-        
-        if (normRed > 0.3 && normBlue > 0.3 && normGreen < 0.2) {
+
+        if (normRed < 0.012 && normGreen <= 0.014 && normBlue > 0.009) {
             detectedThisFrame = DetectedColor.PURPLE;
-        } else if (normGreen > 0.3 && normRed < 0.2 && normBlue < 0.2) {
+        } else if (normRed < 0.012 && normGreen > 0.014 && normGreen < 0.025) {
             detectedThisFrame = DetectedColor.GREEN;
         }
         

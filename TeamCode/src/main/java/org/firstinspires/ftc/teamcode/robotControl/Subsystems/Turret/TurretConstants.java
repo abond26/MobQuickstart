@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret;
 
+import com.qualcomm.robotcore.hardware.Servo;
+
 public interface TurretConstants {
     double shooterP = 164;
     double shooterF = 19.8;
-    int ROTATOR_ZERO_TICKS = 0;
-    int rotator180Range = 260;
+    double ROTATOR_ZERO_POS = 0.0;
+    double rotator180RangePos = 1.0;
     double rotatorPower = 1;
 
     double CLOSE_VELOCITY = 1300;

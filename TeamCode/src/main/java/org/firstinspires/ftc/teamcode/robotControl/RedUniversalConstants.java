@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotControl;
 
+import com.qualcomm.robotcore.hardware.Servo;
+
 import com.pedropathing.geometry.Pose;
 
 public interface RedUniversalConstants {

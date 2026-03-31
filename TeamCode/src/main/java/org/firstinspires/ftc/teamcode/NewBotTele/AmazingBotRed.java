@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.NewBotTele;
 
+import com.qualcomm.robotcore.hardware.Servo;
+
 import android.util.Log;
 
 import com.pedropathing.geometry.Pose;
@@ -9,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 
@@ -93,15 +96,6 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             // Hood control
             actions.hoodControl(gamepad1.x, gamepad1.b);
 
-            // Rotator control
-            if (gamepad1.dpad_left) {
-                robot.turret.shiftRotator(-rotatorIncrement);
-                sillyControls = false;
-            }
-            if (gamepad1.dpad_right) {
-                robot.turret.shiftRotator(rotatorIncrement);
-                sillyControls = false;
-            }
 
             // Feed (launch)
             actions.launch(1, gamepad1.right_bumper);
@@ -114,6 +108,9 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             if (!gamepad1.right_bumper) {
                 actions.intake(sumOfTrigs);
             }
+
+            // Color sensor detection — auto-shifts intake when ball detected
+            Intake.DetectedColor detectedColor = robot.intake.getDetectedColor(telemetry);
             // AUTOMATIC CONTROLS (same as BlueTele)
 
             if (gamepad1.leftStickButtonWasPressed()) {
@@ -133,10 +130,8 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             // Dynamic shooting
             inPosition = robot.chassisLocal.isShootingPosition();
             if (sillyControls) {
-                actions.aimRotatorLocal(target, telemetry);
                 actions.adjustShootingParams(RedUniversalConstants.target);
                 robot.turret.setVelocity(1500);
-
             }
             // TELEMETRY
 
@@ -146,18 +141,17 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             telemetry.addData("X", "%.1f", robot.chassisLocal.getPose().getX());
             telemetry.addData("Y", "%.1f", robot.chassisLocal.getPose().getY());
             telemetry.addData("Heading", "%.1f°", Math.toDegrees(robot.chassisLocal.getPose().getHeading()));
-            telemetry.addData("Rotator Angle", "%.1f", robot.chassisLocal.calculateTurretAngle(RedUniversalConstants.target));
+
 
 
             // Hardware data
             telemetry.addLine("");
             telemetry.addLine("HARDWARE STATUS");
             telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
-            telemetry.addData("Rotator position", robot.turret.getRotatorPos());
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
+            telemetry.addData("Ball Detected", detectedColor);
             telemetry.addData("Launcher velocity", robot.turret.getVelocity());
             telemetry.addData("Distance", robot.chassisLocal.getDistance(target));
-            telemetry.addData("Rotator Angle", "%.1f", robot.chassisLocal.calculateTurretAngle(RedUniversalConstants.target));
             telemetry.update();
         }
     }

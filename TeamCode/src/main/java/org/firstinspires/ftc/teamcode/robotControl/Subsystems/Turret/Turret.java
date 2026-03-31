@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret;
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -11,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Turret implements TurretConstants {
     private DcMotorEx jollyCrusader, gloomyCrusader;
-    private DcMotor rotator;
+    private Servo rotator;
     private Servo hood;
     public static int timesCalled = 0;
     
@@ -39,17 +40,10 @@ public class Turret implements TurretConstants {
         PIDFCoefficients pidfCoefficients2 = new PIDFCoefficients(shooterP, 0, 0, shooterF);
         gloomyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients2);
 
-        // X direction motor
-        rotator = hardwareMap.get(DcMotor.class, "rotator");
-        rotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotator.setTargetPosition(0);
-        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotator.setPower(rotatorPower);
+        rotator = hardwareMap.get(Servo.class, "rotator");
 
-        // This means counterclockwise movement on the rotator (not the motor) is
         // negative
-        rotator.setDirection(DcMotorSimple.Direction.REVERSE);
+        rotator.setDirection(Servo.Direction.REVERSE);
 
         // Our precious lil hoody hood
         hood = hardwareMap.get(Servo.class, "hood");
@@ -57,39 +51,25 @@ public class Turret implements TurretConstants {
     }
 
     // FUNCTIONS FOR ROTATOR
-    /**
-     * Set rotator motor power (e.g. 1.0 for full speed). Use in auton for faster
-     * aiming.
-     */
-    public void setRotatorPower(double power) {
-        rotator.setPower(power);
+
+    public void setRotatorPos(double pos) {
+        rotator.setPosition(pos);
     }
 
-    public void resetEncoders() {
-        rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotator.setTargetPosition(0);
-        rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-    //
-
-    public void setRotatorPos(int ticks) {
-        rotator.setTargetPosition(ticks);
+    public double getRotatorPos() {
+        return rotator.getPosition();
     }
 
-    public int getRotatorPos() {
-        return rotator.getCurrentPosition();
-    }
-
-    public void shiftRotator(int ticks) {
-        int newPos = getRotatorPos() + ticks;
+    public void shiftRotator(double posStep) {
+        double newPos = getRotatorPos() + posStep;
         setRotatorPos(newPos);
     }
 
     // Renamed from setRotatorToTurretAngle to make more sense
     public void setRotatorToAngle(double turretAngleDeg) {
         double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
-        int targetTicks = ROTATOR_ZERO_TICKS + (int) (fracOf180 * rotator180Range);
-        setRotatorPos(targetTicks);
+        double targetPos = ROTATOR_ZERO_POS + (fracOf180 * rotator180RangePos);
+        setRotatorPos(targetPos);
     }
 
     // FUNCTIONS FOR LAUNCHER

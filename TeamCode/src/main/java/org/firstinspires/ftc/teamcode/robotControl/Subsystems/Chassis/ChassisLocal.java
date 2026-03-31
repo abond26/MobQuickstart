@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis;
 
+import com.qualcomm.robotcore.hardware.Servo;
+
 import androidx.annotation.NonNull;
 
 import com.pedropathing.follower.Follower;
@@ -15,7 +17,7 @@ public class ChassisLocal implements DriveConstants{
     private Follower follower;
 
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
-    private DcMotor rotator;
+    private Servo rotator;
 
 
     //we don't put this in the DriveConstants class because it changes (i.e. it isn't a static final)
@@ -208,9 +210,9 @@ public class ChassisLocal implements DriveConstants{
 //    public void setTurretAngle(double turretAngleDeg) {
 //
 //        double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
-//        int targetTicks = (int)(fracOf180 * motor180Range);
+//        double targetTicks = (int)(fracOf180 * motor180Range);
 //
-//        rotator.setTargetPosition(targetTicks);
+//        rotator.setPosition(targetTicks);
 //    }
     //
 }
