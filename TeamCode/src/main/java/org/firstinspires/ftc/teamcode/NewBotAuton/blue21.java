@@ -452,7 +452,7 @@ public class blue21 extends OpMode {
 
         pathTimer = new Timer();
         opModeTimer = new Timer();
-        follower = Constants.createFollower(hardwareMap);
+        follower = ConstantsNewBot.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
         colorTesting = new ColorTesting();
