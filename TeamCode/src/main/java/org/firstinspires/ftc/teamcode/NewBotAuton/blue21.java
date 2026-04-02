@@ -151,7 +151,7 @@ public class blue21 extends OpMode {
     private final Pose startPose = new Pose(26.7, 133.7, Math.toRadians(144));
     private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(180));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
-    private final Pose collect1thing = new Pose(19, 60, Math.toRadians(180));
+        private final Pose collect1thing = new Pose(19, 60, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(53.0489, 60.85, Math.toRadians(180));
     private final Pose shootPose2 = new Pose( 60, 75, Math.toRadians(131.5));
 

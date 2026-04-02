@@ -127,7 +127,7 @@ public class RobotActions implements BlueUniversalConstants {
     }
 
     public void adjustShootingParams(Pose targ) {
-//        autoVelocity(targ);
+        autoVelocity(targ);
         autoAdjustHood(targ);
     }
 

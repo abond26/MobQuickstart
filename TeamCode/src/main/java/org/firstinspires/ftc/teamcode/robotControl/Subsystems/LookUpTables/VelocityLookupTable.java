@@ -29,14 +29,17 @@ public class VelocityLookupTable {
 //        210.5,  205.2,  221.5,
 //    };
     private static final double[] DISTANCES = {
-            1
+            51.6,69.6,84.5,89.7,98.9,60.1,75.5
+
     };
     
     // Corresponding velocity values (in encoder ticks per second)
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
     private static final double[] VELOCITIES = {
-            1
+            1398.5,1478.5,1638,1678.7,1738,1418,1578
+
+
     };
     //
     // Minimum and maximum distances in the table

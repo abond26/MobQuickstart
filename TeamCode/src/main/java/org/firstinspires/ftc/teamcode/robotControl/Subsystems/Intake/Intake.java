@@ -69,8 +69,8 @@ public class Intake implements IntakeConstants{
         intakeShifterR.setPosition(0);
     }
     public void shift(){
-        intakeShifterL.setPosition(0.54);
-        intakeShifterR.setPosition(0.54);
+        intakeShifterL.setPosition(0.4);
+        intakeShifterR.setPosition(0.4);
     }
 
 

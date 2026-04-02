@@ -41,10 +41,9 @@ public class Turret implements TurretConstants {
         gloomyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients2);
 
         rotator = hardwareMap.get(Servo.class, "rotator");
+        rotator.setPosition(0.5);
 
-        // negative
-        rotator.setDirection(Servo.Direction.REVERSE);
-
+        // negativex`
         // Our precious lil hoody hood
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(SCALE_RANGE_LOWER, SCALE_RANGE_UPPER);
@@ -65,7 +64,6 @@ public class Turret implements TurretConstants {
         setRotatorPos(newPos);
     }
 
-    // Renamed from setRotatorToTurretAngle to make more sense
     public void setRotatorToAngle(double turretAngleDeg) {
         double fracOf180 = Math.toRadians(turretAngleDeg) / Math.PI;
         double targetPos = ROTATOR_ZERO_POS + (fracOf180 * rotator180RangePos);

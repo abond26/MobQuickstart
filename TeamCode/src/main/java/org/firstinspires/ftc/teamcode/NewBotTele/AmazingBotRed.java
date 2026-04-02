@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 
 
 @TeleOp(name = "AmazingBotRed")
-public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants {
+public class AmazingBotRed extends LinearOpMode implements BlueUniversalConstants {
     long loopTime;
     Pose sillyTarget;
     Robot robot;
@@ -92,10 +92,22 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
                 veloSwitchNum += 1;
                 sillyControls = false;
             }
+            if (gamepad1.dpad_left) {
+                robot.turret.shiftRotator(-rotatorIncrement);
+                sillyControls = false;
+            }
+            if (gamepad1.dpad_right) {
+                robot.turret.shiftRotator(rotatorIncrement);
+                sillyControls = false;
+            }
 
             // Hood control
-            actions.hoodControl(gamepad1.x, gamepad1.b);
-
+            if (gamepad1.x) {
+                robot.turret.shiftHood(-hoodIncrement);
+            }
+            if (gamepad1.b) {
+                robot.turret.shiftHood(hoodIncrement);
+            }
 
             // Feed (launch)
             actions.launch(1, gamepad1.right_bumper);
@@ -128,10 +140,11 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             }
 
             // Dynamic shooting
+            sillyTarget = robot.chassisLocal.sillyTargetPose(target);
             inPosition = robot.chassisLocal.isShootingPosition();
             if (sillyControls) {
-                actions.adjustShootingParams(RedUniversalConstants.target);
-                robot.turret.setVelocity(1500);
+                actions.aimRotatorLocal(sillyTarget, telemetry);
+                actions.adjustShootingParams(sillyTarget);
             }
             // TELEMETRY
 
@@ -148,9 +161,11 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             telemetry.addLine("");
             telemetry.addLine("HARDWARE STATUS");
             telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
+            telemetry.addData("Rotator", "%.3f", robot.turret.getRotatorPos());
+
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
             telemetry.addData("Ball Detected", detectedColor);
-            telemetry.addData("Launcher velocity", robot.turret.getVelocity());
+            telemetry.addData("Launcher velocity", robot.turret.getTargetVelocity());
             telemetry.addData("Distance", robot.chassisLocal.getDistance(target));
             telemetry.update();
         }
