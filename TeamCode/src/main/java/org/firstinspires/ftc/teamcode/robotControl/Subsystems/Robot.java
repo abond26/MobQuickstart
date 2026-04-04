@@ -21,6 +21,7 @@ public class Robot {
 
     public Robot(HardwareMap hardwareMap, Pose startingPose, int pipeline) {
 
+
         chassisLocal = new ChassisLocal(hardwareMap, startingPose);
         Log.w("Chassis", "Chassis Loaded");
         //

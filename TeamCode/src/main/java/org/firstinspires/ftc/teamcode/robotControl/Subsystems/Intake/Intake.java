@@ -59,6 +59,16 @@ public class Intake implements IntakeConstants{
         intakeL.setPower(sumOfTrigs);
         intakeR.setPower(sumOfTrigs);
     }
+    public void powerON()
+    {
+        intakeL.setPower(1);
+        intakeR.setPower(1);
+    }
+    public void powerOff()
+    {
+        intakeL.setPower(0);
+        intakeR.setPower(0);
+    }
 
     public void up(){
         intakeShifterL.setPosition(0.05);

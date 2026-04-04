@@ -35,6 +35,8 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 @Autonomous(name = "blue 21 ", group = "auto", preselectTeleOp = "BigBoyBlue")
 public class blue21 extends OpMode {
     private static final int PIPELINENUM = 1;
+    Pose target = new Pose(0, 144, Math.toRadians(144));
+    Pose sillyTarget;
     private int rotatorStartPosition=0;
     double txDeg = 0.0; //horizontal deg
     double tyDeg = 0.0; //vertical deg
@@ -148,11 +150,11 @@ public class blue21 extends OpMode {
 
     PathState pathState;
     // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
-    private final Pose startPose = new Pose(26.7, 133.7, Math.toRadians(144));
-    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(180));
+    private final Pose startPose = new Pose(27.7, 133.6, Math.toRadians(234));
+    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(241));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
         private final Pose collect1thing = new Pose(19, 60, Math.toRadians(180));
-    private final Pose goToCollect1ControlPoint = new Pose(53.0489, 60.85, Math.toRadians(180));
+    private final Pose goToCollect1ControlPoint = new Pose(52.26522653061225, 60.091326530612236, Math.toRadians(180));
     private final Pose shootPose2 = new Pose( 60, 75, Math.toRadians(131.5));
 
     // Control points for shoot2 path
@@ -172,6 +174,7 @@ public class blue21 extends OpMode {
 
     //
     private final Pose collect3end = new Pose(18, 85, Math.toRadians(180));
+    private final Pose collect3ControlPoint = new Pose(41.21632653061224, 85.83673469387755);
     private final Pose shootBall6 = new Pose(49, 115, Math.toRadians(147));
 
     private final Pose park = new Pose(41, 84, Math.toRadians(134));
@@ -240,7 +243,7 @@ public class blue21 extends OpMode {
                 .build();
 
         collect3 = follower.pathBuilder()
-                .addPath(new BezierLine(shootBall5, collect3end))
+                .addPath(new BezierCurve(shootBall3, collect3ControlPoint, collect3end))
                 .setTangentHeadingInterpolation()
                 .build();
 
@@ -267,75 +270,92 @@ public class blue21 extends OpMode {
     public void statePathUpdate() {
         switch (pathState) {
             case start:
-
+                robot.gate.block();
+                robot.intake.powerON();
                 follower.setMaxPower(NORMAL_DRIVE_POWER);
                 follower.followPath(shoot1);
                 robot.intake.down();
                 // First shot: actively aim while following shoot1 (shoot while moving).
-                setPathState(blue21.PathState.actuallyshoot1);
+                if (pathTimer.getElapsedTimeSeconds()>0.5)
+                {
+                    robot.gate.open();
+                    setPathState(blue21.PathState.actuallyshoot1);
+                }
+
                 break;
             case actuallyshoot1:
                 // Keep aiming during first-shot motion.
                 robot.intake.shift();
 
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2.2){
-                    if (pathTimer.getElapsedTimeSeconds()>2.7) {
-                        setPathState(blue21.PathState.done);
-                    }
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.5){
+                        setPathState(PathState.collection);
                 }
                 break;
 
 
             case collection:
+
                 if (!follower.isBusy() && !collectionStarted) {
-                    //rotator.setTargetPosition(rotatorStartPosition);
+                    robot.gate.block();
                     follower.followPath(collect1);
                     collectionStarted = true;
                 }
                 if (!follower.isBusy() && collectionStarted) {
                     setPathState((blue21.PathState.shoot));
-
-
                 }
                 break;
             case shoot:
-                // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot2Started) {
+                    robot.intake.down();
                     follower.followPath(shoot2);
-                    shoot2Started = true; // Mark as started to prevent calling again
+                    shoot2Started = true;
                 }
-                if (!follower.isBusy() && shoot2Started) {
-                    if(pathTimer.getElapsedTimeSeconds()>2.95) {
-                        setPathState((blue21.PathState.GateCollection));
+                if (robot.chassisLocal.ShootinAuton() && shoot2Started) {
+                    robot.gate.open();
+                    robot.intake.powerON();
+                    if(pathTimer.getElapsedTimeSeconds()>2.5) {
+                        robot.intake.shift();
+                        setPathState((PathState.GateCollection));
                     }
                 }
                 break;
-
             case GateCollection:
                 if (!follower.isBusy() && !gateCollectionStarted) {
+                    robot.gate.block();
                     follower.followPath(GateCollect1);
                     gateCollectionStarted = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && gateCollectionStarted) {
+
+                Intake.DetectedColor color = robot.intake.getDetectedColor(telemetry);
+
+                boolean full = (color != Intake.DetectedColor.UNKNOWN);
+                boolean ready = full || pathTimer.getElapsedTimeSeconds() > 2.5;
+
+                if (!follower.isBusy() && gateCollectionStarted && full && ready) {
                     setPathState((blue21.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
-                robot.intake.shift();
                 // Continuously adjust based on limelight during shooting
                 if (!follower.isBusy() && !shoot3Started) {
                     follower.followPath(shoot3);
                     //tree.setPower(1);
                     shoot3Started = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && shoot3Started) {
-
-                    if(pathTimer.getElapsedTimeSeconds()>2.75)
+                if (robot.chassisLocal.ShootinAuton() && shoot3Started) {
+                    robot.gate.open();
+                    if(opModeTimer.getElapsedTimeSeconds()<21)
                     {
-                        setPathState((blue21.PathState.GateCollectionAgain));
+                        setPathState((blue21.PathState.GateCollection));
+                    }
+                    if(opModeTimer.getElapsedTimeSeconds()>21 && pathTimer.getElapsedTimeSeconds()>2.25)
+                    {
+                    robot.intake.shift();
+                    setPathState(PathState.collectAgainAgainEnd);
                     }
                 }
                 break;
+//TODO CONTINUE FROM HERE
             case GateCollectionAgain:
                 if (!follower.isBusy() && !gateCollectionAgainStarted) {
                     robot.intake.shift();
@@ -386,17 +406,14 @@ public class blue21 extends OpMode {
                 break;
 
             case collectAgainAgainEnd:
+                robot.gate.block();
                 if (!follower.isBusy() && !collectionStarted) {
                     //rotator.setTargetPosition(rotatorStartPosition);
                     follower.followPath(collect3);
-                    robot.intake.shift();
                     collectionStarted = true; // Mark as started to prevent calling again
                 }
                 if (!follower.isBusy() && collectionStarted) {
-                    if (pathTimer.getElapsedTimeSeconds()>0.25) {
-
-                        setPathState((blue21.PathState.shootAgainAgainAgainAgain));
-                    }
+                    setPathState((blue21.PathState.shootAgainAgainAgainAgain));
 
                 }
                 break;
@@ -406,7 +423,8 @@ public class blue21 extends OpMode {
                     follower.followPath(shoot6);
                     shoot5Started = true; // Mark as started to prevent calling again
                 }
-                if (!follower.isBusy() && shoot5Started) {
+                if (robot.chassisLocal.ShootinAuton() && shoot5Started) {
+                    robot.gate.open();
                     if(pathTimer.getElapsedTimeSeconds()>2.95) {
                         setPathState((blue21.PathState.done));
                     }
@@ -468,6 +486,9 @@ public class blue21 extends OpMode {
                 robot.gate,
                 robot.intake);
         robot.intake.down();
+        robot.gate.block();
+        sillyTarget = robot.chassisLocal.sillyTargetPose(target);
+
         //vision = new Vision(hardwareMap, BlueUniversalConstants.PIPELINENUM);
         telemetry.addLine("Good to go BLUE");
 
@@ -476,18 +497,8 @@ public class blue21 extends OpMode {
     }
 
     public void start() {
-
-
         opModeTimer.resetTimer();
         setPathState(pathState);
-
-
-
-        double P = 400;
-        double I = 0;
-        double D = 0;
-        double F = 13.2965;
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
     }
 
     @Override
@@ -497,7 +508,8 @@ public class blue21 extends OpMode {
 
         // Continuously save pose so it's saved even if autonomous ends early
         PoseStorage.savePose(follower.getPose());
-
+        actions.aimRotatorLocal(sillyTarget, telemetry);
+        actions.adjustShootingParams(sillyTarget);
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
@@ -617,22 +629,6 @@ public class blue21 extends OpMode {
         int targetTicks = (int) (fracOf180 * motor180Range) + offset;
         setRotatorTargetPosition(targetTicks);
     }
-
-//    private boolean readyToLeaveGateCollection() {
-//        boolean hasThreeBalls = colorTesting != null && colorTesting.hasThreeBalls(telemetry);
-//        boolean timedOut = pathTimer.getElapsedTimeSeconds() > BALL_DETECT_TIMEOUT_SEC;
-//        if (intakeSubsystem != null) {
-//            if (hasThreeBalls || timedOut) {
-//                // Leaving gate/intake state: shift up for travel/shoot.
-//                intakeSubsystem.shift();
-//            } else {
-//                // Still collecting: keep shifter down.
-//                intakeSubsystem.down();
-//            }
-//        }
-//        telemetry.addData("Gate Exit", hasThreeBalls ? "3 balls detected" : (timedOut ? "timeout" : "waiting balls"));
-//        return hasThreeBalls || timedOut;
-//    }
 
     private void setRotatorTargetPosition(int ticks) {
         if (turretSubsystem != null) {
