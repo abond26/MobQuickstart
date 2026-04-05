@@ -166,6 +166,10 @@ public class AmazingBotRed extends LinearOpMode implements BlueUniversalConstant
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
             telemetry.addData("Ball Detected", detectedColor);
             telemetry.addData("Launcher velocity", robot.turret.getTargetVelocity());
+            telemetry.addData("LauncherL velocity", robot.turret.getVelocityL());
+            telemetry.addData("LauncherR velocity", robot.turret.getVelocityR());
+
+
             telemetry.addData("Distance", robot.chassisLocal.getDistance(target));
             telemetry.update();
         }

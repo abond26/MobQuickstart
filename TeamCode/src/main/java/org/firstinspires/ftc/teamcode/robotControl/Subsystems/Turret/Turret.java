@@ -81,6 +81,14 @@ public class Turret implements TurretConstants {
         double velos[] = { jollyCrusader.getVelocity(), gloomyCrusader.getVelocity() };
         return velos;
     }
+    public double getVelocityL() {
+        double velo = jollyCrusader.getVelocity() ;
+        return velo;
+    }
+    public double getVelocityR() {
+        double velo = gloomyCrusader.getVelocity() ;
+        return velo;
+    }
 
     public double getTargetVelocity() {
         return targetVelocity;

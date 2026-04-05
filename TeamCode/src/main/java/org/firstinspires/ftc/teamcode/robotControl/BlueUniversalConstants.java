@@ -18,7 +18,7 @@ public interface BlueUniversalConstants {
     Double dpadUpHeading = 0.0;
     //
 
-    double CLOSE_HOOD_POSITION = 0.5; // Hood position for close shots
+    double CLOSE_HOOD_POSITION = 1; // Hood position for close shots
     double MID_HOOD_POSITION = 0.7;
     double FAR_HOOD_POSITION = 0;
     double CLOSE_VELO = 1100; // Hood position for close shots

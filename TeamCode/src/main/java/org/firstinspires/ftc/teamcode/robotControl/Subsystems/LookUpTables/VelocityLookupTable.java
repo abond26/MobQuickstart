@@ -29,7 +29,7 @@ public class VelocityLookupTable {
 //        210.5,  205.2,  221.5,
 //    };
     private static final double[] DISTANCES = {
-            51.6,69.6,84.5,89.7,98.9,60.1,75.5
+            51.6,60.1,69.6,75.5,84.5,89.7,98.9,
 
     };
     
@@ -37,7 +37,7 @@ public class VelocityLookupTable {
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
     private static final double[] VELOCITIES = {
-            1398.5,1478.5,1638,1678.7,1738,1418,1578
+            1450,1470,1530,1620,1690,1730,1800,
 
 
     };
