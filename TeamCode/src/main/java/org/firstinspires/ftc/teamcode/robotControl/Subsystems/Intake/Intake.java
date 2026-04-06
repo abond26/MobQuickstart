@@ -20,8 +20,10 @@ public class Intake implements IntakeConstants{
 
     // Color detection state
     private ElapsedTime colorTimer = new ElapsedTime();
+    private ElapsedTime autonColorTimer = new ElapsedTime();
     private DetectedColor currentlyDetectedColor = DetectedColor.UNKNOWN;
     public double requiredDetectionTimeSeconds = 0.3;
+    public double autonTime = 0.15;
 
     public enum DetectedColor {
         PURPLE,
@@ -61,8 +63,8 @@ public class Intake implements IntakeConstants{
     }
     public void powerON()
     {
-        intakeL.setPower(1);
-        intakeR.setPower(1);
+        intakeL.setPower(-1);
+        intakeR.setPower(-1);
     }
     public void powerOff()
     {
@@ -71,8 +73,8 @@ public class Intake implements IntakeConstants{
     }
 
     public void up(){
-        intakeShifterL.setPosition(0.05);
-        intakeShifterR.setPosition(0.05);
+        intakeShifterL.setPosition(0.1);
+        intakeShifterR.setPosition(0.1);
     }
     public void down(){
         intakeShifterL.setPosition(0.5039);
@@ -117,6 +119,49 @@ public class Intake implements IntakeConstants{
         telemetry.addData("Detection Time (s)", colorTimer.seconds());
 
         if (currentlyDetectedColor != DetectedColor.UNKNOWN && colorTimer.seconds() >= requiredDetectionTimeSeconds) {
+            if (currentlyDetectedColor == DetectedColor.PURPLE || currentlyDetectedColor == DetectedColor.GREEN) {
+                down();
+            }
+            return currentlyDetectedColor;
+        } else {
+            shift();
+        }
+
+        return DetectedColor.UNKNOWN;
+    }
+    public DetectedColor AutonColor(Telemetry telemetry) {
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
+        float normRed = colors.red / colors.alpha;
+        float normGreen = colors.green / colors.alpha;
+        float normBlue = colors.blue / colors.alpha;
+
+        telemetry.addData("Color R", normRed);
+        telemetry.addData("Color G", normGreen);
+        telemetry.addData("Color B", normBlue);
+
+        DetectedColor detectedThisFrame = DetectedColor.UNKNOWN;
+
+
+
+        boolean objectPresent = normRed < 0.015 && normGreen < 0.028;
+
+        if (objectPresent) {
+            if (normGreen > 0.014 && normGreen < 0.025) {
+                detectedThisFrame = DetectedColor.GREEN;
+            } else {
+                detectedThisFrame = DetectedColor.PURPLE;
+            }
+        }
+
+        if (detectedThisFrame != currentlyDetectedColor) {
+            currentlyDetectedColor = detectedThisFrame;
+            autonColorTimer.reset();
+        }
+
+        telemetry.addData("Detected Color", currentlyDetectedColor);
+        telemetry.addData("Detection Time (s)", autonColorTimer.seconds());
+
+        if (currentlyDetectedColor != DetectedColor.UNKNOWN && autonColorTimer.seconds() >= autonTime) {
             if (currentlyDetectedColor == DetectedColor.PURPLE || currentlyDetectedColor == DetectedColor.GREEN) {
                 down();
             }

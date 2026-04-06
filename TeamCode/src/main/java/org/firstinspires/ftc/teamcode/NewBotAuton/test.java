@@ -23,7 +23,9 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
+import com.pedropathing.math.Vector;
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.ShotTimeLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
@@ -31,8 +33,8 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
 import org.firstinspires.ftc.teamcode.tests.ColorTesting;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "blue 21 ", group = "auto", preselectTeleOp = "BigBoyBlue")
-public class blue21 extends OpMode {
+@Autonomous(name = "test ", group = "auto", preselectTeleOp = "BigBoyBlue")
+public class test extends OpMode {
     private static final int PIPELINENUM = 1;
     Pose target = new Pose(0, 144, Math.toRadians(144));
     Pose sillyTarget;
@@ -154,16 +156,16 @@ public class blue21 extends OpMode {
     private final Pose startPose = new Pose(26.5, 134, Math.toRadians(233.5));
     private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(241));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
-        private final Pose collect1thing = new Pose(20, 60, Math.toRadians(180));
-    private final Pose goToCollect1ControlPoint = new Pose(52.26522653061225, 60.091326530612236, Math.toRadians(180));
-    private final Pose shootPose2 = new Pose( 63, 85, Math.toRadians(131.5));
+    private final Pose collect1thing = new Pose(20, 60, Math.toRadians(180));
+    private final Pose goToCollect1ControlPoint = new Pose(52.26522653061225, 60.091326530612236);
+    private final Pose shootPose2 = new Pose( 66, 68, Math.toRadians(170));
 
     // Control points for shoot2 path
     //private final Pose shoot2ControlPoint1 = new Pose(51, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 20, 67, Math.toRadians(155));
+    private final Pose gateCollect1 = new Pose( 12, 61, Math.toRadians(155));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
-    private final Pose shootPose2ToGateControlPoint = new Pose(37.27755102040817, 51.926530612244896);
-    private final Pose shootBall3 = new Pose(63, 85, Math.toRadians(131.5));
+    //private final Pose shootPose2ToGateControlPoint = new Pose(37.27755102040817, 51.926530612244896);
+    private final Pose shootBall3 = new Pose(66, 68, Math.toRadians(170));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose gateCollect2 = new Pose( 15.5, 62, Math.toRadians(155));
     private final Pose shootBall4 = new Pose(60, 75, Math.toRadians(130));
@@ -175,7 +177,7 @@ public class blue21 extends OpMode {
 
     //
     private final Pose collect3end = new Pose(24, 85, Math.toRadians(180));
-    private final Pose collect3ControlPoint = new Pose(41.21632653061224, 85.83673469387755);
+    private final Pose collect3ControlPoint = new Pose(41.020408163265294, 84.85714285714286);
     private final Pose shootBall6 = new Pose(55, 120, Math.toRadians(147));
 
     private final Pose park = new Pose(41, 84, Math.toRadians(134));
@@ -206,47 +208,42 @@ public class blue21 extends OpMode {
                 .setReversed()
                 .build();
         GateCollect1 = follower.pathBuilder()
-                .addPath(new BezierCurve(shootPose2, shootPose2ToGateControlPoint, gateCollect1))
-                .setTangentHeadingInterpolation()
+                .addPath(new BezierLine(shootPose2, gateCollect1))
+                .setLinearHeadingInterpolation(shootPose2.getHeading(), gateCollect1.getHeading())
                 .build();
 
-//        GateCollect1 = follower.pathBuilder()
-//                .addPath(new BezierLine(gateCollect1, gateCollect1))
-//                .setLinearHeadingInterpolation(gateCollect1.getHeading(), gateCollect1.getHeading())
+
+//        shoot3ToGate = follower.pathBuilder()
+//                .addPath(new BezierCurve(shootBall3, shootPose2ToGateControlPoint, gateCollect1))
+//                .setTangentHeadingInterpolation()
+//                .setReversed()
 //                .build();
-
-        shoot3ToGate = follower.pathBuilder()
-                .addPath(new BezierCurve(shootBall3, shootPose2ToGateControlPoint, gateCollect1))
-                .setTangentHeadingInterpolation()
-                .setReversed()
-                .build();
         shoot3 = follower.pathBuilder()
-                .addPath(new BezierCurve(gateCollect1, shootPose2ToGateControlPoint, shootBall3))
-                .setTangentHeadingInterpolation()
-                .setReversed()
-                .build();
-        GateCollect2 = follower.pathBuilder()
-                .addPath(new BezierCurve(shootBall3, shootPose2ToGateControlPoint, gateCollect2))
-                .setTangentHeadingInterpolation()
+                .addPath(new BezierLine(gateCollect1, shootBall3))
+                .setLinearHeadingInterpolation(gateCollect1.getHeading(), shootBall3.getHeading())
                 .build();
 //        GateCollect2 = follower.pathBuilder()
-//                .addPath(new BezierLine(gateCollect2, gateCollect2))
-//                .setLinearHeadingInterpolation(gateCollect2.getHeading(), gateCollect2.getHeading())
+//                .addPath(new BezierCurve(shootBall3, shootPose2ToGateControlPoint, gateCollect2))
+//                .setTangentHeadingInterpolation()
 //                .build();
-        shoot4 = follower.pathBuilder()
-                .addPath(new BezierCurve(gateCollect2, shootPose2ToGateControlPoint, shootBall4))
-                .setTangentHeadingInterpolation()
-                .setReversed()
-                .build();
-        GateCollect3 = follower.pathBuilder()
-                .addPath(new BezierCurve(shootBall4, shootPose2ToGateControlPoint, gateCollect3))
-                .setTangentHeadingInterpolation()
-                .build();
-        shoot5 = follower.pathBuilder()
-                .addPath(new BezierCurve(gateCollect3, shootPose2ToGateControlPoint, shootBall5))
-                .setTangentHeadingInterpolation()
-                .setReversed()
-                .build();
+////        GateCollect2 = follower.pathBuilder()
+////                .addPath(new BezierLine(gateCollect2, gateCollect2))
+////                .setLinearHeadingInterpolation(gateCollect2.getHeading(), gateCollect2.getHeading())
+////                .build();
+//        shoot4 = follower.pathBuilder()
+//                .addPath(new BezierCurve(gateCollect2, shootPose2ToGateControlPoint, shootBall4))
+//                .setTangentHeadingInterpolation()
+//                .setReversed()
+//                .build();
+//        GateCollect3 = follower.pathBuilder()
+//                .addPath(new BezierCurve(shootBall4, shootPose2ToGateControlPoint, gateCollect3))
+//                .setTangentHeadingInterpolation()
+//                .build();
+//        shoot5 = follower.pathBuilder()
+//                .addPath(new BezierCurve(gateCollect3, shootPose2ToGateControlPoint, shootBall5))
+//                .setTangentHeadingInterpolation()
+//                .setReversed()
+//                .build();
 
         collect3 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootBall3, collect3ControlPoint, collect3end))
@@ -286,7 +283,7 @@ public class blue21 extends OpMode {
                 }
                 if (pathTimer.getElapsedTimeSeconds() > 0.5) {
                     robot.gate.open();
-                    setPathState(blue21.PathState.actuallyshoot1);
+                    setPathState(test.PathState.actuallyshoot1);
                 }
                 break;
             case actuallyshoot1:
@@ -294,7 +291,7 @@ public class blue21 extends OpMode {
                 robot.intake.shift();
 
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.5){
-                        setPathState(PathState.collection);
+                    setPathState(PathState.collection);
                 }
                 break;
 
@@ -307,7 +304,7 @@ public class blue21 extends OpMode {
                     collectionStarted = true;
                 }
                 if ((arrived() || isNear(collect1thing, 3)) && collectionStarted) {
-                    setPathState((blue21.PathState.shoot));
+                    setPathState((test.PathState.shoot));
                 }
                 break;
             case shoot:
@@ -338,7 +335,7 @@ public class blue21 extends OpMode {
                 boolean ready = full || pathTimer.getElapsedTimeSeconds() > 2.5;
 
                 if ((arrived() || isNear(gateCollect1, 3)) && gateCollectionStarted && ready) {
-                    setPathState((blue21.PathState.shootAgain));
+                    setPathState((test.PathState.shootAgain));
                 }
                 break;
             case shootAgain:
@@ -351,13 +348,13 @@ public class blue21 extends OpMode {
                 if (shootinAuton() && shoot3Started) {
                     robot.gate.open();
                     boolean close = arrived() || isNear(shootBall3, 3);
-                    if(opModeTimer.getElapsedTimeSeconds()<24.5)
+                    if(opModeTimer.getElapsedTimeSeconds()<23)
                     {
                         if(close) {
-                            setPathState((blue21.PathState.GateCollection));
+                            setPathState((test.PathState.GateCollection));
                         }
                     }
-                    if(opModeTimer.getElapsedTimeSeconds()>24.5 && pathTimer.getElapsedTimeSeconds()>2.25)
+                    if(opModeTimer.getElapsedTimeSeconds()>23 && pathTimer.getElapsedTimeSeconds()>2.25)
                     {
                         robot.intake.shift();
                         if(close) {
@@ -374,7 +371,7 @@ public class blue21 extends OpMode {
                     gateCollectionAgainStarted = true; // Mark as started to prevent calling again
                 }
                 if ((arrived() || isNear(gateCollect2, 3)) && gateCollectionAgainStarted) {
-                    setPathState((blue21.PathState.shootAgainAgain));
+                    setPathState((test.PathState.shootAgainAgain));
                 }
                 break;
             case shootAgainAgain:
@@ -384,7 +381,7 @@ public class blue21 extends OpMode {
                     shoot4Started = true;
                 }
                 if (shoot4Started && pathTimer.getElapsedTimeSeconds() > 2.75) {
-                    setPathState((blue21.PathState.GateCollectionAgainAgain));
+                    setPathState((test.PathState.GateCollectionAgainAgain));
                 }
                 break;
             case GateCollectionAgainAgain:
@@ -394,7 +391,7 @@ public class blue21 extends OpMode {
                     gateCollectionAgainStarted = true;
                 }
                 if ((arrived() || isNear(gateCollect3, 3)) && gateCollectionAgainStarted) {
-                    setPathState((blue21.PathState.shootAgainAgainAgain));
+                    setPathState((test.PathState.shootAgainAgainAgain));
                 }
                 break;
             case shootAgainAgainAgain:
@@ -404,7 +401,7 @@ public class blue21 extends OpMode {
                     shoot4Started = true;
                 }
                 if (shoot4Started && pathTimer.getElapsedTimeSeconds() > 2.75) {
-                    setPathState((blue21.PathState.collectAgainAgainEnd));
+                    setPathState((test.PathState.collectAgainAgainEnd));
                 }
                 break;
 
@@ -415,7 +412,7 @@ public class blue21 extends OpMode {
                     collectionStarted = true;
                 }
                 if ((arrived() || isNear(collect3end, 3)) && collectionStarted) {
-                    setPathState((blue21.PathState.shootAgainAgainAgainAgain));
+                    setPathState((test.PathState.shootAgainAgainAgainAgain));
                 }
                 break;
             case shootAgainAgainAgainAgain:
@@ -427,7 +424,7 @@ public class blue21 extends OpMode {
                 if (shootinAuton() && shoot5Started) {
                     robot.gate.open();
                     if(pathTimer.getElapsedTimeSeconds()>2.95) {
-                        setPathState((blue21.PathState.done));
+                        setPathState((test.PathState.done));
                     }
                 }
                 break;
@@ -512,7 +509,25 @@ public class blue21 extends OpMode {
         double dx = target.getX() - currentPose.getX();
         double dy = target.getY() - currentPose.getY();
         double dist = Math.sqrt(dx * dx + dy * dy);
-        double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
+
+        // Shoot-while-moving: lead the target based on robot velocity and shot flight time
+        Vector velocity = follower.getVelocity();
+        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
+        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
+        double shotTime = ShotTimeLookupTable.getTime(dist);
+        Pose aimTarget;
+        if (dist < 120) {
+            aimTarget = new Pose(
+                    target.getX() - vx * shotTime,
+                    target.getY() - vy * shotTime
+            );
+        } else {
+            aimTarget = target;
+        }
+
+        double aimDx = aimTarget.getX() - currentPose.getX();
+        double aimDy = aimTarget.getY() - currentPose.getY();
+        double angleToGoal = Math.toDegrees(Math.atan2(aimDy, aimDx));
         double turretAngle = angleToGoal - Math.toDegrees(currentPose.getHeading());
         while (turretAngle > 180) turretAngle -= 360;
         while (turretAngle < -180) turretAngle += 360;
@@ -530,6 +545,7 @@ public class blue21 extends OpMode {
         telemetry.addData("Heading", Math.toDegrees(currentPose.getHeading()));
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("Dist to target", dist);
+        telemetry.addData("Turret Angle", -turretAngle);
     }
 
     private boolean shootinAuton() {

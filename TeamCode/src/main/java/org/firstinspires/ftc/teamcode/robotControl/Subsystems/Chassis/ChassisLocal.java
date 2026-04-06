@@ -46,6 +46,10 @@ public class ChassisLocal implements DriveConstants{
         follower.startTeleopDrive();
     }
 
+    public Follower getFollower() {
+        return follower;
+    }
+
     public void update() {
         follower.update();
     }
