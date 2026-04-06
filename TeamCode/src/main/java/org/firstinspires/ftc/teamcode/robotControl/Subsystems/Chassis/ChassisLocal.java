@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import androidx.annotation.NonNull;
+import com.pedropathing.paths.PathChain;
+
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -12,6 +14,7 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.ShotTimeLookupTable;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
+//import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class ChassisLocal implements DriveConstants{
 
     private Follower follower;
@@ -63,6 +66,22 @@ public class ChassisLocal implements DriveConstants{
     }
     public Vector getVelocity() {return follower.getVelocity();}
 
+    public void followPath(PathChain path, boolean holdEnd) {
+        follower.followPath(path, holdEnd);
+    }
+
+    public void setMaxPower(double power) {
+        follower.setMaxPower(power);
+    }
+
+    public boolean isBusy() {
+        return follower.isBusy();
+    }
+
+    public Follower getFollower() {
+        return follower;
+    }
+
     public void drive(double y, double x, double r) {
 
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(r), 1);
@@ -73,22 +92,22 @@ public class ChassisLocal implements DriveConstants{
         rightRear.setPower((y + x - r) / denominator);
     }
 
-    public Pose sillyTargetPose(Pose target){
-        double dist = getDistance(target);
-
-        Vector velocity = getVelocity();
-        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
-        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
-        Pose sillyTarget = new Pose(
-                target.getX() - vx * ShotTimeLookupTable.getTime(dist),
-                target.getY() - vy * ShotTimeLookupTable.getTime(dist)
-        );
-        if (dist < 120){
-            return sillyTarget;
-        }else{
-            return target;
-        }
-    }
+//    public Pose sillyTargetPose(Pose target){
+//        double dist = getDistance(target);
+//
+//        Vector velocity = getVelocity();
+//        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
+//        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
+//        Pose sillyTarget = new Pose(
+//                target.getX() - vx * ShotTimeLookupTable.getTime(dist),
+//                target.getY() - vy * ShotTimeLookupTable.getTime(dist)
+//        );
+//        if (dist < 120){
+//            return sillyTarget;
+//        }else{
+//            return target;
+//        }
+//    }
 
 
     public double getDistance(@NonNull Pose target){
@@ -134,7 +153,7 @@ public class ChassisLocal implements DriveConstants{
         while (turretAngle < -180) turretAngle += 360;
         return -turretAngle;
     }
-    //
+//
     /*if blue:
          y = -x + 144
          if red:
@@ -202,7 +221,7 @@ public class ChassisLocal implements DriveConstants{
             }
         }
         return inPosition;
-
+        
 
 
         //Left Side
@@ -213,27 +232,6 @@ public class ChassisLocal implements DriveConstants{
         //y = x
         //y = -x + 144
 
-    }
-    public boolean ShootinAuton() {
-        boolean AutonShoot = false;
-        Pose currentPosition = getPose();
-        double y = currentPosition.getY();
-        double x = currentPosition.getX();
-        double leftUpBound = -x + 144 ;
-        double leftBottomBound = x - 48 ;
-        double rightUpBound = x;
-        double rightBottomBound = -x + 144 - 48;
-
-        if (currentPosition.getX() < 72) {
-            if (y > leftUpBound || y < leftBottomBound) {
-                AutonShoot = true;
-            }
-        } else {
-            if (y > rightUpBound || y < rightBottomBound) {
-                AutonShoot = true;
-            }
-        }
-        return AutonShoot;
     }
 
     //----------------------------------------------------------------

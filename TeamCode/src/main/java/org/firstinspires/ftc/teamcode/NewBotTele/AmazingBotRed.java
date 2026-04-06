@@ -146,9 +146,7 @@ public class AmazingBotRed extends LinearOpMode implements BlueUniversalConstant
                 actions.aimRotatorLocal(sillyTarget, telemetry);
                 actions.adjustShootingParams(sillyTarget);
             }
-            // TELEMETRY
 
-            // Position data
             telemetry.addLine("");
             telemetry.addLine("ROBOT POSITION");
             telemetry.addData("X", "%.1f", robot.chassisLocal.getPose().getX());
