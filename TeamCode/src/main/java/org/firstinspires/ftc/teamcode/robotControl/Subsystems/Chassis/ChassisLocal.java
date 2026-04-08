@@ -20,7 +20,6 @@ public class ChassisLocal implements DriveConstants{
     private Follower follower;
 
     private DcMotorEx leftFront, leftRear, rightFront, rightRear;
-    private Servo rotator;
 
 
     //we don't put this in the DriveConstants class because it changes (i.e. it isn't a static final)
@@ -78,9 +77,6 @@ public class ChassisLocal implements DriveConstants{
         return follower.isBusy();
     }
 
-    public Follower getFollower() {
-        return follower;
-    }
 
     public void drive(double y, double x, double r) {
 
@@ -92,22 +88,22 @@ public class ChassisLocal implements DriveConstants{
         rightRear.setPower((y + x - r) / denominator);
     }
 
-//    public Pose sillyTargetPose(Pose target){
-//        double dist = getDistance(target);
-//
-//        Vector velocity = getVelocity();
-//        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
-//        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
-//        Pose sillyTarget = new Pose(
-//                target.getX() - vx * ShotTimeLookupTable.getTime(dist),
-//                target.getY() - vy * ShotTimeLookupTable.getTime(dist)
-//        );
-//        if (dist < 120){
-//            return sillyTarget;
-//        }else{
-//            return target;
-//        }
-//    }
+    public Pose sillyTargetPose(Pose target){
+        double dist = getDistance(target);
+
+        Vector velocity = getVelocity();
+        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
+        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
+        Pose sillyTarget = new Pose(
+                target.getX() - vx * ShotTimeLookupTable.getTime(dist),
+                target.getY() - vy * ShotTimeLookupTable.getTime(dist)
+        );
+        if (dist < 120){
+            return sillyTarget;
+        }else{
+            return target;
+        }
+    }
 
 
     public double getDistance(@NonNull Pose target){

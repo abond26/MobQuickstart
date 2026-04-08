@@ -36,7 +36,7 @@ public class ShotTimeLookupTable {
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
     private static final double[] ShotTime = {
-            0.708368, 0.771998, 0.82, 0.835628, 0.84, 0.91, 0.937436, 0.962888, 0.98153, 1.01055, 1.02, 1.03, 1.05629
+            0.758368, 0.821998, 0.87, 0.885628, 0.89, 0.96, 0.987436, 1.012888, 1.03153, 1.06055, 1.07, 1.08, 1.10629
     };
 //
     // Minimum and maximum distances in the table

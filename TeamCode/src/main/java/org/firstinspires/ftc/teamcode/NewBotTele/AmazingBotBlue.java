@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 
 
-@TeleOp(name = "AmazingBotRed")
-public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants {
+@TeleOp(name = "AmazingBotBlue")
+public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstants {
     long loopTime;
     Pose sillyTarget;
     Robot robot;
