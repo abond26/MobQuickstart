@@ -35,8 +35,8 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 import java.security.cert.PKIXRevocationChecker;
 
-@Autonomous(name = "test red", group = "auto", preselectTeleOp = "AmazingBotRed")
-public class test2 extends OpMode {
+@Autonomous(name = "thingy", group = "auto", preselectTeleOp = "AmazingBotRed")
+public class thingy extends OpMode {
     private static final int PIPELINENUM = 0;
     Pose target = new Pose(144, 144, Math.toRadians(36));
     Pose sillyTarget;
@@ -137,12 +137,14 @@ public class test2 extends OpMode {
 
     PathState pathState;
 
-    private final Pose startPose = new Pose(112.21723544631305, 136.97551020408164, Math.toRadians(-90));
-    private final Pose shootPose1 = new Pose(82, 77, Math.toRadians(40));
+    private final Pose startPose = new Pose(87.3, 7.5, Math.toRadians(90));
+
+    private final Pose shootPose1 = new Pose(132.5, 60.25, Math.toRadians(38));
+    //private final Pose shootPose1 = new Pose(133, 61, Math.toRadians(40)); TODO works kinda, watch IMG_0754
     private final Pose collect1thing = new Pose(126, 58, Math.toRadians(0));
     private final Pose goToCollect1ControlPoint = new Pose(91.735, 60.091);
     private final Pose shootPose2 = new Pose(82, 77, Math.toRadians(25));
-    private final Pose gateCollect1 = new Pose(132.5, 60.25, Math.toRadians(38));
+    private final Pose gateCollect1 = new Pose(129, 66, Math.toRadians(45));
     private final Pose option1 = new Pose(131, 61, Math.toRadians(45));
     private final Pose option2 = new Pose(137, 55, Math.toRadians(90));
 
@@ -152,7 +154,7 @@ public class test2 extends OpMode {
     private final Pose shootBall4 = new Pose(84, 75, Math.toRadians(230));
     private final Pose gateCollect3 = new Pose(128.5, 62, Math.toRadians(205));
     private final Pose shootBall5 = new Pose(95, 87, Math.toRadians(230));
-    private final Pose collect3end = new Pose(120, 85, Math.toRadians(0));
+    private final Pose collect3end = new Pose(116, 85, Math.toRadians(0));
     private final Pose collect3ControlPoint = new Pose(102.98, 84.857);
     private final Pose shootBall6 = new Pose(89, 120, Math.toRadians(33));
     private final Pose park = new Pose(103, 84, Math.toRadians(226));
@@ -175,8 +177,8 @@ public class test2 extends OpMode {
                 .setLinearHeadingInterpolation(collect1thing.getHeading(), shootPose2.getHeading())
                 .build();
         GateCollect1 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose2, gateCollect1))
-                .setLinearHeadingInterpolation(shootPose2.getHeading(), gateCollect1.getHeading())
+                .addPath(new BezierLine(shootPose2, option1))
+                .setLinearHeadingInterpolation(shootPose2.getHeading(), option1.getHeading())
                 .build();
         Turn = follower.pathBuilder()
                 .addPath(new BezierLine(gateCollect1, option1))
@@ -185,8 +187,8 @@ public class test2 extends OpMode {
 
 
         shoot3 = follower.pathBuilder()
-                .addPath(new BezierLine(gateCollect1, shootBall3))
-                .setLinearHeadingInterpolation(gateCollect1.getHeading(), shootBall3.getHeading())
+                .addPath(new BezierLine(option1, shootBall3))
+                .setLinearHeadingInterpolation(option1.getHeading(), shootBall3.getHeading())
                 .build();
 
         collect3 = follower.pathBuilder()
@@ -204,134 +206,13 @@ public class test2 extends OpMode {
         switch (pathState) {
             case start:
                 if (!shoot1Started) {
+                    follower.followPath(shoot1);
+                    robot.intake.shift();
                     robot.gate.block();
                     robot.intake.powerON();
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
-                    follower.followPath(shoot1);
                     shoot1Started = true;
                 }
-                if (pathTimer.getElapsedTimeSeconds() > 0.5) {
-                    robot.gate.open();
-                    setPathState(test2.PathState.actuallyshoot1);
-                }
-                break;
-            case actuallyshoot1:
-                robot.intake.shift();
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 0.75) {
-                    setPathState(PathState.collection);
-                }
-                break;
-
-            case collection:
-                if (!collectionStarted) {
-                    robot.gate.block();
-                    follower.followPath(collect1);
-                    collectionStarted = true;
-                }
-                if ((arrived() || isNear(collect1thing, 3)) && collectionStarted) {
-                    setPathState((test2.PathState.shoot));
-                }
-                break;
-            case shoot:
-                if (!shoot2Started) {
-                    follower.followPath(shoot2);
-                    shoot2Started = true;
-                }
-                if (shoot2Started && (arrived() || isNear(shootPose2, 5))) {
-                    robot.intake.powerON();
-                    if (!shotFeeding) {
-                        robot.gate.open();
-                        shootTimer.resetTimer();
-                        shotFeeding = true;
-                    }
-                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 1.5) {
-                        setPathState((PathState.GateCollection));
-                    }
-                }
-                break;
-            case GateCollection:
-                if (!gateCollectionStarted) {
-                    robot.intake.down();
-                    robot.gate.block();
-                    follower.followPath(GateCollect1);
-                    gateCollectionStarted = true;
-                    openTimer.resetTimer();
-                }
-                Intake.DetectedColor color = robot.intake.AutonColor(telemetry);
-                boolean full = (color != Intake.DetectedColor.UNKNOWN);
-                boolean ready = full || gateTimer.getElapsedTimeSeconds() >5;
-
-                if ((arrived() || isNear(gateCollect1, 3))&& gateCollectionStarted && ready) {
-                    robot.intake.down();
-                    setPathState((test2.PathState.shootAgain));
-                }
-                break;
-//            case Turny:
-//                if (!turn) {
-//                    robot.intake.shift();
-//                    robot.gate.block();
-//                    follower.followPath(Turn);
-//                    turn = true;
-//                    gateTimer.resetTimer();
-//                }
-//                Intake.DetectedColor color = robot.intake.AutonColor(telemetry);
-//                boolean full = (color != Intake.DetectedColor.UNKNOWN);
-//                boolean ready = full || gateTimer.getElapsedTimeSeconds() >5;
-//
-//                if ((arrived() || isNear(option1, 3)) && turn && ready) {
-//                    robot.intake.down();
-//                    setPathState((test2.PathState.shootAgain));
-//                }
-//                break;
-            case shootAgain:
-                if (!shoot3Started) {
-                    follower.followPath(shoot3);
-                    shoot3Started = true;
-                }
-                if (shoot3Started && (arrived() || isNear(shootBall3, 5))) {
-                    robot.intake.powerON();
-                    if (!shotFeeding) {
-                        robot.gate.open();
-                        shootTimer.resetTimer();
-                        shotFeeding = true;
-                    }
-                    boolean readyToLeave = shotFeeding && shootTimer.getElapsedTimeSeconds() > 1.5;
-                    if (opModeTimer.getElapsedTimeSeconds() < 24 && readyToLeave) {
-                        setPathState((test2.PathState.GateCollection));
-                    }
-                    if (opModeTimer.getElapsedTimeSeconds() > 24 && pathTimer.getElapsedTimeSeconds() > 2.25) {
-                        setPathState(PathState.collectAgainAgainEnd);
-                    }
-                }
-                break;
-            case collectAgainAgainEnd:
-                robot.gate.block();
-                if (!collectionStarted) {
-                    follower.followPath(collect3);
-                    collectionStarted = true;
-                }
-                if ((arrived() || isNear(collect3end, 3)) && collectionStarted) {
-                    setPathState((test2.PathState.shootAgainAgainAgainAgain));
-                }
-                break;
-            case shootAgainAgainAgainAgain:
-                if (!shoot5Started) {
-                    follower.followPath(shoot6);
-                    shoot5Started = true;
-                }
-                if (shoot5Started && (arrived() || isNear(shootBall6, 5))) {
-                    robot.intake.powerON();
-                    if (!shotFeeding) {
-                        robot.gate.open();
-                        shootTimer.resetTimer();
-                        shotFeeding = true;
-                    }
-                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5) {
-                        setPathState((test2.PathState.done));
-                    }
-                }
-                break;
-            case done:
                 break;
         }
     }
