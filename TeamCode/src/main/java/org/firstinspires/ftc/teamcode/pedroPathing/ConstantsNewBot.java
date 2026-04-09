@@ -26,7 +26,7 @@ public class ConstantsNewBot {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .centripetalScaling(0)
             .headingPIDFCoefficients(new PIDFCoefficients(0.846, 0.01, 0.095, 0.04))
-            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.25, 0.093269, 0.001974))
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.17, 0.10609802970817711, 0.002207382519525858))
 //            .translationalPIDFCoefficients(new PIDFCoefficients(0.22, 0, 0.015, 0.0085))
 //            .drivePIDFCoefficients((new FilteredPIDFCoefficients(0.0075, 0.001, 0.00003, 0.03, 0.0095)))
             .forwardZeroPowerAcceleration(-73.2273364)

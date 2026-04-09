@@ -160,7 +160,7 @@ public class blue21 extends OpMode {
 
     // Control points for shoot2 path
     //private final Pose shoot2ControlPoint1 = new Pose(51, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 20, 67, Math.toRadians(155));
+    private final Pose gateCollect1 = new Pose( 20, 69, Math.toRadians(160));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose shootPose2ToGateControlPoint = new Pose(37.27755102040817, 51.926530612244896);
     private final Pose shootBall3 = new Pose(63, 85, Math.toRadians(131.5));

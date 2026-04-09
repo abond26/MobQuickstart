@@ -153,19 +153,19 @@ public class test extends OpMode {
 
     PathState pathState;
     // Mirrored coordinates: blueX = 144 - redX, blueHeading = Math.PI - redHeading
-    private final Pose startPose = new Pose(26.5, 134, Math.toRadians(233.5));
-    private final Pose shootPose1 = new Pose(46, 97.5, Math.toRadians(241));
+    private final Pose startPose = new Pose(26.5, 134, Math.toRadians(234));
+    private final Pose shootPose1 = new Pose(66, 77, Math.toRadians(220));
     //private final Pose collect1thingstart = new Pose(56, 59, Math.toRadians(180));
-    private final Pose collect1thing = new Pose(20, 60, Math.toRadians(180));
+    private final Pose collect1thing = new Pose(18, 60, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(52.26522653061225, 60.091326530612236);
-    private final Pose shootPose2 = new Pose( 66, 68, Math.toRadians(170));
+    private final Pose shootPose2 = new Pose( 66, 77, Math.toRadians(155));
 
     // Control points for shoot2 path
     //private final Pose shoot2ControlPoint1 = new Pose(51, 76, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose( 12, 61, Math.toRadians(155));
+    private final Pose gateCollect1 = new Pose( 18, 63, Math.toRadians(143.5));
     //private final Pose inBetween1 = new Pose(44, 62, Math.toRadians(157.5));
     //private final Pose shootPose2ToGateControlPoint = new Pose(37.27755102040817, 51.926530612244896);
-    private final Pose shootBall3 = new Pose(66, 68, Math.toRadians(170));
+    private final Pose shootBall3 = new Pose(68, 77, Math.toRadians(155));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(157.5));
     private final Pose gateCollect2 = new Pose( 15.5, 62, Math.toRadians(155));
     private final Pose shootBall4 = new Pose(60, 75, Math.toRadians(130));
@@ -176,7 +176,7 @@ public class test extends OpMode {
     //private final Pose shoot4ToCollect3ControlPoint = new Pose(41.254125340599455039340599455039, 82.36784741144412, Math.toRadians(180));
 
     //
-    private final Pose collect3end = new Pose(24, 85, Math.toRadians(180));
+    private final Pose collect3end = new Pose(28, 85, Math.toRadians(180));
     private final Pose collect3ControlPoint = new Pose(41.020408163265294, 84.85714285714286);
     private final Pose shootBall6 = new Pose(55, 120, Math.toRadians(147));
 
@@ -194,7 +194,7 @@ public class test extends OpMode {
 
         collect1 = follower.pathBuilder()
                 .addPath(new BezierCurve(shootPose1, goToCollect1ControlPoint, collect1thing))
-                .setTangentHeadingInterpolation()
+                .setLinearHeadingInterpolation(shootPose1.getHeading(), collect1thing.getHeading())
                 .build();
 
 //        collect1 = follower.pathBuilder()
@@ -246,8 +246,8 @@ public class test extends OpMode {
 //                .build();
 
         collect3 = follower.pathBuilder()
-                .addPath(new BezierCurve(shootBall3, collect3ControlPoint, collect3end))
-                .setTangentHeadingInterpolation()
+                .addPath(new BezierLine(shootBall3, collect3end))
+                .setLinearHeadingInterpolation(shootBall3.getHeading(), collect3end.getHeading())
                 .build();
 
 //        collect3 = follower.pathBuilder()
@@ -290,15 +290,14 @@ public class test extends OpMode {
                 // Keep aiming during first-shot motion.
                 robot.intake.shift();
 
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.5){
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>0.75){
                     setPathState(PathState.collection);
                 }
                 break;
 
 
             case collection:
-
-                if (!follower.isBusy() && !collectionStarted) {
+                if (!collectionStarted) {
                     robot.gate.block();
                     follower.followPath(collect1);
                     collectionStarted = true;
@@ -308,22 +307,22 @@ public class test extends OpMode {
                 }
                 break;
             case shoot:
-                if (!follower.isBusy() && !shoot2Started) {
-                    robot.intake.up();
+                if (!shoot2Started) {
+                    //robot.intake.up();
                     follower.followPath(shoot2);
                     shoot2Started = true;
                 }
-                if (shootinAuton() && shoot2Started) {
+                if ((shootinAuton() && shoot2Started) || pathTimer.getElapsedTimeSeconds()>4) {
                     robot.gate.open();
-                    robot.intake.powerON();
+                    //robot.intake.powerON();
                     if(arrived() || isNear(shootPose2, 3)) {
-                        robot.intake.shift();
-                        setPathState((PathState.GateCollection));
+                        //robot.intake.shift();
+                            setPathState((PathState.GateCollection));
                     }
                 }
                 break;
             case GateCollection:
-                if (!follower.isBusy() && !gateCollectionStarted) {
+                if (!gateCollectionStarted) {
                     robot.gate.block();
                     follower.followPath(GateCollect1);
                     gateCollectionStarted = true; // Mark as started to prevent calling again
@@ -340,7 +339,7 @@ public class test extends OpMode {
                 break;
             case shootAgain:
                 // Continuously adjust based on limelight during shooting
-                if (!follower.isBusy() && !shoot3Started) {
+                if (!shoot3Started) {
                     follower.followPath(shoot3);
                     //tree.setPower(1);
                     shoot3Started = true; // Mark as started to prevent calling again
@@ -348,19 +347,27 @@ public class test extends OpMode {
                 if (shootinAuton() && shoot3Started) {
                     robot.gate.open();
                     boolean close = arrived() || isNear(shootBall3, 3);
-                    if(opModeTimer.getElapsedTimeSeconds()<23)
+                    if(opModeTimer.getElapsedTimeSeconds()<24)
                     {
                         if(close) {
                             setPathState((test.PathState.GateCollection));
                         }
                     }
-                    if(opModeTimer.getElapsedTimeSeconds()>23 && pathTimer.getElapsedTimeSeconds()>2.25)
+                    if(opModeTimer.getElapsedTimeSeconds()>24 && pathTimer.getElapsedTimeSeconds()>2.25)
                     {
-                        robot.intake.shift();
+                        //robot.intake.shift();
                         if(close) {
                             setPathState(PathState.collectAgainAgainEnd);
                         }
                     }
+                }
+                if(shoot3Started)
+                {
+                    telemetry.addLine("shoot3started");
+                }
+                if(arrived() || isNear(shootBall3, 3) )
+                {
+                    telemetry.addLine("Close");
                 }
                 break;
 //TODO CONTINUE FROM HERE
@@ -486,6 +493,7 @@ public class test extends OpMode {
                 robot.intake);
         robot.intake.up();
         robot.gate.block();
+        robot.turret.setVelocity(1800);
         sillyTarget = robot.chassisLocal.sillyTargetPose(target);
 
         telemetry.addLine("Good to go BLUE");
@@ -496,6 +504,7 @@ public class test extends OpMode {
     public void start() {
         opModeTimer.resetTimer();
         setPathState(pathState);
+        robot.turret.setVelocity(1800);
     }
 
     @Override
@@ -546,6 +555,7 @@ public class test extends OpMode {
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("Dist to target", dist);
         telemetry.addData("Turret Angle", -turretAngle);
+        telemetry.addData("Turret velocity", launcher.getVelocity());
     }
 
     private boolean shootinAuton() {
@@ -637,7 +647,7 @@ public class test extends OpMode {
                     adjustRotator(txDeg);
 
                     // Update velocity and hood based on distance
-                    launcher.setVelocity(calcVelocity(currentDistance));
+                    //launcher.setVelocity(calcVelocity(currentDistance));
                     adjustHoodBasedOnDistance(currentDistance);
                 }
             } else {
@@ -646,7 +656,7 @@ public class test extends OpMode {
                     // Use last known good values (from previous successful detection)
                     adjustRotator(lastValidTx);
                     if (lastValidDistance > 0) {
-                        launcher.setVelocity(calcVelocity(lastValidDistance));
+                        //launcher.setVelocity(calcVelocity(lastValidDistance));
                         adjustHoodBasedOnDistance(lastValidDistance);
                     }
                 }
