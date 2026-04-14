@@ -4,11 +4,13 @@ import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -17,6 +19,7 @@ public class Intake implements IntakeConstants{
     private DcMotor intakeL, intakeR;
     private Servo intakeShifterR, intakeShifterL;
     private NormalizedColorSensor colorSensor;
+    private DistanceSensor distanceSensor;
 
     // Color detection state
     private ElapsedTime colorTimer = new ElapsedTime();
@@ -28,6 +31,7 @@ public class Intake implements IntakeConstants{
     public enum DetectedColor {
         PURPLE,
         GREEN,
+        BALL,
         UNKNOWN
     }
 
@@ -165,6 +169,30 @@ public class Intake implements IntakeConstants{
             if (currentlyDetectedColor == DetectedColor.PURPLE || currentlyDetectedColor == DetectedColor.GREEN) {
                 down();
             }
+            return currentlyDetectedColor;
+        } else {
+            shift();
+        }
+
+        return DetectedColor.UNKNOWN;
+    }
+
+    public DetectedColor getDetectedColorByDistance(Telemetry telemetry) {
+        double distanceMM = distanceSensor.getDistance(DistanceUnit.MM);
+        telemetry.addData("Distance (mm)", distanceMM);
+
+        DetectedColor detectedThisFrame = (distanceMM < 25) ? DetectedColor.BALL : DetectedColor.UNKNOWN;
+
+        if (detectedThisFrame != currentlyDetectedColor) {
+            currentlyDetectedColor = detectedThisFrame;
+            colorTimer.reset();
+        }
+
+        telemetry.addData("Detected State", currentlyDetectedColor);
+        telemetry.addData("Detection Time (s)", colorTimer.seconds());
+
+        if (currentlyDetectedColor != DetectedColor.UNKNOWN && colorTimer.seconds() >= requiredDetectionTimeSeconds) {
+            down();
             return currentlyDetectedColor;
         } else {
             shift();

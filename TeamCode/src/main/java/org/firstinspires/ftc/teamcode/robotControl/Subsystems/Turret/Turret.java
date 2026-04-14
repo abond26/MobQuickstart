@@ -25,26 +25,21 @@ public class Turret implements TurretConstants {
     }
 
     public Turret(@NonNull HardwareMap hardwareMap) {
-        // LEFTm
+        // LEFT launcher
         jollyCrusader = hardwareMap.get(DcMotorEx.class, "launcherL");
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         jollyCrusader.setDirection(DcMotorSimple.Direction.FORWARD);
         jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(shooterP, 0, 0, shooterF);
-        jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
+        // RIGHT launcher
         gloomyCrusader = hardwareMap.get(DcMotorEx.class, "launcherR");
         gloomyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         gloomyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
         gloomyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        PIDFCoefficients pidfCoefficients2 = new PIDFCoefficients(shooterP, 0, 0, shooterF);
-        gloomyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients2);
 
         rotator = hardwareMap.get(Servo.class, "rotator");
         rotator.setPosition(0.5);
 
-        // negativex`
-        // Our precious lil hoody hood
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(SCALE_RANGE_LOWER, SCALE_RANGE_UPPER);
     }
@@ -97,6 +92,39 @@ public class Turret implements TurretConstants {
     public void shiftVelocity(double ticksPerSec) {
         double newVelo = targetVelocity + ticksPerSec;
         setVelocity(newVelo);
+    }
+
+    // --- RPM control (feedforward + feedback from Flywheel) ---
+
+    /**
+     * Returns the current RPM of the left launcher motor.
+     * Uses the same formula as Flywheel.getRPM().
+     */
+    public double getRPM() {
+        double ticksPerSec = jollyCrusader.getVelocity();
+        return ((ticksPerSec / ENCODER_CPM) * 60) / GEAR_RATIO;
+    }
+
+    /**
+     * Commands both launcher motors to a target RPM using a
+     * feedforward + proportional feedback loop (ported from Flywheel).
+     * Call this every loop iteration for closed-loop RPM control.
+     */
+    public void setRPM(double targetRPM) {
+        double error       = targetRPM - getRPM();
+        double feedforward = KV * targetRPM + KS;
+        double feedback    = KP * error;
+        double power       = feedforward + feedback;
+        jollyCrusader.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        gloomyCrusader.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        jollyCrusader.setPower(power);
+        gloomyCrusader.setPower(power);
+    }
+
+    /** Stops both launcher motors. */
+    public void stop() {
+        jollyCrusader.setPower(0);
+        gloomyCrusader.setPower(0);
     }
 
     public void presetVelo(@NonNull ShotType dist) {

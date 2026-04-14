@@ -13,5 +13,12 @@ public interface TurretConstants {
     double FAR_VELOCITY = 1800;
     double SCALE_RANGE_LOWER = 0.011;
     double SCALE_RANGE_UPPER = 0.5828;
+
+    // --- Flywheel RPM control ---
+    double ENCODER_CPM  = 28;      // counts per motor revolution
+    double GEAR_RATIO   = 1.57;    // external gear/belt ratio
+    double KV           = 0.000196;
+    double KS           = 0.145;
+    double KP           = 0.003;
     //
 }

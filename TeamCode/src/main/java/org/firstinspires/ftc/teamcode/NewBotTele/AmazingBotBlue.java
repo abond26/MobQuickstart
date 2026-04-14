@@ -26,6 +26,7 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
     boolean sillyControls = false;
     boolean inPosition;
     private boolean lastDpadUp = false;
+    private double targetRPM = 0;
 
 
     private boolean lastDpadDown = false;
@@ -80,17 +81,21 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
 
             // MANUAL CONTROLS — SHOOTING (same as BlueTele)
 
-            // Turret velocity
+            // Turret RPM
             if (gamepad1.aWasPressed()) {
-                robot.turret.shiftVelocity(launcherSpeedIncrement);
+                targetRPM += 50;
             }
             if (gamepad1.yWasPressed()) {
-                robot.turret.shiftVelocity(-launcherSpeedIncrement);
+                targetRPM -= 50;
             }
             if (gamepad1.rightStickButtonWasPressed()) {
-                robot.turret.presetVeloSwitch(veloSwitchNum);
-                veloSwitchNum += 1;
+                targetRPM = 0;
+                robot.turret.stop();
                 sillyControls = false;
+            }
+            // Run RPM loop every iteration
+            if (targetRPM > 0) {
+                robot.turret.setRPM(targetRPM);
             }
             if (gamepad1.dpad_left) {
                 robot.turret.shiftRotator(-rotatorIncrement);
@@ -144,7 +149,7 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             inPosition = robot.chassisLocal.isShootingPosition();
             if (sillyControls) {
                 actions.aimRotatorLocal(sillyTarget, telemetry);
-                actions.adjustShootingParams(sillyTarget);
+//                actions.adjustShootingParams(sillyTarget);
             }
 
             telemetry.addLine("");
@@ -163,7 +168,8 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
 
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
             telemetry.addData("Ball Detected", detectedColor);
-            telemetry.addData("Launcher velocity", robot.turret.getTargetVelocity());
+            telemetry.addData("Target RPM", "%.0f", targetRPM);
+            telemetry.addData("Current RPM", "%.0f", robot.turret.getRPM());
             telemetry.addData("LauncherL velocity", robot.turret.getVelocityL());
             telemetry.addData("LauncherR velocity", robot.turret.getVelocityR());
 
