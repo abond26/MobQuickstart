@@ -8,16 +8,16 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class RotatorServoTest extends LinearOpMode {
     private Servo rotator;
     private double position = 0.0;
-    private static final double STEP_FINE = 0.001;
-    private static final double STEP_COARSE = 0.01;
+    private static final double STEP_FINE = 0.00001;
+    private static final double STEP_COARSE = 0.0001;
 
     @Override
     public void runOpMode() throws InterruptedException {
         rotator = hardwareMap.get(Servo.class, "rotator");
         rotator.setDirection(Servo.Direction.REVERSE);
 
-        rotator.setPosition(0.0);
-        position = 0.0;
+        rotator.setPosition(0.5);
+        position = 0.5;
 
         telemetry.addData("Status", "Initialized — Rotator zeroed to 0.0");
         telemetry.addData("Controls", "DPad L/R = fine, Bumpers = coarse, A = zero");

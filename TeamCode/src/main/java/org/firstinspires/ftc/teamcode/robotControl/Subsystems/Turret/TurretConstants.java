@@ -3,10 +3,10 @@ package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public interface TurretConstants {
-    double shooterP = 200;
+    double shooterP = 164;
     double shooterF = 19.8;
-    double ROTATOR_ZERO_POS = 0.5;
-    double rotator180RangePos = 0.56;
+    double ROTATOR_ZERO_POS    = 0.5;          // servo position = turret 0° (physical center)
+    double rotator180RangePos  = 0.5;
 
     double CLOSE_VELOCITY = 1300;
     double MID_VELOCITY = 1500;
@@ -19,6 +19,6 @@ public interface TurretConstants {
     double GEAR_RATIO   = 1.57;    // external gear/belt ratio
     double KV           = 0.000196;
     double KS           = 0.145;
-    double KP           = 0.003;
+    double KP           = 0.04;
     //
 }

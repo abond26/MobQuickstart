@@ -146,7 +146,9 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
                 actions.aimRotatorLocal(sillyTarget, telemetry);
                 actions.adjustShootingParams(sillyTarget);
             }
+            // TELEMETRY
 
+            // Position data
             telemetry.addLine("");
             telemetry.addLine("ROBOT POSITION");
             telemetry.addData("X", "%.1f", robot.chassisLocal.getPose().getX());
@@ -164,10 +166,6 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
             telemetry.addData("Ball Detected", detectedColor);
             telemetry.addData("Launcher velocity", robot.turret.getTargetVelocity());
-            telemetry.addData("LauncherL velocity", robot.turret.getVelocityL());
-            telemetry.addData("LauncherR velocity", robot.turret.getVelocityR());
-
-
             telemetry.addData("Distance", robot.chassisLocal.getDistance(target));
             telemetry.update();
         }

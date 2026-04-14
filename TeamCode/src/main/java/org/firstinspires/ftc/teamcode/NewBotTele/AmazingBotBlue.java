@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 
 
-@TeleOp(name = "AmazingBotBlue")
+@TeleOp(name = "AMAZINGBOTBLUE")
 public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstants {
     long loopTime;
     Pose sillyTarget;
@@ -26,7 +26,6 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
     boolean sillyControls = false;
     boolean inPosition;
     private boolean lastDpadUp = false;
-    private double targetRPM = 0;
 
 
     private boolean lastDpadDown = false;
@@ -81,21 +80,17 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
 
             // MANUAL CONTROLS — SHOOTING (same as BlueTele)
 
-            // Turret RPM
+            // Turret velocity
             if (gamepad1.aWasPressed()) {
-                targetRPM += 50;
+                robot.turret.shiftVelocity(launcherSpeedIncrement);
             }
             if (gamepad1.yWasPressed()) {
-                targetRPM -= 50;
+                robot.turret.shiftVelocity(-launcherSpeedIncrement);
             }
             if (gamepad1.rightStickButtonWasPressed()) {
-                targetRPM = 0;
-                robot.turret.stop();
+                robot.turret.presetVeloSwitch(veloSwitchNum);
+                veloSwitchNum += 1;
                 sillyControls = false;
-            }
-            // Run RPM loop every iteration
-            if (targetRPM > 0) {
-                robot.turret.setRPM(targetRPM);
             }
             if (gamepad1.dpad_left) {
                 robot.turret.shiftRotator(-rotatorIncrement);
@@ -149,9 +144,11 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             inPosition = robot.chassisLocal.isShootingPosition();
             if (sillyControls) {
                 actions.aimRotatorLocal(sillyTarget, telemetry);
-//                actions.adjustShootingParams(sillyTarget);
+                actions.adjustShootingParams(sillyTarget);
             }
+            // TELEMETRY
 
+            // Position data
             telemetry.addLine("");
             telemetry.addLine("ROBOT POSITION");
             telemetry.addData("X", "%.1f", robot.chassisLocal.getPose().getX());
@@ -168,12 +165,7 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
 
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
             telemetry.addData("Ball Detected", detectedColor);
-            telemetry.addData("Target RPM", "%.0f", targetRPM);
-            telemetry.addData("Current RPM", "%.0f", robot.turret.getRPM());
-            telemetry.addData("LauncherL velocity", robot.turret.getVelocityL());
-            telemetry.addData("LauncherR velocity", robot.turret.getVelocityR());
-
-
+            telemetry.addData("Launcher velocity", robot.turret.getTargetVelocity());
             telemetry.addData("Distance", robot.chassisLocal.getDistance(target));
             telemetry.update();
         }

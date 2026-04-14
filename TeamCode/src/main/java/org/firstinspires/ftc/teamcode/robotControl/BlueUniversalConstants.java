@@ -7,7 +7,7 @@ import com.pedropathing.geometry.Pose;
 public interface BlueUniversalConstants {
     double launcherSpeedIncrement = 20;
     double hoodIncrement = 0.005;
-    double rotatorIncrement = 0.0001; // 10 is for testing, 50 for real game
+    double rotatorIncrement = 0.00002; // scaled for 5-turn servo (was 0.0001 for standard 180° servo)
     int PIPELINENUM = 1;
     // Pose defaultPose = new Pose(24.4, 126.7, Math.toRadians(143));
     Pose defaultPose = new Pose(25.448900388098327, 131.8809831824062, Math.toRadians(234));
