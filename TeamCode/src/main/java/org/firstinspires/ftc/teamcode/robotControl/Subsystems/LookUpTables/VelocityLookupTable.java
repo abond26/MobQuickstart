@@ -29,22 +29,17 @@ public class VelocityLookupTable {
 //        210.5,  205.2,  221.5,
 //    };
     private static final double[] DISTANCES = {
-            51.6,60.1,69.6,75.5,84.5,89.7,98.9,
-
+            56.1, 61.1, 66.1, 71.1, 76.1, 81.1
     };
     
-    // Corresponding velocity values (in encoder ticks per second)
-    // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
-    // Start with reasonable values, then fine-tune based on actual shooting results
+
     private static final double[] VELOCITIES = {
-            1450,1470,1530,1620,1690,1730,1800,
-
-
+            1520, 1582, 1644, 1706, 1768, 1830
     };
     //
     // Minimum and maximum distances in the table
-    private static final double MIN_DISTANCE = 55.3;
-    private static final double MAX_DISTANCE = 157.18;
+    private static final double MIN_DISTANCE = 56.1;
+    private static final double MAX_DISTANCE = 81.1;
     
     /**
      * Gets the velocity for a given distance using pure lookup table with linear interpolation.

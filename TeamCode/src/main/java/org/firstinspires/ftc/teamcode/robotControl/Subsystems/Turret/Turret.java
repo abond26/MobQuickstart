@@ -42,6 +42,7 @@ public class Turret implements TurretConstants {
 
         rotator = hardwareMap.get(Servo.class, "rotator");
         rotator.setPosition(0.5);
+        rotator.scaleRange(0.0831,0.8962);
         rotator.setDirection(Servo.Direction.REVERSE);
         // negativex`
         // Our precious lil hoody hood

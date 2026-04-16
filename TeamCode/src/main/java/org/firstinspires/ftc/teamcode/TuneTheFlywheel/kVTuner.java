@@ -10,13 +10,12 @@ public class kVTuner extends OpMode {
     public double kV = 0.000285;
     public double kS = 0.1;
     public double goalRPM = 1700;
-    double [] incriments = {0.000001,0.00001,0.0001,0.001,0.01};
+    double[] incriments = { 0.000001, 0.00001, 0.0001, 0.001, 0.01 };
     int incrementIdx = 4;
 
     @Override
-    public void init(){
+    public void init() {
         flywheel.init(hardwareMap);
-
 
     }
 
@@ -37,8 +36,12 @@ public class kVTuner extends OpMode {
         double currentStep = incriments[incrementIdx];
 
         // change kV
-        if (gamepad1.dpadUpWasPressed()) { kV += currentStep; }
-        if (gamepad1.dpadDownWasPressed()) { kV -= currentStep; }
+        if (gamepad1.dpadUpWasPressed()) {
+            kV += currentStep;
+        }
+        if (gamepad1.dpadDownWasPressed()) {
+            kV -= currentStep;
+        }
 
         double power = (kV * goalRPM) + kS;
         flywheel.setMotorPower(power);

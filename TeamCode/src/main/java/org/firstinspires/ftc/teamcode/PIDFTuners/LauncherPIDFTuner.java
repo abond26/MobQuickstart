@@ -4,28 +4,38 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
+
 
 @TeleOp
 public class LauncherPIDFTuner extends OpMode {
-    //
-    public DcMotorEx flywheelMotor;
+    public DcMotorEx flywheelMotor,flywheelMotor1;
+    public Intake intake;
     public double highVelocity = 1500;
     public double lowVelocity = 901;
     double curTargetVelocity = highVelocity;
-    double F = 0;
-    double P = 0;
+    double F = 13.5300;
+    double P = 350;
     double[] stepSizes = {10.0, 1.0, 0.1, 0.001, 0.0001};
     int stepIndex = 1;
 
     @Override
     public void init(){
         flywheelMotor = hardwareMap.get(DcMotorEx.class, "launcherL");
+        flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelMotor1 = hardwareMap.get(DcMotorEx.class, "launcherR");
+        flywheelMotor1.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //changed to Ex
+
+        intake = new Intake(hardwareMap);
+
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         flywheelMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         telemetry.addLine("Init complete");
     }
+
 
     @Override
     public void loop(){
@@ -58,9 +68,18 @@ public class LauncherPIDFTuner extends OpMode {
         //update PIDF
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         flywheelMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        flywheelMotor1.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         //set velocity
         flywheelMotor.setVelocity(curTargetVelocity);
+        flywheelMotor1.setVelocity(curTargetVelocity);
+
+        intake.simpleIntake(gamepad1.left_trigger - gamepad1.right_trigger);
+        if (gamepad1.xWasPressed()) {
+            intake.shift();
+        }
+
+
 
         double curVelocity = flywheelMotor.getVelocity();
         double error = curTargetVelocity - curVelocity;

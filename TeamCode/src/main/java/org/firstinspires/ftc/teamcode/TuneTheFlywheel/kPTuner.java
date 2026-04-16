@@ -9,15 +9,14 @@ public class kPTuner extends OpMode {
     Flywheel flywheel = new Flywheel();
     public double kV = 0.000285;
     public double kS = 0.145;
-    public double kP = 0.005300 ;
+    public double kP = 0.005300;
     public double goalRPM = 1700;
-    double [] incriments = {0.000001,0.00001,0.0001,0.001,0.01};
+    double[] incriments = { 0.000001, 0.00001, 0.0001, 0.001, 0.01 };
     int incrementIdx = 4;
 
     @Override
-    public void init(){
+    public void init() {
         flywheel.init(hardwareMap);
-
 
     }
 
@@ -38,8 +37,12 @@ public class kPTuner extends OpMode {
         double currentStep = incriments[incrementIdx];
 
         // change kV
-        if (gamepad1.dpadUpWasPressed()) { kP += currentStep; }
-        if (gamepad1.dpadDownWasPressed()) { kP -= currentStep; }
+        if (gamepad1.dpadUpWasPressed()) {
+            kP += currentStep;
+        }
+        if (gamepad1.dpadDownWasPressed()) {
+            kP -= currentStep;
+        }
 
         double feedForward = (kV * goalRPM) + kS;
         double error = goalRPM - flywheel.getRPM();
