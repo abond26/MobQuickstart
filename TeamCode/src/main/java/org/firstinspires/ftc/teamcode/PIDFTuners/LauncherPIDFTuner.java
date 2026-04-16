@@ -25,9 +25,11 @@ public class LauncherPIDFTuner extends OpMode {
     public void init(){
         flywheelMotor = hardwareMap.get(DcMotorEx.class, "launcherL");
         flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         flywheelMotor1 = hardwareMap.get(DcMotorEx.class, "launcherR");
         flywheelMotor1.setDirection(DcMotorSimple.Direction.REVERSE);
-        flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //changed to Ex
+        flywheelMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //changed to Ex
+        flywheelMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         intake = new Intake(hardwareMap);
 

@@ -27,18 +27,18 @@ public class Turret implements TurretConstants {
     public Turret(@NonNull HardwareMap hardwareMap) {
         // LEFTm
         jollyCrusader = hardwareMap.get(DcMotorEx.class, "launcherL");
-        jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         jollyCrusader.setDirection(DcMotorSimple.Direction.FORWARD);
         jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(shooterP, 0, 0, shooterF);
         jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         gloomyCrusader = hardwareMap.get(DcMotorEx.class, "launcherR");
-        gloomyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        gloomyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         gloomyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
         gloomyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        PIDFCoefficients pidfCoefficients2 = new PIDFCoefficients(shooterP, 0, 0, shooterF);
-        gloomyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients2);
+//        PIDFCoefficients pidfCoefficients2 = new PIDFCoefficients(shooterP, 0, 0, shooterF);
+//        gloomyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients2);
 
         rotator = hardwareMap.get(Servo.class, "rotator");
         rotator.setPosition(0.5);

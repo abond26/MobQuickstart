@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public interface TurretConstants {
-    double shooterP = 350;
+    double shooterP = 650;
     double shooterF = 13.5300;
     double ROTATOR_ZERO_POS    = 0.5;          // servo position = turret 0° (physical center)
     double rotator180RangePos  = 0.5;

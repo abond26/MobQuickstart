@@ -15,6 +15,7 @@
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
 
+
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
 
@@ -24,5 +25,12 @@ android {
 }
 
 dependencies {
+    implementation "org.solverslib:core:0.3.4" // core
+    implementation "org.solverslib:pedroPathing:0.3.4"
     implementation project(':FtcRobotController')
+}
+repositories {
+    maven {
+        url "https://repo.dairy.foundation/releases"
+    }
 }
