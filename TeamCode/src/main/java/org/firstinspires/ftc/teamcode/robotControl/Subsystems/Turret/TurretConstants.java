@@ -5,14 +5,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 public interface TurretConstants {
     double shooterP = 650;
     double shooterF = 13.5300;
-    double ROTATOR_ZERO_POS    = 0.5;          // servo position = turret 0° (physical center)
+
+    double ROTATOR_ZERO_POS    = 0.5;           // servo position = turret 0° (physical center)
     double rotator180RangePos  = 0.5;
 
     double CLOSE_VELOCITY = 1300;
     double MID_VELOCITY = 1500;
     double FAR_VELOCITY = 1800;
-    double SCALE_RANGE_LOWER = 0.011;
-    double SCALE_RANGE_UPPER = 0.5828;
+    double SCALE_RANGE_LOWER = 0;
+    double SCALE_RANGE_UPPER = 0.58;
 
     // --- Flywheel RPM control ---
     double ENCODER_CPM  = 28;      // counts per motor revolution

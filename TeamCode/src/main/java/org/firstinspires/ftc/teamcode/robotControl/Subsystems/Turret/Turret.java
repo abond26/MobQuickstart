@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret;
 
 import androidx.annotation.NonNull;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -10,7 +11,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+@Configurable
 public class Turret implements TurretConstants {
+    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS_CLOSE = new PIDFCoefficients(386, 0, 8.7, 13.53);
+    public static PIDFCoefficients FLYWHEEL_PIDF_COEFFICIENTS_FAR = new PIDFCoefficients(509, 52, 3.5, 13.53);
+
     private DcMotorEx jollyCrusader, gloomyCrusader;
     private Servo rotator;
     private Servo hood;
@@ -30,7 +35,7 @@ public class Turret implements TurretConstants {
         jollyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         jollyCrusader.setDirection(DcMotorSimple.Direction.FORWARD);
         jollyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(shooterP, 0, 0, shooterF);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(386, 0, 8.7, 13.53);
         jollyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         gloomyCrusader = hardwareMap.get(DcMotorEx.class, "launcherR");

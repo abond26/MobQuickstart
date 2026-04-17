@@ -29,12 +29,12 @@ public class VelocityLookupTable {
 //        210.5,  205.2,  221.5,
 //    };
     private static final double[] DISTANCES = {
-            56.1, 61.1, 66.1, 71.1, 76.1, 81.1
+            59.24,70.3,84.23
     };
     
 
     private static final double[] VELOCITIES = {
-            1520, 1582, 1644, 1706, 1768, 1830
+            2000,2200,2500
     };
     //
     // Minimum and maximum distances in the table
