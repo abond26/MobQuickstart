@@ -17,7 +17,7 @@ public interface BlueUniversalConstants {
     // every auton close
     Double dpadUpHeading = 0.0;
     //
-
+ //
     double CLOSE_HOOD_POSITION = 1; // Hood position for close shots
     double MID_HOOD_POSITION = 0.7;
     double FAR_HOOD_POSITION = 0;

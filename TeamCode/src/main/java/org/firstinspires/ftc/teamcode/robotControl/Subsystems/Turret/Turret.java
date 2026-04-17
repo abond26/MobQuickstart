@@ -146,6 +146,7 @@ public class Turret implements TurretConstants {
     public double getHoodPos() {
         return hood.getPosition();
     }
+    //
 
     public void shiftHood(double ticks) {
         double newPos = getHoodPos() + ticks;

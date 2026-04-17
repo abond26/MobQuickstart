@@ -40,9 +40,7 @@ public class Intake implements IntakeConstants{
         intakeL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeL.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeL.setPower(0);
-        intakeR = hardwareMap.get(DcMotor.class, "intakeR");
-        intakeR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intakeR.setDirection(DcMotorSimple.Direction.FORWARD);
+
         intakeR.setPower(0);
 
         intakeShifterR = hardwareMap.get(Servo.class, "intakeShifterR");
@@ -55,6 +53,8 @@ public class Intake implements IntakeConstants{
 
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "color_sensor");
 //        colorSensor.setGain(5);
+        //
+         //
 
         colorTimer.reset();
     }

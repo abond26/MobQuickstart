@@ -39,6 +39,7 @@ public class ShotTimeLookupTable {
             0.758368, 0.821998, 0.87, 0.885628, 0.89, 0.96, 0.987436, 1.012888, 1.03153, 1.06055, 1.07, 1.08, 1.10629
     };
 //
+     //
     // Minimum and maximum distances in the table
     private static final double MIN_DISTANCE = 55;
     private static final double MAX_DISTANCE = 109.17;

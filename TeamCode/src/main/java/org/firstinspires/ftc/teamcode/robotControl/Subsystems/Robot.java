@@ -18,7 +18,7 @@ public class Robot {
     public final Intake intake;
     public final TransferGate gate;
     public final Vision vision;
-
+//
     public Robot(HardwareMap hardwareMap, Pose startingPose, int pipeline) {
 
 

@@ -31,7 +31,7 @@ public class VelocityLookupTable {
     private static final double[] DISTANCES = {
             59.24,70.3,84.23
     };
-    
+    //
 
     private static final double[] VELOCITIES = {
             2000,2200,2500

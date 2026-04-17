@@ -131,7 +131,6 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         if (turret instanceof TestTurret) {
             ((TestTurret) turret).setTargetRPM(targetRPM);
         } else {
-            // Convert RPM to ticks per second for standard Turret
             double ticksPerSec = (targetRPM * ENCODER_CPM * GEAR_RATIO) / 60.0;
             turret.setVelocity(ticksPerSec);
         }
@@ -148,20 +147,12 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         turret.setRotatorToAngle(angle);
     }
 
-    public void aim() {
-
-    }
 
     public void targetFixX(double amount) {
         Pose current = getShootingTarget();
         shootingTargetOverride = new Pose(current.getX() + amount, current.getY(), current.getHeading());
     }
 
-    // public void relocalize() {
-    // Pose pose = vision.getEstimatedPose();
-    // drive.setPoseEstimate(pose);
-    // }
-    //
     // public void autoAdjustShooter() {
     // double distance = vision.getTargetDistance();
     // shooter.setVelocityFromDistance(distance);

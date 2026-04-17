@@ -10,4 +10,5 @@ public interface IntakeConstants {
     //how long should i hold this b all
     public double requiredDetectionTimeSeconds = 0.3;
     //
+     //
 }

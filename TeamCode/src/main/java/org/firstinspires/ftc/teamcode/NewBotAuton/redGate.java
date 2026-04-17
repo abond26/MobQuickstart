@@ -414,7 +414,7 @@ public class redGate extends OpMode {
         opModeTimer.resetTimer();
         setPathState(pathState);
     }
-
+//
     @Override
     public void loop() {
         follower.update();
