@@ -10,8 +10,8 @@ public interface RedUniversalConstants {
     int rotatorIncrement = 10; // 10 is for testing, 50 for real game
     int PIPELINENUM = 0;
     // Pose defaultPose = new Pose(24.4, 126.7, Math.toRadians(143));
-    Pose defaultPose = new Pose(112.21723544631305, 134.86157826649418, Math.toRadians(270));
-    Pose target = new Pose(140, 144, Math.toRadians(36));
+    Pose defaultPose = new Pose(112.21723544631305, 134.86157826649418, Math.toRadians(-90));
+    Pose target = new Pose(138, 144, Math.toRadians(36));
     Pose aprilTagPose = new Pose(16, 132, Math.toRadians(145));
     Double dpadUpHeading = 180.0;
     //

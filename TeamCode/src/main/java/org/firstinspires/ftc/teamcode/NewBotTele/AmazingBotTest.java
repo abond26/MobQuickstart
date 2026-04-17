@@ -72,12 +72,13 @@ public class AmazingBotTest extends LinearOpMode implements RedUniversalConstant
                 actions.intake(sumOfTrigs);
             }
             if (sillyControls) {
-                actions.aimRotatorLocal(sillyTarget, telemetry);
+                actions.aimRotatorLocal(target, telemetry);
                 actions.autoVelocityEquation(sillyTarget);
             }
             // Telemetry
             telemetry.addData("Mode", "MANUAL PID LOOP");
             telemetry.addData("RPM", "%.1f / Target: %.1f", testTurret.getRPM(), testTurret.getTargetVelocity());
+            telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
             telemetry.addData("Distance", "%.2f", currentDist);
             telemetry.update();
         }

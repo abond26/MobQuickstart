@@ -40,21 +40,21 @@ public class Intake implements IntakeConstants{
         intakeL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeL.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeL.setPower(0);
-
+        intakeR = hardwareMap.get(DcMotor.class, "intakeR");
+        intakeR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeR.setDirection(DcMotorSimple.Direction.FORWARD);
         intakeR.setPower(0);
 
         intakeShifterR = hardwareMap.get(Servo.class, "intakeShifterR");
         intakeShifterR.setDirection(Servo.Direction.FORWARD);
-        intakeShifterR.setPosition(0.54);
+        intakeShifterR.setPosition(0.5);
         intakeShifterL = hardwareMap.get(Servo.class, "intakeShifterL");
         intakeShifterL.setDirection(Servo.Direction.REVERSE);
-        intakeShifterL.setPosition(0.54);
+        intakeShifterL.setPosition(0.5);
 
 
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "color_sensor");
 //        colorSensor.setGain(5);
-        //
-         //
 
         colorTimer.reset();
     }

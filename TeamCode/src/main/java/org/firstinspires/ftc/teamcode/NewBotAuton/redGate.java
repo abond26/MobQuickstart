@@ -450,9 +450,13 @@ public class redGate extends OpMode {
         double turretAngle = angleToGoal - Math.toDegrees(currentPose.getHeading());
         while (turretAngle > 180) turretAngle -= 360;
         while (turretAngle < -180) turretAngle += 360;
-        robot.turret.setRotatorToAngle(-turretAngle);
+        robot.chassisLocal.update();
+        sillyTarget = robot.chassisLocal.sillyTargetPose(target);
+        double currentDist = robot.chassisLocal.getDistance(target);
+        testTurret.update(currentDist);
+        actions.aimRotatorLocal(target, telemetry);
 
-        actions.autoVelocityEquation(sillyTarget);
+        actions.autoVelocityEquation(target);
 
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", currentPose.getX());

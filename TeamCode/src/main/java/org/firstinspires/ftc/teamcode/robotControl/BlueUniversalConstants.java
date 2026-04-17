@@ -10,8 +10,8 @@ public interface BlueUniversalConstants {
     double rotatorIncrement = 0.00002; // scaled for 5-turn servo (was 0.0001 for standard 180° servo)
     int PIPELINENUM = 1;
     // Pose defaultPose = new Pose(24.4, 126.7, Math.toRadians(143));
-    Pose defaultPose = new Pose(31.78276455368695, 136.97551020408164, Math.toRadians(270));
-    Pose target = new Pose(0, 144, Math.toRadians(144));
+    Pose defaultPose = new Pose(31.78276455368695, 136.97551020408164, Math.toRadians(-90 ));
+    Pose target = new Pose(-3, 138, Math.toRadians(144));
     Pose aprilTagPose = new Pose(16, 132, Math.toRadians(145));
     // Pose dpadUpPose = new Pose(130.8, 24.08, Math.toRadians(0)); //change for
     // every auton close
