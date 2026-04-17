@@ -9,10 +9,12 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis.ChassisLoc
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConstants;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TestTurret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
 
-public class RobotActions implements BlueUniversalConstants {
+public class RobotActions implements BlueUniversalConstants, TurretConstants {
 
     private ChassisLocal chassisLocal;
     private Turret turret;
@@ -45,16 +47,14 @@ public class RobotActions implements BlueUniversalConstants {
 
     }
 
-    public void launch(double speed, boolean bumperPressed){
+    public void launch(double speed, boolean bumperPressed) {
         if (bumperPressed) {
             gate.open();
             intake.simpleIntake(-speed);
-        }
-        else{
+        } else {
             gate.block();
         }
     }
-
 
     // Manual hood Control
     public void hoodControl(boolean xPressed, boolean bPressed) {
@@ -82,13 +82,11 @@ public class RobotActions implements BlueUniversalConstants {
         return shootingTargetOverride != null ? shootingTargetOverride : target;
     }
 
-
     // we have a control for intake in this class in case intaking becomes more
     // complex
     public void intake(double power) {
         intake.simpleIntake(power);
     }
-
 
     public void autoAdjustHood(Pose targ) {
         // If launch() is actively controlling the hood for far shots, skip
@@ -105,20 +103,20 @@ public class RobotActions implements BlueUniversalConstants {
         }
     }
 
-//    public void autoAdjustVelo(Pose targ) {
-//        // If launch() is actively controlling the hood for far shots, skip
-//        if (farShootingActive)
-//            return;
-//        double dist = chassisLocal.getDistance(targ);
-//        int zone = ServoLookupTable.getZone(dist);
-//        if (zone == 1) {
-//            turret.setVelocity(CLOSE_VELO);
-//        } else if (zone == 2) {
-//            turret.setVelocity(MID_VELO);
-//        } else {
-//            turret.setVelocity(FAR_VELO);
-//        }
-//    }
+    // public void autoAdjustVelo(Pose targ) {
+    // // If launch() is actively controlling the hood for far shots, skip
+    // if (farShootingActive)
+    // return;
+    // double dist = chassisLocal.getDistance(targ);
+    // int zone = ServoLookupTable.getZone(dist);
+    // if (zone == 1) {
+    // turret.setVelocity(CLOSE_VELO);
+    // } else if (zone == 2) {
+    // turret.setVelocity(MID_VELO);
+    // } else {
+    // turret.setVelocity(FAR_VELO);
+    // }
+    // }
 
     public void autoVelocity(Pose targ) {
         double dist = chassisLocal.getDistance(targ);
@@ -126,18 +124,29 @@ public class RobotActions implements BlueUniversalConstants {
         turret.setVelocity(autoVelocity);
     }
 
-    public void adjustShootingParams(Pose targ) {
-        autoVelocity(targ);
-        autoAdjustHood(targ);
+    public void autoVelocityEquation(Pose targ) {
+        double dist = chassisLocal.getDistance(targ);
+        double targetRPM = 0.121548 * Math.pow(dist, 2) - 8.93555 * dist + 2209.37317;
+
+        if (turret instanceof TestTurret) {
+            ((TestTurret) turret).setTargetRPM(targetRPM);
+        } else {
+            // Convert RPM to ticks per second for standard Turret
+            double ticksPerSec = (targetRPM * ENCODER_CPM * GEAR_RATIO) / 60.0;
+            turret.setVelocity(ticksPerSec);
+        }
     }
 
+    public void adjustShootingParams(Pose targ) {
+        autoVelocityEquation(targ);
+        autoAdjustHood(targ);
+    }
 
     public void aimRotatorLocal(Pose targ, @NonNull Telemetry telemetry) {
         double angle = chassisLocal.calculateTurretAngle(targ);
         telemetry.addData("Angle with localization", angle);
         turret.setRotatorToAngle(angle);
     }
-
 
     public void aim() {
 

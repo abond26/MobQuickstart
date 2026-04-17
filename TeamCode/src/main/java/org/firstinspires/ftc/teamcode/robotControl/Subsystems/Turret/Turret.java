@@ -42,12 +42,14 @@ public class Turret implements TurretConstants {
         gloomyCrusader.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         gloomyCrusader.setDirection(DcMotorSimple.Direction.REVERSE);
         gloomyCrusader.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        PIDFCoefficients pidfCoefficients2 = new PIDFCoefficients(shooterP, 0, 0, shooterF);
-//        gloomyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients2);
+        // PIDFCoefficients pidfCoefficients2 = new PIDFCoefficients(shooterP, 0, 0,
+        // shooterF);
+        // gloomyCrusader.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,
+        // pidfCoefficients2);
 
         rotator = hardwareMap.get(Servo.class, "rotator");
         rotator.setPosition(0.5);
-        rotator.scaleRange(0.0831,0.8962);
+        rotator.scaleRange(0.0831, 0.8962);
         rotator.setDirection(Servo.Direction.REVERSE);
         // negativex`
         // Our precious lil hoody hood

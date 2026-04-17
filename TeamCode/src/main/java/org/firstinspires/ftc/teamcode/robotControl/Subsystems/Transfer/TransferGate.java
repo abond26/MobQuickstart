@@ -11,7 +11,6 @@ public class TransferGate implements TransferGConstants {
 
     public TransferGate(@NonNull HardwareMap hardwareMap) {
         blocker = hardwareMap.get(Servo.class, "blocker");
-        blocker.setDirection(Servo.Direction.REVERSE);
         blocker.scaleRange(SCALE_RANGE_LOWER, SCALE_RANGE_UPPER);
     }
 

@@ -24,7 +24,6 @@ public class ServoAdjustClass extends LinearOpMode {
 
         hood = hardwareMap.get(Servo.class, "hood");
         blocker = hardwareMap.get(Servo.class, "blocker");
-        blocker.setDirection(Servo.Direction.REVERSE);
         intakeShifterR.setPosition(0);
         intakeShifterL.setPosition(0);
         hood.setPosition(0);

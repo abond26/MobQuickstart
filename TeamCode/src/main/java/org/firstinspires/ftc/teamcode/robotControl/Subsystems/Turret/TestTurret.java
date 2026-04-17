@@ -39,6 +39,7 @@ public class TestTurret extends Turret {
         rotator = hardwareMap.get(Servo.class, "rotator");
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(SCALE_RANGE_LOWER,SCALE_RANGE_UPPER);
+        hood.setPosition(0.8);
 
         timer.reset();
     }
@@ -58,7 +59,7 @@ public class TestTurret extends Turret {
         PIDFCoefficients coeffs = (distance <= SWITCH_PID_DIST) ? FLYWHEEL_PID_CLOSE : FLYWHEEL_PID_FAR;
         double power = (coeffs.f * targetRPM) + (coeffs.p * error) + (coeffs.i * integralSum) + (coeffs.d * derivative);
 
-        power = Math.max(-1, Math.min(1, power));
+        power = Math.max(0, Math.min(1, power));
         if (targetRPM == 0) { power = 0; integralSum = 0; }
 
         jollyCrusader.setPower(power);
@@ -71,10 +72,16 @@ public class TestTurret extends Turret {
     }
 
     public void setTargetRPM(double rpm) { this.targetRPM = rpm; }
+    
+    public void setTargetRPMFromDistance(double distance) {
+        setTargetRPM(0.121548 * Math.pow(distance, 2) - 8.93555 * distance + 2209.37317);
+    }
 
     public void setVelocity(double ticksPerSec) {
         setTargetRPM((ticksPerSec * 60.0) / (ENCODER_CPM * GEAR_RATIO));
     }
+
+
 
     @Override
     public double getTargetVelocity() { return targetRPM; }
