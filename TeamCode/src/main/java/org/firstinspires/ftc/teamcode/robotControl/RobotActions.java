@@ -128,11 +128,13 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         double dist = chassisLocal.getDistance(targ);
         double targetRPM = 0.121548 * Math.pow(dist, 2) - 8.93555 * dist + 2209.37317;
 
+        if (turret instanceof TestTurret) {
             ((TestTurret) turret).setTargetRPM(targetRPM);
-
+        } else {
+            // Convert RPM to ticks per second for standard Turret
             double ticksPerSec = (targetRPM * ENCODER_CPM * GEAR_RATIO) / 60.0;
             turret.setVelocity(ticksPerSec);
-
+        }
     }
 
     public void adjustShootingParams(Pose targ) {
