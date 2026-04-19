@@ -1,18 +1,23 @@
 package org.firstinspires.ftc.teamcode.NewBotTele;
 
 import android.util.Log;
+
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TestTurret;
 import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
 @TeleOp(name = "BLUEEEEE b")
+@Configurable
+
 public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstants {
     Robot robot;
     RobotActions actions;
@@ -20,6 +25,11 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
     boolean sillyControls = false;
 
     Pose sillyTarget;
+    public static double RpmChange = 20;
+    public static double intakespeed = 0.8;
+
+
+
 
 
 
@@ -43,6 +53,10 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
 
         while (opModeIsActive()) {
 
+//            if (gamepad1.right_stick_button){
+//                PoseStorage.clearPose();
+//            }
+
             robot.chassisLocal.update();
             sillyTarget = robot.chassisLocal.sillyTargetPose(target);
 
@@ -51,8 +65,8 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             double currentDist = robot.chassisLocal.getDistance(target);
             testTurret.update(currentDist);
 
-            if (gamepad1.aWasPressed()) testTurret.shiftVelocity(50);
-            if (gamepad1.yWasPressed()) testTurret.shiftVelocity(-50);
+            if (gamepad1.aWasPressed()) testTurret.shiftVelocity(RpmChange);
+            if (gamepad1.yWasPressed()) testTurret.shiftVelocity(-RpmChange);
 
 
             if (gamepad1.dpad_left) {
@@ -71,7 +85,7 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
                 robot.turret.shiftHood(hoodIncrement);
             }
 
-            actions.launch(0.8, gamepad1.right_bumper);
+            actions.launch(intakespeed, gamepad1.right_bumper);
             if (gamepad1.right_bumper) {
                 gamepad1.rumble(100);
             }
@@ -81,12 +95,16 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             }
             if (sillyControls) {
                 actions.aimRotatorLocal(target, telemetry);
-                actions.autoVelocityEquation(sillyTarget);
+                actions.autoVelocityEquation(target);
             }
+            Intake.DetectedColor detectedColor = robot.intake.getDetectedColor(telemetry);
+
+//            PoseStorage.savePose(robot.chassisLocal.getPose());
             // Telemetry
             telemetry.addData("Mode", "MANUAL PID LOOP");
             telemetry.addData("RPM", "%.1f / Target: %.1f", testTurret.getRPM(), testTurret.getTargetVelocity());
             telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
+            telemetry.addData("Ball Detected", detectedColor);
 
             telemetry.addData("Distance", "%.2f", currentDist);
             telemetry.update();

@@ -14,9 +14,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Configurable
 public class TestTurret extends Turret {
     // Small coefficients for the manual power loop
-    public static PIDFCoefficients FLYWHEEL_PID_CLOSE = new PIDFCoefficients(0.0019, 0, 0.00005, 0.00007);
-    public static PIDFCoefficients FLYWHEEL_PID_FAR = new PIDFCoefficients(0.0035, 0.0005, 0.00002, 0.000077);
-    public static double SWITCH_PID_DIST = 120;
+    public static PIDFCoefficients FLYWHEEL_PID_CLOSE = new PIDFCoefficients(0.0019, 0, 0.00005, 0.0003);
+    public static PIDFCoefficients FLYWHEEL_PID_FAR = new PIDFCoefficients(0.004, 0.00002, 0.00005, 0.0003);
+    public static double SWITCH_PID_DIST = 140;
 
     private DcMotorEx jollyCrusader, gloomyCrusader;
     private Servo rotator, hood;
@@ -63,7 +63,7 @@ public class TestTurret extends Turret {
         if (targetRPM == 0) { power = 0; integralSum = 0; }
 
        jollyCrusader.setPower(power);
-        gloomyCrusader.setPower(power);
+            gloomyCrusader.setPower(power);
     }
 //
 

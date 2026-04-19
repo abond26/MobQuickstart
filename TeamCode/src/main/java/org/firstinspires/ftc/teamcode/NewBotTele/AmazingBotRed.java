@@ -122,7 +122,7 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             }
 
             // Color sensor detection — auto-shifts intake when ball detected
-//            Intake.DetectedColor detectedColor = robot.intake.getDetectedColor(telemetry);
+            Intake.DetectedColor detectedColor = robot.intake.getDetectedColor(telemetry);
             // AUTOMATIC CONTROLS (same as BlueTele)
 
             if (gamepad1.leftStickButtonWasPressed()) {
@@ -162,9 +162,9 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             telemetry.addLine("HARDWARE STATUS");
             telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
             telemetry.addData("Rotator", "%.3f", robot.turret.getRotatorPos());
-
+            telemetry.addData("y", robot.chassisLocal.getPose().getY());
             telemetry.addData("Intake power", "%.2f", robot.intake.getPower());
-//            telemetry.addData("Ball Detected", detectedColor);
+            telemetry.addData("Ball Detected", detectedColor);
             telemetry.addData("Launcher velocity", robot.turret.getTargetVelocity());
             telemetry.addData("Distance", robot.chassisLocal.getDistance(target));
             telemetry.update();
