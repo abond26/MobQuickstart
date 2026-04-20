@@ -126,14 +126,7 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
 
     public void autoVelocityEquation(Pose targ) {
         double dist = chassisLocal.getDistance(targ);
-        double robotY = chassisLocal.getPose().getY();
-        double targetRPM;
-
-        if (robotY < 80) {
-            return;
-        } else {
-            targetRPM = 0.121548 * Math.pow(dist, 2) - 8.93555 * dist + 2209.37317;
-        }
+        double targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1500.8400;
 
         if (turret instanceof TestTurret) {
             ((TestTurret) turret).setTargetRPM(targetRPM);
