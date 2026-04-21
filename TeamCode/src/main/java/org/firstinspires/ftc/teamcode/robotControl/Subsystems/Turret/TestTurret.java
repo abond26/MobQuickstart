@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Configurable
 public class TestTurret extends Turret {
     // Small coefficients for the manual power loop
-    public static PIDFCoefficients FLYWHEEL_PID_CLOSE = new PIDFCoefficients(0.0019, 0, 0.00005, 0.0003);
+    public static PIDFCoefficients FLYWHEEL_PID_CLOSE = new PIDFCoefficients(0.003, 0, 0.00005, 0.0004);
     public static PIDFCoefficients FLYWHEEL_PID_FAR = new PIDFCoefficients(0.004, 0.00002, 0.00005, 0.0003);
     public static double SWITCH_PID_DIST = 140;
 
@@ -39,7 +39,7 @@ public class TestTurret extends Turret {
         rotator = hardwareMap.get(Servo.class, "rotator");
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(SCALE_RANGE_LOWER,SCALE_RANGE_UPPER);
-        hood.setPosition(0.8);
+        hood.setPosition(1);
 
         timer.reset();
     }

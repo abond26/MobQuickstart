@@ -99,7 +99,7 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
                 actions.aimRotatorLocal(dynamicTarget, telemetry);
                 actions.autoVelocityEquation(dynamicTarget);
             }
-            Intake.DetectedColor detectedColor = robot.intake.getDetectedColor(telemetry);
+            Intake.DetectedColor detectedColor = robot.intake.getDetectedColorByDistance(telemetry);
 
 //            PoseStorage.savePose(robot.chassisLocal.getPose());
             // Telemetry

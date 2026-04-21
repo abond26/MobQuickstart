@@ -54,6 +54,7 @@ public class Intake implements IntakeConstants{
 
 
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "color_sensor");
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "color_sensor");
 //        colorSensor.setGain(5);
 
         colorTimer.reset();
@@ -184,7 +185,7 @@ public class Intake implements IntakeConstants{
         double distanceMM = distanceSensor.getDistance(DistanceUnit.MM);
         telemetry.addData("Distance (mm)", distanceMM);
 
-        DetectedColor detectedThisFrame = (distanceMM < 25) ? DetectedColor.BALL : DetectedColor.UNKNOWN;
+        DetectedColor detectedThisFrame = (distanceMM < 5) ? DetectedColor.BALL : DetectedColor.UNKNOWN;
 
         if (detectedThisFrame != currentlyDetectedColor) {
             currentlyDetectedColor = detectedThisFrame;

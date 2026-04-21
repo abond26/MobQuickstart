@@ -130,15 +130,11 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         double targetRPM;
 
         if (robotY < 30) {
-            turret.setHoodPos(0.168);
-
-            targetRPM = 2580;
-
+           return;
         } else {
-            turret.setHoodPos(0.8);
 
 
-            targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1510.8400;
+            targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1470;
         }
 
         if (turret instanceof TestTurret) {
@@ -169,11 +165,11 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         double robotY = chassisLocal.getPose().getY();
 
         if (robotY < 30) {
-            shootingTargetOverride = new Pose(5, 144, 144);
+            shootingTargetOverride = new Pose(7, 144, 144);
         } else if (robotY >= 30 && robotY < 109.851150202977) {
-            shootingTargetOverride = new Pose(2, 144, 0);
+            shootingTargetOverride = new Pose(-1, 144, 0);
         } else {
-            shootingTargetOverride = new Pose(9, 140, 0);
+            shootingTargetOverride = new Pose(7, 140, 0);
         }
     }
     public void ChangeTargRed() {

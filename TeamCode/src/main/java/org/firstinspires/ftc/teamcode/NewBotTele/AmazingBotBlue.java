@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.NewBotTele;
 import android.util.Log;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -14,6 +15,8 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TestTurret;
 import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
+import com.bylazar.telemetry.PanelsTelemetry;
+
 
 @TeleOp(name = "BLUEEEEE b")
 @Configurable
@@ -23,6 +26,8 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
     RobotActions actions;
     TestTurret testTurret;
     boolean sillyControls = false;
+    static TelemetryManager telemetryM;
+
 
     Pose sillyTarget;
     public static double RpmChange = 20;
@@ -37,6 +42,8 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
     public void runOpMode() throws InterruptedException {
         Pose startPose = PoseStorage.loadPose(defaultPose);
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+
 
         // Initialize the specialized TEST TURRET
         testTurret = new TestTurret(hardwareMap);
@@ -95,22 +102,24 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             }
             actions.ChangeTargBlue();
             Pose dynamicTarget = actions.getShootingTarget();
+            sillyTarget = robot.chassisLocal.sillyTargetPose(dynamicTarget);
             if (sillyControls) {
-                actions.aimRotatorLocal(dynamicTarget, telemetry);
-                actions.autoVelocityEquation(dynamicTarget);
+                actions.aimRotatorLocal(sillyTarget, telemetry);
+                actions.autoVelocityEquation(sillyTarget);
             }
             Intake.DetectedColor detectedColor = robot.intake.getDetectedColor(telemetry);
 
 //            PoseStorage.savePose(robot.chassisLocal.getPose());
             // Telemetry
-            telemetry.addData("Mode", "MANUAL PID LOOP");
-            telemetry.addData("RPM", "%.1f / Target: %.1f", testTurret.getRPM(), testTurret.getTargetVelocity());
-            telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
-            telemetry.addData("Ball Detected", detectedColor);
-            telemetry.addData("Target Pose", dynamicTarget);
+            telemetryM.debug("Mode", "MANUAL PID LOOP");
+            
+            telemetryM.debug("RPM", "%.1f / Target: %.1f", testTurret.getRPM(), testTurret.getTargetVelocity());
+            telemetryM.debug("Hood", "%.3f", robot.turret.getHoodPos());
+            telemetryM.debug("Ball Detected", detectedColor);
+            telemetryM.debug("Target Pose", dynamicTarget);
 
-            telemetry.addData("Distance", "%.2f", currentDist);
-            telemetry.update();
+            telemetryM.debug("Distance", "%.2f", currentDist);
+            telemetryM.update();
         }
     }
 }
