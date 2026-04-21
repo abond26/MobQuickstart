@@ -126,7 +126,20 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
 
     public void autoVelocityEquation(Pose targ) {
         double dist = chassisLocal.getDistance(targ);
-        double targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1500.8400;
+        double robotY = chassisLocal.getPose().getY();
+        double targetRPM;
+
+        if (robotY < 30) {
+            turret.setHoodPos(0.168);
+
+            targetRPM = 2580;
+
+        } else {
+            turret.setHoodPos(0.8);
+
+
+            targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1510.8400;
+        }
 
         if (turret instanceof TestTurret) {
             ((TestTurret) turret).setTargetRPM(targetRPM);
@@ -152,6 +165,29 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         Pose current = getShootingTarget();
         shootingTargetOverride = new Pose(current.getX() + amount, current.getY(), current.getHeading());
     }
+    public void ChangeTargBlue() {
+        double robotY = chassisLocal.getPose().getY();
+
+        if (robotY < 30) {
+            shootingTargetOverride = new Pose(5, 144, 144);
+        } else if (robotY >= 30 && robotY < 109.851150202977) {
+            shootingTargetOverride = new Pose(2, 144, 0);
+        } else {
+            shootingTargetOverride = new Pose(9, 140, 0);
+        }
+    }
+    public void ChangeTargRed() {
+        double robotY = chassisLocal.getPose().getY();
+
+        if (robotY < 30) {
+            shootingTargetOverride = new Pose(72, 72, 0);
+        } else if (robotY >= 30 && robotY < 60) {
+            shootingTargetOverride = new Pose(72, 100, 0);
+        } else {
+            shootingTargetOverride = new Pose(72, 140, 0);
+        }
+    }
+
 
     // public void autoAdjustShooter() {
     // double distance = vision.getTargetDistance();

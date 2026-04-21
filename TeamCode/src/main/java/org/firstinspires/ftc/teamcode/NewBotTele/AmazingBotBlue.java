@@ -26,7 +26,7 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
 
     Pose sillyTarget;
     public static double RpmChange = 20;
-    public static double intakespeed = 0.8;
+    public static double intakespeed = 1;
 
 
 
@@ -93,9 +93,11 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             if (!gamepad1.right_bumper) {
                 actions.intake(sumOfTrigs);
             }
+            actions.ChangeTargBlue();
+            Pose dynamicTarget = actions.getShootingTarget();
             if (sillyControls) {
-                actions.aimRotatorLocal(target, telemetry);
-                actions.autoVelocityEquation(target);
+                actions.aimRotatorLocal(dynamicTarget, telemetry);
+                actions.autoVelocityEquation(dynamicTarget);
             }
             Intake.DetectedColor detectedColor = robot.intake.getDetectedColor(telemetry);
 
@@ -105,6 +107,7 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             telemetry.addData("RPM", "%.1f / Target: %.1f", testTurret.getRPM(), testTurret.getTargetVelocity());
             telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
             telemetry.addData("Ball Detected", detectedColor);
+            telemetry.addData("Target Pose", dynamicTarget);
 
             telemetry.addData("Distance", "%.2f", currentDist);
             telemetry.update();
