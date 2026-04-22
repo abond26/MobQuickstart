@@ -218,7 +218,8 @@ public class ChassisLocal implements DriveConstants{
             }
         }
         return inPosition;
-        
+
+
 
 
         //Left Side
@@ -230,6 +231,29 @@ public class ChassisLocal implements DriveConstants{
         //y = -x + 144
 
     }
+    // Inside ChassisLocal.java
+    public Pose getLeadTargetPose(Pose target) {
+        double dist = getDistance(target);
+        Vector velocity = getVelocity();
+
+
+        double g = 386.088;
+        double scoreHeight = 44.0;
+        double scoreAngle = Math.toRadians(-40);
+
+        double time = Math.sqrt(2 * (scoreHeight - dist * Math.tan(scoreAngle)) / g);
+
+        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
+        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
+
+        return new Pose(
+                target.getX() - vx * time,
+                target.getY() - vy * time,
+                target.getHeading()
+        );
+    }
+
+
 
     //----------------------------------------------------------------
     //TO CHANGE? -> Put in Turret class

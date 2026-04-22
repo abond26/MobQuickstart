@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Configurable
 public class TestTurret extends Turret {
     // Small coefficients for the manual power loop
-    public static PIDFCoefficients FLYWHEEL_PID_CLOSE = new PIDFCoefficients(0.0029, 0.000, 0.00001, 0.000077);
+    public static PIDFCoefficients FLYWHEEL_PID_CLOSE = new PIDFCoefficients(0.0029, 0.000, 0.00005, 0.000077);
     public static PIDFCoefficients FLYWHEEL_PID_FAR = new PIDFCoefficients(.008, 0.000, 0.0000, 0.000087);
     public static double SWITCH_PID_DIST = 140;
 

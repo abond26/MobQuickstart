@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.robotControl;
 import androidx.annotation.NonNull;
 
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis.ChassisLocal;
@@ -13,6 +15,7 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TurretConst
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TestTurret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.ShotTimeLookupTable;
 
 public class RobotActions implements BlueUniversalConstants, TurretConstants {
 
@@ -130,9 +133,11 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         double targetRPM;
 
         if (robotY < 30) {
+            targetRPM = 2700;
+
            return;
         } else {
-            turret.setHoodPos(0.38984674329501917);
+//            turret.setHoodPos(0.38984674329501917);
 
 
             targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1500;
@@ -166,7 +171,7 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         double robotY = chassisLocal.getPose().getY();
 
         if (robotY < 30) {
-            shootingTargetOverride = new Pose(14, 144, 144);
+            shootingTargetOverride = new Pose(12, 144, 144);
         } else if (robotY >= 30 && robotY < 109.851150202977) {
             shootingTargetOverride = new Pose(-1, 144, 0);
         } else {
@@ -184,6 +189,15 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
             shootingTargetOverride = new Pose(72, 140, 0);
         }
     }
+    // Inside RobotActions.java
+    public void aimTurret(Pose target) {
+        Pose leadTarget = chassisLocal.getLeadTargetPose(target);
+
+        double angle = chassisLocal.calculateTurretAngle(leadTarget);
+        turret.setRotatorToAngle(angle);
+
+    }
+
 
 
     // public void autoAdjustShooter() {
