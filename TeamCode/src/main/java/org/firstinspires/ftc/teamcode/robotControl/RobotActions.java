@@ -132,9 +132,10 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         if (robotY < 30) {
            return;
         } else {
+            turret.setHoodPos(0.38984674329501917);
 
 
-            targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1470;
+            targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1500;
         }
 
         if (turret instanceof TestTurret) {
@@ -165,7 +166,7 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         double robotY = chassisLocal.getPose().getY();
 
         if (robotY < 30) {
-            shootingTargetOverride = new Pose(7, 144, 144);
+            shootingTargetOverride = new Pose(14, 144, 144);
         } else if (robotY >= 30 && robotY < 109.851150202977) {
             shootingTargetOverride = new Pose(-1, 144, 0);
         } else {

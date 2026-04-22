@@ -25,7 +25,7 @@ public class Intake implements IntakeConstants{
     private ElapsedTime colorTimer = new ElapsedTime();
     private ElapsedTime autonColorTimer = new ElapsedTime();
     private DetectedColor currentlyDetectedColor = DetectedColor.UNKNOWN;
-    public double requiredDetectionTimeSeconds = 0.3;
+    public double requiredDetectionTimeSeconds = 0.6;
     public double autonTime = 0.2;
 
     public enum DetectedColor {
