@@ -29,13 +29,8 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
     static TelemetryManager telemetryM;
 
 
-    Pose sillyTarget;
     public static double RpmChange = 20;
     public static double intakespeed = 1;
-
-
-
-
 
 
     @Override
@@ -60,17 +55,10 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
 
         while (opModeIsActive()) {
 
-//            if (gamepad1.right_stick_button){
-//                PoseStorage.clearPose();
-//            }
-
             robot.chassisLocal.update();
-            sillyTarget = robot.chassisLocal.sillyTargetPose(target);
 
             robot.chassisLocal.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            double currentDist = robot.chassisLocal.getDistance(target);
-            testTurret.update(currentDist);
 
             if (gamepad1.aWasPressed()) testTurret.shiftVelocity(RpmChange);
             if (gamepad1.yWasPressed()) testTurret.shiftVelocity(-RpmChange);
@@ -101,24 +89,22 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
                 actions.intake(sumOfTrigs);
             }
 
+            Pose activeTarget = target;
             if (sillyControls) {
                 actions.ChangeTargBlue();
-                Pose dynamicTarget = actions.getShootingTarget();
-                actions.aimTurret(dynamicTarget);
-                actions.autoVelocityEquation(dynamicTarget);
+                activeTarget = actions.getShootingTarget();
+                
+                actions.aimTurret(activeTarget);
             }
-            }
-//            Intake.DetectedColor detectedColor = robot.intake.getDetectedColor(telemetry);
 
-//            PoseStorage.savePose(robot.chassisLocal.getPose());
-            // Telemetry
-            telemetryM.debug("Mode", "MANUAL PID LOOP");
-            
-            telemetryM.debug("RPM", "%.1f / Target: %.1f", testTurret.getRPM(), testTurret.getTargetVelocity());
-            telemetryM.debug("Hood", "%.3f", robot.turret.getHoodPos());
-//            telemetryM.debug("Ball Detected", detectedColor);
+            testTurret.update(robot.chassisLocal.getDistance(activeTarget));
 
-            telemetryM.update();
+            telemetry.addData("Mode", sillyControls ? "AUTO-AIM ACTIVE" : "MANUAL PID LOOP");
+            telemetry.addData("RPM", "%.1f / Target: %.1f", testTurret.getRPM(), testTurret.getTargetVelocity());
+            telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
+            telemetry.addData("Pose", "X: %.1f, Y: %.1f", robot.chassisLocal.getPose().getX(), robot.chassisLocal.getPose().getY());
+            telemetry.addData("Velo", "XVelo: %.1f, YVelo: %.1f", robot.chassisLocal.getVeloX(), robot.chassisLocal.getVeloY());
+            telemetry.update();
         }
     }
-
+}

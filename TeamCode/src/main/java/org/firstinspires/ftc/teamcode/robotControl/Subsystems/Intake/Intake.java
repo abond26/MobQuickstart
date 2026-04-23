@@ -2,14 +2,12 @@ package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake;
 
 import androidx.annotation.NonNull;
 
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.SwitchableLight;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -18,13 +16,11 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Intake implements IntakeConstants{
     private DcMotor intakeL, intakeR;
     private Servo intakeShifterR, intakeShifterL;
-    private NormalizedColorSensor colorSensor;
     private DistanceSensor distanceSensor;
-
-    // Color detection state
+    
     private ElapsedTime colorTimer = new ElapsedTime();
-    private ElapsedTime autonColorTimer = new ElapsedTime();
     private DetectedColor currentlyDetectedColor = DetectedColor.UNKNOWN;
+
     public double requiredDetectionTimeSeconds = 0.6;
     public double autonTime = 0.2;
 
@@ -53,10 +49,7 @@ public class Intake implements IntakeConstants{
         intakeShifterL.setPosition(0.56);
 
 
-        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "color_sensor");
-        distanceSensor = hardwareMap.get(DistanceSensor.class, "color_sensor");
-//        colorSensor.setGain(5);
-
+        distanceSensor = hardwareMap.get(RevColorSensorV3.class, "color_sensor");
         colorTimer.reset();
     }
 
@@ -94,114 +87,36 @@ public class Intake implements IntakeConstants{
     }
 
 
-    public DetectedColor getDetectedColor(Telemetry telemetry) {
-        NormalizedRGBA colors = colorSensor.getNormalizedColors();
-        float normRed = colors.red / colors.alpha;
-        float normGreen = colors.green / colors.alpha;
-        float normBlue = colors.blue / colors.alpha;
+    public DetectedColor getDetectedBall(Telemetry telemetry) {
+        double distanceInches = distanceSensor.getDistance(DistanceUnit.INCH);
+        telemetry.addData("Intake Distance (in)", distanceInches);
 
-        telemetry.addData("Color R", normRed);
-        telemetry.addData("Color G", normGreen);
-        telemetry.addData("Color B", normBlue);
-
-        DetectedColor detectedThisFrame = DetectedColor.UNKNOWN;
-
-
-
-        boolean objectPresent = normRed < 0.015 && normGreen < 0.028;
-
-        if (objectPresent) {
-            if (normGreen > 0.014 && normGreen < 0.025) {
-                detectedThisFrame = DetectedColor.GREEN;
-            } else {
-                detectedThisFrame = DetectedColor.PURPLE;
-            }
-        }
+        DetectedColor detectedThisFrame = (distanceInches < DISTANCE_THRESHOLD_INCHES) ? DetectedColor.BALL : DetectedColor.UNKNOWN;
 
         if (detectedThisFrame != currentlyDetectedColor) {
             currentlyDetectedColor = detectedThisFrame;
             colorTimer.reset();
         }
 
-        telemetry.addData("Detected Color", currentlyDetectedColor);
-        telemetry.addData("Detection Time (s)", colorTimer.seconds());
-
-        if (currentlyDetectedColor != DetectedColor.UNKNOWN && colorTimer.seconds() >= requiredDetectionTimeSeconds) {
-            if (currentlyDetectedColor == DetectedColor.PURPLE || currentlyDetectedColor == DetectedColor.GREEN) {
-                down();
-            }
-            return currentlyDetectedColor;
-        } else {
-            shift();
+        if (currentlyDetectedColor == DetectedColor.BALL && colorTimer.seconds() >= requiredDetectionTimeSeconds) {
+            return DetectedColor.BALL;
         }
 
         return DetectedColor.UNKNOWN;
     }
+
+    public DetectedColor getDetectedColor(Telemetry telemetry) {
+        return getDetectedBall(telemetry);
+    }
+
     public DetectedColor AutonColor(Telemetry telemetry) {
-        NormalizedRGBA colors = colorSensor.getNormalizedColors();
-        float normRed = colors.red / colors.alpha;
-        float normGreen = colors.green / colors.alpha;
-        float normBlue = colors.blue / colors.alpha;
-
-        telemetry.addData("Color R", normRed);
-        telemetry.addData("Color G", normGreen);
-        telemetry.addData("Color B", normBlue);
-
-        DetectedColor detectedThisFrame = DetectedColor.UNKNOWN;
-
-
-
-        boolean objectPresent = normRed < 0.015 && normGreen < 0.028;
-
-        if (objectPresent) {
-            if (normGreen > 0.014 && normGreen < 0.025) {
-                detectedThisFrame = DetectedColor.GREEN;
-            } else {
-                detectedThisFrame = DetectedColor.PURPLE;
-            }
-        }
-
-        if (detectedThisFrame != currentlyDetectedColor) {
-            currentlyDetectedColor = detectedThisFrame;
-            autonColorTimer.reset();
-        }
-
-        telemetry.addData("Detected Color", currentlyDetectedColor);
-        telemetry.addData("Detection Time (s)", autonColorTimer.seconds());
-
-        if (currentlyDetectedColor != DetectedColor.UNKNOWN && autonColorTimer.seconds() >= autonTime) {
-            if (currentlyDetectedColor == DetectedColor.PURPLE || currentlyDetectedColor == DetectedColor.GREEN) {
-                down();
-            }
-            return currentlyDetectedColor;
-        } else {
-            shift();
-        }
-
-        return DetectedColor.UNKNOWN;
+         if (distanceSensor.getDistance(DistanceUnit.INCH) < DISTANCE_THRESHOLD_INCHES) {
+             return DetectedColor.BALL;
+         }
+         return DetectedColor.UNKNOWN;
     }
 
     public DetectedColor getDetectedColorByDistance(Telemetry telemetry) {
-        double distanceMM = distanceSensor.getDistance(DistanceUnit.MM);
-        telemetry.addData("Distance (mm)", distanceMM);
-
-        DetectedColor detectedThisFrame = (distanceMM < 5) ? DetectedColor.BALL : DetectedColor.UNKNOWN;
-
-        if (detectedThisFrame != currentlyDetectedColor) {
-            currentlyDetectedColor = detectedThisFrame;
-            colorTimer.reset();
-        }
-
-        telemetry.addData("Detected State", currentlyDetectedColor);
-        telemetry.addData("Detection Time (s)", colorTimer.seconds());
-
-        if (currentlyDetectedColor != DetectedColor.UNKNOWN && colorTimer.seconds() >= requiredDetectionTimeSeconds) {
-            down();
-            return currentlyDetectedColor;
-        } else {
-            shift();
-        }
-
-        return DetectedColor.UNKNOWN;
+        return getDetectedBall(telemetry);
     }
 }
