@@ -238,8 +238,8 @@ public class ChassisLocal implements DriveConstants{
 
 
         double g = 386.088;
-        double scoreHeight = 44.0;
-        double scoreAngle = Math.toRadians(-40);
+        double scoreHeight = 50;
+        double scoreAngle = Math.toRadians(-60);
 
         double time = Math.sqrt(2 * (scoreHeight - dist * Math.tan(scoreAngle)) / g);
 
@@ -251,6 +251,14 @@ public class ChassisLocal implements DriveConstants{
                 target.getY() - vy * time,
                 target.getHeading()
         );
+    }
+    public double getVeloX(){
+        Vector velocity = getVelocity();
+        return  velocity.getXComponent();
+    }
+    public double getVeloY(){
+        Vector velocity = getVelocity();
+        return  velocity.getYComponent();
     }
 
 
