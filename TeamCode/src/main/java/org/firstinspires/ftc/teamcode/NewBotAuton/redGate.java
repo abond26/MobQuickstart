@@ -272,9 +272,11 @@ public class redGate extends OpMode {
                 }
                 Intake.DetectedColor color = robot.intake.AutonColor(telemetry);
                 boolean full = (color != Intake.DetectedColor.UNKNOWN);
-                boolean ready = full || openTimer.getElapsedTimeSeconds() >3.5;
+                boolean ready = full || openTimer.getElapsedTimeSeconds() > 3.5;
+                boolean forceGateLeave = opModeTimer.getElapsedTimeSeconds() >= 24.5;
 
-                if ((arrived() || isNear(gateCollect1, 3))&& gateCollectionStarted && ready) {
+                if (gateCollectionStarted
+                        && (((arrived() || isNear(gateCollect1, 3)) && ready) || forceGateLeave)) {
                     robot.intake.up();
                     robot.gate.block();
                     shotFeeding = false;
@@ -314,12 +316,13 @@ public class redGate extends OpMode {
                         robot.gate.open();
                     }
                     boolean readyToLeave = shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5;
-                    if (opModeTimer.getElapsedTimeSeconds() < 24 && readyToLeave) {
-                        setPathState((redGate.PathState.GateCollection));
-                    }
-                    if (opModeTimer.getElapsedTimeSeconds() > 24 &&readyToLeave) {
-                        robot.intake.shift();
-                        setPathState(PathState.collectAgainAgainEnd);
+                    if (readyToLeave) {
+                        if (opModeTimer.getElapsedTimeSeconds() < 24) {
+                            setPathState((redGate.PathState.GateCollection));
+                        } else {
+                            robot.intake.shift();
+                            setPathState(PathState.collectAgainAgainEnd);
+                        }
                     }
                 }
                 break;

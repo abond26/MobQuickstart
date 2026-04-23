@@ -208,7 +208,10 @@ public class redFar extends OpMode {
                 }
                 if(shoot1Started) {
                     robot.gate.open();
-                    setPathState(redFar.PathState.actuallyshoot1);
+                    // Do not call setPathState here; it clears shoot1Started and can break
+                    // the first-shot transition.
+                    pathState = PathState.actuallyshoot1;
+                    pathTimer.resetTimer();
                 }
 
                 break;
@@ -252,12 +255,15 @@ public class redFar extends OpMode {
                     robot.gate.block();
                     follower.followPath(GateCollect1);
                     gateCollectionStarted = true;
+                    openTimer.resetTimer();
                 }
                 Intake.DetectedColor color = robot.intake.AutonColor(telemetry);
                 boolean full = (color != Intake.DetectedColor.UNKNOWN);
-                boolean ready = full || openTimer.getElapsedTimeSeconds() >1.0;
+                boolean ready = full || openTimer.getElapsedTimeSeconds() > 1.0;
+                boolean forceGateLeave = opModeTimer.getElapsedTimeSeconds() >= 27.5;
 
-                if ((arrived() || isNear(gateCollect1, 3))&& gateCollectionStarted && ready) {
+                if (gateCollectionStarted
+                        && (((arrived() || isNear(gateCollect1, 3)) && ready) || forceGateLeave)) {
                     robot.intake.down();
                     setPathState((redFar.PathState.shootAgain));
                 }
@@ -275,11 +281,12 @@ public class redFar extends OpMode {
                         shotFeeding = true;
                     }
                     boolean readyToLeave = shotFeeding && shootTimer.getElapsedTimeSeconds() > 1.5;
-                    if (opModeTimer.getElapsedTimeSeconds() < 27 && readyToLeave) {
-                        setPathState((redFar.PathState.GateCollection));
-                    }
-                    if (opModeTimer.getElapsedTimeSeconds() > 27 && pathTimer.getElapsedTimeSeconds() > 2.25) {
-                        setPathState(PathState.collectAgainAgainEnd);
+                    if (readyToLeave) {
+                        if (opModeTimer.getElapsedTimeSeconds() < 27) {
+                            setPathState((redFar.PathState.GateCollection));
+                        } else {
+                            setPathState(PathState.collectAgainAgainEnd);
+                        }
                     }
                 }
                 break;

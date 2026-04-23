@@ -26,7 +26,7 @@ public class Intake implements IntakeConstants{
     private ElapsedTime autonColorTimer = new ElapsedTime();
     private DetectedColor currentlyDetectedColor = DetectedColor.UNKNOWN;
     public double requiredDetectionTimeSeconds = 0.6;
-    public double autonTime = 0.2;
+    public double autonTime = 0.15;
 
     public enum DetectedColor {
         PURPLE,
@@ -91,6 +91,11 @@ public class Intake implements IntakeConstants{
     public void shift(){
         intakeShifterL.setPosition(0.56);
         intakeShifterR.setPosition(0.56);
+    }
+    public void gateCollet()
+    {
+        intakeShifterL.setPosition(0.58);
+        intakeShifterR.setPosition(0.58);
     }
 
 

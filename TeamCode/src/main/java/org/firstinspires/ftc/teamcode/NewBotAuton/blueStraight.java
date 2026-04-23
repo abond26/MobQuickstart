@@ -29,12 +29,11 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
 import org.firstinspires.ftc.teamcode.tests.ColorTesting;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "BlueGate", group = "auto", preselectTeleOp = "AmazingBotBlue")
-public class blueGate extends OpMode implements BlueUniversalConstants {
+@Autonomous(name = "Blue Straight", group = "auto", preselectTeleOp = "AmazingBotBlue")
+public class blueStraight extends OpMode implements BlueUniversalConstants {
     private static final double CONSTANT_TARGET_RPM = 2100.0;
     private static double rpmFromDistanceInches(double distIn) {
-        // Keep auton in sync with the latest RobotActions quadratic fit.
-        return 0.012264577 * Math.pow(distIn, 2) + 5.4005132 * distIn + 1500;
+        return  0.012264577 * Math.pow(distIn, 2) + 5.4005132 * distIn + 1470;
     }
     Pose sillyTarget;
     TestTurret testTurret;
@@ -130,41 +129,44 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
         GateCollectionAgain,
         GateCollectionAgainAgain,
         shootAgainAgainAgainAgain,
-        shoot3ToGate
+        shoot3ToGate,
+        collection2
     }
 
     PathState pathState;
 
     private final Pose startPose = new Pose(31.7827645537, 136.97551020408164, Math.toRadians(270));
-    private final Pose shootPose1 = new Pose(62, 77, Math.toRadians(140));
-    private final Pose collect1thing = new Pose(18, 58, Math.toRadians(180));
-    private final Pose goToCollect1ControlPoint = new Pose(52.265, 60.091);
-    private final Pose shootPose2 = new Pose(62, 77, Math.toRadians(155));
+    private final Pose shootPose1 = new Pose(48, 113, Math.toRadians(270));
+    private final Pose collect1thing = new Pose(26, 92, Math.toRadians(270));
+    //private final Pose collect1thingControlPoint1= new Pose(48, 113);
+    private final Pose collect1thingControlPoint2= new Pose(21.17611405126541, 104.94167532212336);
+    private final Pose shootPose2 = new Pose(54, 80, Math.toRadians(270));
+    private final Pose collect2 = new Pose(24, 67.5, Math.toRadians(270));
+    private final Pose collect2ControlPoint1= new Pose(20.598349381017883, 74.95770288858321);
+    private final Pose shootBall3 = new Pose(62, 77, Math.toRadians(148));
     private final Pose gateCollect1 = new Pose(12.75, 60.75, Math.toRadians(148));
+
+    private final Pose shootBall4 = new Pose(62, 77, Math.toRadians(155));
     private final Pose option1 = new Pose(131, 61, Math.toRadians(45));
     private final Pose option2 = new Pose(137, 55, Math.toRadians(90));
 
-    private final Pose shootBall3 = new Pose(62, 77, Math.toRadians(155));
+
     private final Pose inBetween2 = new Pose(100, 62, Math.toRadians(202.5));
     private final Pose gateCollect2 = new Pose(128.5, 62, Math.toRadians(205));
-    private final Pose shootBall4 = new Pose(84, 75, Math.toRadians(230));
     private final Pose gateCollect3 = new Pose(128.5, 62, Math.toRadians(205));
     private final Pose shootBall5 = new Pose(95, 87, Math.toRadians(230));
-    private final Pose collect3end = new Pose(24, 85, Math.toRadians(180));
     private final Pose collect3ControlPoint = new Pose(102.98, 84.857);
-    private final Pose shootBall6 = new Pose(55, 120, Math.toRadians(147));
-    private final Pose park = new Pose(103, 84, Math.toRadians(226));
-
-    private PathChain shoot1, Turn, goToCollect1, shoot3ToGate, collect1, shoot2, GateCollect3, shoot6, InBetween1, InBetween2, GateCollect1, GateCollect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
+    private final Pose park = new Pose(47, 78, Math.toRadians(155));
+    private PathChain shoot1, collection2, Turn, goToCollect1, shoot3ToGate, collect1, shoot2, GateCollect3, shoot6, InBetween1, InBetween2, GateCollect1, GateCollect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
 
     public void buildPaths() {
         shoot1 = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, shootPose1))
+                .addPath(new BezierLine(startPose , shootPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
                 .build();
 
         collect1 = follower.pathBuilder()
-                .addPath(new BezierCurve(shootPose1, goToCollect1ControlPoint, collect1thing))
+                .addPath(new BezierCurve(shootPose1, collect1thingControlPoint2 , collect1thing))
                 .setLinearHeadingInterpolation(shootPose1.getHeading(), collect1thing.getHeading())
                 .build();
 
@@ -172,29 +174,25 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                 .addPath(new BezierLine(collect1thing, shootPose2))
                 .setLinearHeadingInterpolation(collect1thing.getHeading(), shootPose2.getHeading())
                 .build();
-        GateCollect1 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose2, gateCollect1))
-                .setLinearHeadingInterpolation(shootPose2.getHeading(), gateCollect1.getHeading())
+        collection2 = follower.pathBuilder()
+                .addPath(new BezierCurve(shootPose2, collect2ControlPoint1 , collect2))
+                .setLinearHeadingInterpolation(shootPose2.getHeading(), collect2.getHeading())
                 .build();
-        Turn = follower.pathBuilder()
-                .addPath(new BezierLine(gateCollect1, option1))
-                .setLinearHeadingInterpolation(gateCollect1.getHeading(), option1.getHeading())
-                .build();
-
-
         shoot3 = follower.pathBuilder()
+                .addPath(new BezierLine(collect2, shootBall3))
+                .setLinearHeadingInterpolation(collect2.getHeading(), shootBall3.getHeading())
+                .build();
+        GateCollect1 = follower.pathBuilder()
+                .addPath(new BezierLine(shootBall3, gateCollect1))
+                .setLinearHeadingInterpolation(shootBall3.getHeading(), gateCollect1.getHeading())
+                .build();
+        shoot4 = follower.pathBuilder()
                 .addPath(new BezierLine(gateCollect1, shootBall3))
                 .setLinearHeadingInterpolation(gateCollect1.getHeading(), shootBall3.getHeading())
                 .build();
-
-        collect3 = follower.pathBuilder()
-                .addPath(new BezierLine(shootBall3, collect3end))
-                .setLinearHeadingInterpolation(shootBall3.getHeading(), collect3end.getHeading())
-                .build();
-
-        shoot6 = follower.pathBuilder()
-                .addPath(new BezierLine(collect3end, shootBall6))
-                .setLinearHeadingInterpolation(collect3end.getHeading(), shootBall6.getHeading())
+        parking = follower.pathBuilder()
+                .addPath(new BezierLine(shootBall3, park))
+                .setLinearHeadingInterpolation(shootBall3.getHeading(), park.getHeading())
                 .build();
     }
 
@@ -207,6 +205,10 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                     follower.setMaxPower(NORMAL_DRIVE_POWER);
                     follower.followPath(shoot1);
                     shoot1Started = true;
+                }
+                if(pathTimer.getElapsedTime()>0.5)
+                {
+                    robot.gate.open();
                 }
                 // Do not use setPathState here: it clears shoot1Started and breaks the first-shot logic.
                 if (shoot1Started) {
@@ -222,18 +224,17 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                 if (isNear(shootPose1, 5)) {
                     robot.gate.open();
                 }
-                if (shoot1Started && (arrived() || isNear(shootPose1, 7))) {
+                if (shoot1Started && (arrived() || isNear(shootPose1, 5))) {
                     if (!shotFeeding) {
                         robot.gate.open();
                         shootTimer.resetTimer();
                         shotFeeding = true;
                     }
-                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5) {
+                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.75) {
                         setPathState(PathState.collection);
                     }
                 }
                 break;
-
             case collection:
                 if (!collectionStarted) {
                     robot.gate.block();
@@ -242,7 +243,7 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                     shotFeeding = false;
                 }
                 if ((arrived() || isNear(collect1thing, 3)) && collectionStarted) {
-                    setPathState((blueGate.PathState.shoot));
+                    setPathState((PathState.shoot));
                 }
                 break;
             case shoot:
@@ -258,12 +259,40 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                         shotFeeding = true;
                     }
                     if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5) {
-                        robot.intake.gateCollet();
+                        robot.intake.shift();
+                        setPathState((PathState.collectAgainAgain));
+                    }
+                }
+                break;
+            case collectAgainAgain:
+                robot.gate.block();
+                if (!collectionStarted) {
+                    follower.followPath(collection2);
+                    collectionStarted = true;
+                }
+                if ((arrived() || isNear(collect2, 3)) && collectionStarted) {
+                    setPathState((blueStraight.PathState.shootAgainAgainAgainAgain));
+                }
+                break;
+            case shootAgainAgainAgainAgain:
+                if (!shoot5Started) {
+                    follower.followPath(shoot3);
+                    shoot5Started = true;
+                }
+                if (shoot5Started && (arrived() || isNear(shootBall3, 5))) {
+                    robot.intake.powerON();
+                    if (!shotFeeding) {
+                        robot.gate.open();
+                        shootTimer.resetTimer();
+                        shotFeeding = true;
+                    }
+                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5) {
                         setPathState((PathState.GateCollection));
                     }
                 }
                 break;
-            case GateCollection: 
+
+            case GateCollection:
                 if (!gateCollectionStarted) {
                     robot.intake.gateCollet();
                     robot.gate.block();
@@ -282,29 +311,12 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                     robot.intake.up();
                     robot.gate.block();
                     shotFeeding = false;
-                    setPathState((blueGate.PathState.shootAgain));
+                    setPathState((blueStraight.PathState.shootAgain));
                 }
                 break;
-//            case Turny:
-//                if (!turn) {2
-//                    robot.intake.shift();
-//                    robot.gate.block();
-//                    follower.followPath(Turn);
-//                    turn = true;
-//                    gateTimer.resetTimer();
-//                }
-//                Intake.DetectedColor color = robot.intake.AutonColor(telemetry);
-//                boolean full = (color != Intake.DetectedColor.UNKNOWN);
-//                boolean ready = full || gateTimer.getElapsedTimeSeconds() >5;
-//
-//                if ((arrived() || isNear(option1, 3)) && turn && ready) {
-//                    robot.intake.down();
-//                    setPathState((test2.PathState.shootAgain));
-//                }
-//                break;
             case shootAgain:
                 if (!shoot3Started) {
-                    follower.followPath(shoot3);
+                    follower.followPath(shoot4);
                     shoot3Started = true;
                 }
                 if (shoot3Started && (arrived() || isNear(shootBall3, 5))) {
@@ -320,41 +332,20 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                     boolean readyToLeave = shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5;
                     if (readyToLeave) {
                         if (opModeTimer.getElapsedTimeSeconds() < 25) {
-                            setPathState((blueGate.PathState.GateCollection));
+                            setPathState((blueStraight.PathState.GateCollection));
                         } else {
                             robot.intake.shift();
-                            setPathState(PathState.collectAgainAgainEnd);
+                            setPathState(PathState.parklol);
                         }
                     }
                 }
                 break;
-            case collectAgainAgainEnd:
-                robot.gate.block();
-                if (!collectionStarted) {
-                    follower.followPath(collect3);
-                    collectionStarted = true;
-                }
-                if ((arrived() || isNear(collect3end, 3)) && collectionStarted) {
-                    setPathState((blueGate.PathState.shootAgainAgainAgainAgain));
-                }
-                break;
-            case shootAgainAgainAgainAgain:
-                if (!shoot5Started) {
-                    follower.followPath(shoot6);
-                    shoot5Started = true;
-                }
-                if (shoot5Started && (arrived() || isNear(shootBall6, 5))) {
-                    robot.intake.powerON();
-                    if (!shotFeeding) {
-                        robot.gate.open();
-                        shootTimer.resetTimer();
-                        shotFeeding = true;
-                    }
-                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5) {
-                        setPathState((blueGate.PathState.done));
-                    }
-                }
-                break;
+            case parklol:
+            {
+                follower.followPath(parking);
+                setPathState(PathState.done);
+            }
+            break;
             case done:
                 break;
         }
@@ -405,7 +396,7 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                 testTurret,
                 robot.gate,
                 robot.intake
-                );
+        );
         robot.intake.down();
         robot.gate.block();
 
@@ -475,7 +466,7 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
         telemetry.addData("Heading", Math.toDegrees(currentPose.getHeading()));
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("Dist to goal", dist);
-        telemetry.addData("Dist for shooter (lead)", distForShooter);
+        telemetry.addData("Dist for shooter (fixed)", distForShooter);
         telemetry.addData("Turret Angle", -turretAngle);
         telemetry.addData("RPM actual", testTurret.getRPM());
         telemetry.addData("RPM target", testTurret.getTargetVelocity());
