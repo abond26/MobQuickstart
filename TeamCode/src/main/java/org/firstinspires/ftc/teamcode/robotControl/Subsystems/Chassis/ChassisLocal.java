@@ -232,10 +232,13 @@ public class ChassisLocal implements DriveConstants{
 
     }
     // Inside ChassisLocal.java
-    public Pose getLeadTargetPose(Pose target) {
+    /**
+     * @param velocityScale multiply reported chassis velocity before applying lead (use above 1.0 in
+     *                    auton when path follower velocity is smaller than teleop stick drive).
+     */
+    public Pose getLeadTargetPose(Pose target, double velocityScale) {
         double dist = getDistance(target);
         Vector velocity = getVelocity();
-
 
         double g = 386.088;
         double scoreHeight = 50;
@@ -243,14 +246,19 @@ public class ChassisLocal implements DriveConstants{
 
         double time = Math.sqrt(2 * (scoreHeight - dist * Math.tan(scoreAngle)) / g);
 
-        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
-        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
+        double mag = velocity.getMagnitude() * velocityScale;
+        double vx = mag * Math.cos(velocity.getTheta());
+        double vy = mag * Math.sin(velocity.getTheta());
 
         return new Pose(
                 target.getX() - vx * time,
                 target.getY() - vy * time,
                 target.getHeading()
         );
+    }
+
+    public Pose getLeadTargetPose(Pose target) {
+        return getLeadTargetPose(target, 1.0);
     }
     public double getVeloX(){
         Vector velocity = getVelocity();

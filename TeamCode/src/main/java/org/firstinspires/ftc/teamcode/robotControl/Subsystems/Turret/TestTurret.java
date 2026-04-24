@@ -63,7 +63,7 @@ public class TestTurret extends Turret {
         if (targetRPM == 0) { power = 0; integralSum = 0; }
 
        jollyCrusader.setPower(power);
-            gloomyCrusader.setPower(power);
+        gloomyCrusader.setPower(power);
     }
 //
 
