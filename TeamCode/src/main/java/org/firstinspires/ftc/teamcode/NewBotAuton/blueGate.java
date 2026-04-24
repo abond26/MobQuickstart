@@ -460,9 +460,14 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
         sillyTarget = aimTarget;
 
         // RPM target + hood from real auton pose and lead distance (matches teleop intent).
-        double targetRpm = rpmFromDistanceInches(distForShooter);
-        testTurret.setTargetRPM(targetRpm);
-        testTurret.setRotatorToAngle(-turretAngle);
+//        double targetRpm = rpmFromDistanceInches(distForShooter);
+//        testTurret.setTargetRPM(targetRpm);
+        Pose activeTarget = target;
+        actions.ChangeTargBlue();
+        activeTarget = actions.getShootingTarget();
+        actions.aimTurret(target);
+        testTurret.update(robot.chassisLocal.getDistance(activeTarget));
+
         int zone = VelocityLookupTable.getZone(distForShooter);
         if (zone == 1) testTurret.setHoodPos(BlueUniversalConstants.CLOSE_HOOD_POSITION);
         else if (zone == 2) testTurret.setHoodPos(BlueUniversalConstants.MID_HOOD_POSITION);

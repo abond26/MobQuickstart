@@ -109,7 +109,7 @@ public class Intake implements IntakeConstants{
 
         return DetectedColor.UNKNOWN;
     }
-
+//
     public DetectedColor getDetectedColor(Telemetry telemetry) {
         return getDetectedBall(telemetry);
     }

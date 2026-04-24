@@ -23,7 +23,7 @@ public class TestTurret extends Turret {
 
     private double targetRPM = 0;
     private double integralSum = 0;
-    private double lastError = 0;
+    private double lastError = 0; //
     private ElapsedTime timer = new ElapsedTime();
 
     public TestTurret(@NonNull HardwareMap hardwareMap) {

@@ -30,6 +30,7 @@ public class Robot {
 
         intake = new Intake(hardwareMap);
         Log.w("Intake", "Intake Loaded");
+        //
 
         gate = new TransferGate(hardwareMap);
         Log.w("TransferGate", "TransferGate Loaded");

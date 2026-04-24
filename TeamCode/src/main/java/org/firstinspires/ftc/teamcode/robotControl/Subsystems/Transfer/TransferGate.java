@@ -14,7 +14,7 @@ public class TransferGate implements TransferGConstants {
         blocker.scaleRange(SCALE_RANGE_LOWER, SCALE_RANGE_UPPER);
         blocker.setDirection(Servo.Direction.REVERSE);
     }
-//
+/// /
     public void block() {
         blocker.setPosition(BLOCK_POSITION);
     }
