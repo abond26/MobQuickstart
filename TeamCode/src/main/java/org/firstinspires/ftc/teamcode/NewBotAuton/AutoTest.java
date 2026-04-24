@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.NewBotAuton;
 
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.pedropathing.follower.Follower;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
@@ -18,40 +18,45 @@ import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 
+import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
+import com.pedropathing.math.Vector;
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.ShotTimeLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TestTurret;
+import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
 import org.firstinspires.ftc.teamcode.tests.ColorTesting;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
+import org.firstinspires.ftc.teamcode.LimeLight.BallLimelight;
 
-@Autonomous(name = "BlueGate", group = "auto", preselectTeleOp = "AmazingBotBlue")
-public class blueGate extends OpMode implements BlueUniversalConstants {
-    /**
-     * Fixed field-relative turret angle (degrees) for this auton after run starts.
-     * Tune on the field (telemetry used to show dynamic angle; match that here).
-     */
-    private static final double AUTON_FIXED_TURRET_ANGLE_DEG = 23.5;
-    private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FIRST = 25.0;
-    private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FINAL = 0.0;
-    private static final double AUTON_RPM_OFFSET = 100.0;
-
-    /** Open blocker (`robot.gate`) when this close to the shot pose (inches). */
-    private static final double GATE_OPEN_PROXIMITY_IN = 10.0;
-
+@Autonomous(name = "AutoTest", group = "auto", preselectTeleOp = "AmazingBotBlue")
+public class AutoTest extends OpMode {
+    private static final int PIPELINENUM = 0;
+    Pose target = new Pose(0, 144, Math.toRadians(144));
     Pose sillyTarget;
-    TestTurret testTurret;
-    private int rotatorStartPosition=0;
+    private int rotatorStartPosition = 0;
     double txDeg = 0.0;
     double tyDeg = 0.0;
+    private Follower follower;
+    private BallLimelight ballLimelight;
+    /** 0 = following collect1, 1 = detour out, 2 = detour back, 3 = resume to collect pose */
+    private int ballDetourStep = 0;
+    private boolean ballDetourConsumed = false;
+    private Pose ballDetourOrigin;
+    private static final double BALL_DETOUR_RANGE_IN = 30.0;
+    private static final double BALL_DETOUR_MAX_LATERAL_IN = 18.0;
+    private static final double BALL_DETOUR_FORWARD_IN = 6.0;
+    private static final double BALL_DETOUR_MIN_DIST_TO_GOAL_IN = 16.0;
+
     Robot robot;
-    private RobotActions actions;
+
     private Vision vision = null;
     private ColorTesting colorTesting = null;
     private Intake intakeSubsystem = null;
+    private Turret turretSubsystem = null;
     private TransferGate gateSubsystem = null;
-    private static final double BALL_DETECT_TIMEOUT_SEC = 3;
+    private static final double BALL_DETECT_TIMEOUT_SEC = 3.0;
 
     private boolean shoot1Started = false;
     private boolean shoot2Started = false;
@@ -69,7 +74,6 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
     private boolean beginGateCollectionAgainStarted = false;
     private boolean gateCollectionAgainStarted = false;
     private boolean shotFeeding = false;
-    /** True after we have reached the gate pose; gate dwell timer runs only from here. */
     private boolean gateWallDwellStarted = false;
 
     private Servo hood, blocker;
@@ -78,6 +82,7 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 1;
     private static final double INTAKE_DRIVE_POWER = 1;
+    RobotActions actions;
 
     private static final double DISTANCE_THRESHOLD = 180.0;
     private static final double CLOSE_HOOD_POSITION = .2541;
@@ -138,30 +143,29 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
 
     PathState pathState;
 
-    private final Pose startPose = new Pose(31.7827645537, 136.97551020408164, Math.toRadians(270));
-    private final Pose shootPose1 = new Pose(62, 77, Math.toRadians(155));
-    private final Pose collect1thing = new Pose(18, 58, Math.toRadians(180));
-    private final Pose goToCollect1ControlPoint = new Pose(52.265, 60.091);
-    private final Pose shootPose2 = new Pose(64, 77, Math.toRadians(155));
-    private final Pose gateCollect1 = new Pose(12.5, 64.5, Math.toRadians(148));
-    private final Pose option1 = new Pose(131, 61, Math.toRadians(45));
-    private final Pose option2 = new Pose(137, 55, Math.toRadians(90));
+    private final Pose startPose = new Pose(54.7, 7.6, Math.toRadians(180));
+    private final Pose shootPose1 = new Pose(54.7, 18, Math.toRadians(180));
+    private final Pose collect1thing = new Pose(13.5, 34, Math.toRadians(180));
+    private final Pose goToCollect1ControlPoint = new Pose(42.4576341127923, 35.30371389270978);
+    private final Pose shootPose2 = new Pose(47, 9, Math.toRadians(180));
+    private final Pose gateCollect1 = new Pose(9.5, 8, Math.toRadians(180));
+    private final Pose option1 = new Pose(13, 61, Math.toRadians(135));
+    private final Pose option2 = new Pose(7, 55, Math.toRadians(90));
 
-    private final Pose shootBall3 = new Pose(64, 77, Math.toRadians(155));
-    private final Pose inBetween2 = new Pose(100, 62, Math.toRadians(202.5));
-    private final Pose gateCollect2 = new Pose(128.5, 62, Math.toRadians(205));
-    private final Pose shootBall4 = new Pose(84, 75, Math.toRadians(230));
-    private final Pose gateCollect3 = new Pose(128.5, 62, Math.toRadians(205));
-    private final Pose shootBall5 = new Pose(95, 87, Math.toRadians(230));
-    private final Pose collect3end = new Pose(24, 85, Math.toRadians(180));
-    private final Pose collect3ControlPoint = new Pose(102.98, 84.857);
+    private final Pose shootBall3 = new Pose(47, 9, Math.toRadians(180));
+    private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(337.5));
+    private final Pose gateCollect2 = new Pose(15.5, 62, Math.toRadians(335));
+    private final Pose shootBall4 = new Pose(60, 75, Math.toRadians(310));
+    private final Pose gateCollect3 = new Pose(15.5, 62, Math.toRadians(335));
+    private final Pose shootBall5 = new Pose(49, 87, Math.toRadians(310));
+    private final Pose collect3end = new Pose(37, 8.8, Math.toRadians(180));
+    private final Pose collect3ControlPoint = new Pose(41.02, 84.857);
     private final Pose shootBall6 = new Pose(55, 120, Math.toRadians(147));
-    private final Pose park = new Pose(103, 84, Math.toRadians(226));
+    private final Pose park = new Pose(41, 84, Math.toRadians(314));
 
     private PathChain shoot1, Turn, goToCollect1, shoot3ToGate, collect1, shoot2, GateCollect3, shoot6, InBetween1, InBetween2, GateCollect1, GateCollect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
 
     public void buildPaths() {
-        Follower follower = robot.chassisLocal.getFollower();
         shoot1 = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shootPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
@@ -185,7 +189,6 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                 .setLinearHeadingInterpolation(gateCollect1.getHeading(), option1.getHeading())
                 .build();
 
-
         shoot3 = follower.pathBuilder()
                 .addPath(new BezierLine(gateCollect1, shootBall3))
                 .setLinearHeadingInterpolation(gateCollect1.getHeading(), shootBall3.getHeading())
@@ -203,7 +206,6 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
     }
 
     public void statePathUpdate() {
-        Follower follower = robot.chassisLocal.getFollower();
         switch (pathState) {
             case start:
                 if (!shoot1Started) {
@@ -213,8 +215,8 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                     follower.followPath(shoot1);
                     shoot1Started = true;
                 }
-                // Do not use setPathState here: it clears shoot1Started and breaks the first-shot logic.
                 if (shoot1Started) {
+                    robot.gate.open();
                     pathState = PathState.actuallyshoot1;
                     pathTimer.resetTimer();
                 }
@@ -222,20 +224,8 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                 break;
             case actuallyshoot1:
                 robot.intake.shift();
-                // Open gate when close to first shot pose (do not clear shotFeeding every frame — that
-                // was resetting the feed timer every loop so collection never triggered).
-                if (isNear(shootPose1, GATE_OPEN_PROXIMITY_IN)) {
-                    robot.gate.open();
-                }
-                if (shoot1Started && (arrived() || isNear(shootPose1, GATE_OPEN_PROXIMITY_IN))) {
-                    if (!shotFeeding) {
-                        robot.gate.open();
-                        shootTimer.resetTimer();
-                        shotFeeding = true;
-                    }
-                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5) {
-                        setPathState(PathState.collection);
-                    }
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 0.25) {
+                    setPathState(PathState.collection);
                 }
                 break;
 
@@ -246,8 +236,55 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                     collectionStarted = true;
                     shotFeeding = false;
                 }
+                boolean farEnoughForBallDetour = !isNear(collect1thing, BALL_DETOUR_MIN_DIST_TO_GOAL_IN);
+                if (!ballDetourConsumed
+                        && ballDetourStep == 0
+                        && ballLimelight.isConnected()
+                        && ballLimelight.seesBall()
+                        && farEnoughForBallDetour
+                        && follower.isBusy()) {
+                    ballDetourOrigin = follower.getPose();
+                    double tx = ballLimelight.getTxDegrees();
+                    // Positive tx = target right of crosshair → drive robot-right → negative robot-left.
+                    double lateral = -Math.tan(Math.toRadians(tx)) * BALL_DETOUR_RANGE_IN;
+                    lateral = Math.max(-BALL_DETOUR_MAX_LATERAL_IN,
+                            Math.min(BALL_DETOUR_MAX_LATERAL_IN, lateral));
+                    Pose toward = offsetRobotRelative(ballDetourOrigin, BALL_DETOUR_FORWARD_IN, lateral);
+                    PathChain detourOut = follower.pathBuilder()
+                            .addPath(new BezierLine(ballDetourOrigin, toward))
+                            .setLinearHeadingInterpolation(
+                                    ballDetourOrigin.getHeading(), toward.getHeading())
+                            .build();
+                    follower.followPath(detourOut);
+                    ballDetourStep = 1;
+                    break;
+                }
+                if (ballDetourStep == 1 && arrived()) {
+                    Pose at = follower.getPose();
+                    PathChain detourBack = follower.pathBuilder()
+                            .addPath(new BezierLine(at, ballDetourOrigin))
+                            .setLinearHeadingInterpolation(at.getHeading(), ballDetourOrigin.getHeading())
+                            .build();
+                    follower.followPath(detourBack);
+                    ballDetourStep = 2;
+                    break;
+                }
+                if (ballDetourStep == 2 && arrived()) {
+                    Pose at2 = follower.getPose();
+                    PathChain resumeToCollect = follower.pathBuilder()
+                            .addPath(new BezierLine(at2, collect1thing))
+                            .setLinearHeadingInterpolation(at2.getHeading(), collect1thing.getHeading())
+                            .build();
+                    follower.followPath(resumeToCollect);
+                    ballDetourStep = 3;
+                    break;
+                }
+                if (ballDetourStep == 3 && arrived()) {
+                    ballDetourStep = 0;
+                    ballDetourConsumed = true;
+                }
                 if ((arrived() || isNear(collect1thing, 3)) && collectionStarted) {
-                    setPathState((blueGate.PathState.shoot));
+                    setPathState((AutoTest.PathState.shoot));
                 }
                 break;
             case shoot:
@@ -255,78 +292,54 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                     follower.followPath(shoot2);
                     shoot2Started = true;
                 }
-                if (shoot2Started && (arrived() || isNear(shootPose2, GATE_OPEN_PROXIMITY_IN))) {
+                if (shoot2Started && (arrived() || isNear(shootPose2, 5))) {
                     robot.intake.powerON();
                     if (!shotFeeding) {
                         robot.gate.open();
                         shootTimer.resetTimer();
                         shotFeeding = true;
                     }
-                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5) {
-                        robot.intake.gateCollet();
+                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 1.5) {
                         setPathState((PathState.GateCollection));
                     }
                 }
                 break;
-            case GateCollection: 
+            case GateCollection:
                 if (!gateCollectionStarted) {
-                    robot.intake.gateCollet();
+                    robot.intake.down();
                     robot.gate.block();
                     follower.followPath(GateCollect1);
                     gateCollectionStarted = true;
                     openTimer.resetTimer();
                 }
                 Intake.DetectedColor color = robot.intake.AutonColor(telemetry);
-                robot.intake.gateCollet();
                 boolean full = (color != Intake.DetectedColor.UNKNOWN);
-                boolean ready = full || openTimer.getElapsedTimeSeconds() > 3.25;
-                boolean forceGateLeave = opModeTimer.getElapsedTimeSeconds() >= 25.5;
+                boolean ready = full || openTimer.getElapsedTimeSeconds() > 1.0;
+                boolean forceGateLeave = opModeTimer.getElapsedTimeSeconds() >= 27.5;
 
                 if (gateCollectionStarted
-                        && (((arrived() || isNear(gateCollect1, 5)) && ready) || forceGateLeave)) {
-                    robot.intake.up();
-                    robot.gate.block();
-                    shotFeeding = false;
-                    setPathState((blueGate.PathState.shootAgain));
+                        && (((arrived() || isNear(gateCollect1, 3)) && ready) || forceGateLeave)) {
+                    robot.intake.down();
+                    setPathState((AutoTest.PathState.shootAgain));
                 }
                 break;
-//            case Turny:
-//                if (!turn) {2
-//                    robot.intake.shift();
-//                    robot.gate.block();
-//                    follower.followPath(Turn);
-//                    turn = true;
-//                    gateTimer.resetTimer();
-//                }
-//                Intake.DetectedColor color = robot.intake.AutonColor(telemetry);
-//                boolean full = (color != Intake.DetectedColor.UNKNOWN);
-//                boolean ready = full || gateTimer.getElapsedTimeSeconds() >5;
-//
-//                if ((arrived() || isNear(option1, 3)) && turn && ready) {
-//                    robot.intake.down();
-//                    setPathState((test2.PathState.shootAgain));
-//                }
-//                break;
             case shootAgain:
                 if (!shoot3Started) {
                     follower.followPath(shoot3);
                     shoot3Started = true;
                 }
-                if (shoot3Started && (arrived() || isNear(shootBall3, GATE_OPEN_PROXIMITY_IN))) {
+                if (shoot3Started && (arrived() || isNear(shootBall3, 5))) {
                     robot.intake.powerON();
                     if (!shotFeeding) {
+                        robot.gate.open();
                         shootTimer.resetTimer();
                         shotFeeding = true;
                     }
-                    if (isNear(shootBall3, GATE_OPEN_PROXIMITY_IN)) {
-                        robot.gate.open();
-                    }
-                    boolean readyToLeave = shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5;
+                    boolean readyToLeave = shotFeeding && shootTimer.getElapsedTimeSeconds() > 1.5;
                     if (readyToLeave) {
-                        if (opModeTimer.getElapsedTimeSeconds() < 25) {
-                            setPathState((blueGate.PathState.GateCollection));
+                        if (opModeTimer.getElapsedTimeSeconds() < 27) {
+                            setPathState((AutoTest.PathState.GateCollection));
                         } else {
-                            robot.intake.shift();
                             setPathState(PathState.collectAgainAgainEnd);
                         }
                     }
@@ -339,24 +352,7 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                     collectionStarted = true;
                 }
                 if ((arrived() || isNear(collect3end, 3)) && collectionStarted) {
-                    setPathState((blueGate.PathState.shootAgainAgainAgainAgain));
-                }
-                break;
-            case shootAgainAgainAgainAgain:
-                if (!shoot5Started) {
-                    follower.followPath(shoot6);
-                    shoot5Started = true;
-                }
-                if (shoot5Started && (arrived() || isNear(shootBall6, GATE_OPEN_PROXIMITY_IN))) {
-                    robot.intake.powerON();
-                    if (!shotFeeding) {
-                        robot.gate.open();
-                        shootTimer.resetTimer();
-                        shotFeeding = true;
-                    }
-                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5) {
-                        setPathState((blueGate.PathState.done));
-                    }
+                    setPathState(PathState.done);
                 }
                 break;
             case done:
@@ -384,6 +380,8 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
         gateCollectionAgainStarted = false;
         shotFeeding = false;
         gateWallDwellStarted = false;
+        ballDetourStep = 0;
+        ballDetourConsumed = false;
     }
 
     @Override
@@ -396,22 +394,26 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
         shootTimer = new Timer();
         openTimer = new Timer();
 
+        follower = ConstantsNewBot.createFollower(hardwareMap);
+        follower.setStartingPose(startPose);
+        buildPaths();
+
+        ballLimelight = new BallLimelight(hardwareMap);
+
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
-        // Important: create TestTurret AFTER Robot so launcher motors end in TestTurret's
-        // RUN_WITHOUT_ENCODER + manual power-loop configuration (same order as AmazingBotBlue).
-        testTurret = new TestTurret(hardwareMap);
+        intakeSubsystem = robot.intake;
+        turretSubsystem = robot.turret;
+        gateSubsystem = robot.gate;
         actions = new RobotActions(
                 robot.chassisLocal,
                 robot.vision,
-                testTurret,
+                robot.turret,
                 robot.gate,
-                robot.intake
-                );
-        buildPaths();
+                robot.intake);
         robot.intake.down();
         robot.gate.block();
 
-        sillyTarget = autonTarget;
+        sillyTarget = robot.chassisLocal.sillyTargetPose(target);
 
         telemetry.addLine("Good to go BLUE");
         telemetry.update();
@@ -422,43 +424,46 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
         setPathState(pathState);
     }
 
-    private double getFixedTurretAngleDeg() {
-        if (pathState == PathState.actuallyshoot1) {
-            return AUTON_FIXED_TURRET_ANGLE_DEG_FIRST;
-        }
-        if (pathState == PathState.shootAgainAgainAgainAgain) {
-            return AUTON_FIXED_TURRET_ANGLE_DEG_FINAL;
-        }
-        return AUTON_FIXED_TURRET_ANGLE_DEG;
-    }
-    //
     @Override
     public void loop() {
-        robot.chassisLocal.update();
+        follower.update();
         statePathUpdate();
 
-        Pose currentPose = robot.chassisLocal.getPose();
+        Pose currentPose = follower.getPose();
         PoseStorage.savePose(currentPose);
 
-        // Same RPM path as AmazingBotBlue silly mode: ChangeTargBlue + lead + autoVelocityEquation
-        // (see RobotActions.aimTurret — formula lives in autoVelocityEquation).
-        actions.ChangeTargBlue();
-        Pose activeTarget = actions.getShootingTarget();
-        Pose velocityTarg = robot.chassisLocal.getLeadTargetPose(activeTarget, 1.0);
-        sillyTarget = velocityTarg;
+        double dx = target.getX() - currentPose.getX();
+        double dy = target.getY() - currentPose.getY();
+        double dist = Math.sqrt(dx * dx + dy * dy);
 
-        double dist = robot.chassisLocal.getDistance(activeTarget);
-        double distForShooter = robot.chassisLocal.getDistance(velocityTarg);
+        Vector velocity = follower.getVelocity();
+        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
+        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
+        double shotTime = ShotTimeLookupTable.getTime(dist);
+        Pose aimTarget;
+        if (dist < 120) {
+            aimTarget = new Pose(
+                    target.getX() - vx * shotTime,
+                    target.getY() - vy * shotTime
+            );
+        } else {
+            aimTarget = target;
+        }
 
-        double fixedTurretAngleDeg = getFixedTurretAngleDeg();
-        testTurret.setRotatorToAngle(fixedTurretAngleDeg);
-        actions.autoVelocityEquation(velocityTarg);
-        testTurret.setTargetRPM(testTurret.getTargetVelocity() + AUTON_RPM_OFFSET);
+        double aimDx = aimTarget.getX() - currentPose.getX();
+        double aimDy = aimTarget.getY() - currentPose.getY();
+        double distForShooter = Math.hypot(aimDx, aimDy);
+        double angleToGoal = Math.toDegrees(Math.atan2(aimDy, aimDx));
+        double turretAngle = angleToGoal - Math.toDegrees(currentPose.getHeading());
+        while (turretAngle > 180) turretAngle -= 360;
+        while (turretAngle < -180) turretAngle += 360;
+        robot.turret.setRotatorToAngle(-turretAngle);
+
+        robot.turret.setVelocity(VelocityLookupTable.getVelocity(distForShooter));
         int zone = VelocityLookupTable.getZone(distForShooter);
-        if (zone == 1) testTurret.setHoodPos(BlueUniversalConstants.CLOSE_HOOD_POSITION);
-        else if (zone == 2) testTurret.setHoodPos(BlueUniversalConstants.MID_HOOD_POSITION);
-        else testTurret.setHoodPos(BlueUniversalConstants.FAR_HOOD_POSITION);
-        testTurret.update(distForShooter);
+        if (zone == 1) robot.turret.setHoodPos(BlueUniversalConstants.CLOSE_HOOD_POSITION);
+        else if (zone == 2) robot.turret.setHoodPos(BlueUniversalConstants.MID_HOOD_POSITION);
+        else robot.turret.setHoodPos(BlueUniversalConstants.FAR_HOOD_POSITION);
 
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", currentPose.getX());
@@ -466,15 +471,17 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
         telemetry.addData("Heading", Math.toDegrees(currentPose.getHeading()));
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("Dist to goal", dist);
-        telemetry.addData("Dist for shooter", distForShooter);
-        telemetry.addData("Turret Angle (fixed)", fixedTurretAngleDeg);
-        telemetry.addData("RPM actual", testTurret.getRPM());
-        telemetry.addData("RPM target", testTurret.getTargetVelocity());
-        telemetry.update();
+        telemetry.addData("Dist for shooter (lead)", distForShooter);
+        telemetry.addData("Turret Angle", -turretAngle);
+        telemetry.addData("Launcher velocity", robot.turret.getTargetVelocity());
+        telemetry.addData("Ball LL", ballLimelight.isConnected());
+        telemetry.addData("Sees ball", ballLimelight.isConnected() && ballLimelight.seesBall());
+        telemetry.addData("Ball detour step", ballDetourStep);
+        telemetry.addData("Ball detour used", ballDetourConsumed);
     }
 
     private boolean shootinAuton() {
-        Pose pos = robot.chassisLocal.getPose();
+        Pose pos = follower.getPose();
         double y = pos.getY();
         double x = pos.getX();
         double leftUpBound = -x + 144;
@@ -489,13 +496,23 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
     }
 
     private boolean isNear(Pose target, double thresholdInches) {
-        Pose p = robot.chassisLocal.getPose();
+        Pose p = follower.getPose();
         double dx = p.getX() - target.getX();
         double dy = p.getY() - target.getY();
         return Math.sqrt(dx * dx + dy * dy) < thresholdInches;
     }
 
     private boolean arrived() {
-        return robot.chassisLocal.getFollower().atParametricEnd();
+        return !follower.isBusy();
+    }
+
+    /** Robot-relative offset: forward along heading, positive left perpendicular to heading. */
+    private static Pose offsetRobotRelative(Pose p, double forwardIn, double leftIn) {
+        double h = p.getHeading();
+        double cos = Math.cos(h);
+        double sin = Math.sin(h);
+        double x = p.getX() + forwardIn * cos + leftIn * (-sin);
+        double y = p.getY() + forwardIn * sin + leftIn * cos;
+        return new Pose(x, y, h);
     }
 }
