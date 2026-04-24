@@ -82,13 +82,13 @@ public class Intake implements IntakeConstants{
         intakeShifterR.setPosition(0.62);
     }
     public void shift(){
-        intakeShifterL.setPosition(0.56);
-        intakeShifterR.setPosition(0.56);
+        intakeShifterL.setPosition(0.53);
+        intakeShifterR.setPosition(0.53);
     }
     public void gateCollet()
     {
-        intakeShifterL.setPosition(0.58);
-        intakeShifterR.setPosition(0.58);
+        intakeShifterL.setPosition(0.53);
+        intakeShifterR.setPosition(0.53);
     }
 
 

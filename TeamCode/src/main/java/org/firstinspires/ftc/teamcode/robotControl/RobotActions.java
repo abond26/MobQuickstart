@@ -186,7 +186,15 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
     }
     // Inside RobotActions.java
     public void aimTurret(Pose target) {
-        Pose compensatedTarget = chassisLocal.getLeadTargetPose(target);
+        aimTurret(target, 1.0);
+    }
+
+    /**
+     * @param leadVelocityScale passed to {@link ChassisLocal#getLeadTargetPose(Pose, double)} so auton
+     *                          can match teleop-style lead when path follower reports low velocity.
+     */
+    public void aimTurret(Pose target, double leadVelocityScale) {
+        Pose compensatedTarget = chassisLocal.getLeadTargetPose(target, leadVelocityScale);
 
         double angle = chassisLocal.calculateTurretAngle(compensatedTarget);
         turret.setRotatorToAngle(angle);
