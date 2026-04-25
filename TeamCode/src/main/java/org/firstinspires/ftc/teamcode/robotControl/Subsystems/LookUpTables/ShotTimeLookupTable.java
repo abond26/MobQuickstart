@@ -36,7 +36,7 @@ public class ShotTimeLookupTable {
     // TUNE THESE VALUES EMPIRICALLY - No formulas, just test and adjust!
     // Start with reasonable values, then fine-tune based on actual shooting results
     private static final double[] ShotTime = {
-            0.908368, 0.971998, 1.02, 1.035628, 1.04, 1.11, 1.137436, 1.162888, 1.18153, 1.21055, 1.22, 1.23, 1.25629
+            0.808368, 0.871998, 0.92, 0.935628, 0.94, 1.01, 1.037436, 1.062888, 1.08153, 1.11055, 1.12, 1.13, 1.15629
     };
 //
      //

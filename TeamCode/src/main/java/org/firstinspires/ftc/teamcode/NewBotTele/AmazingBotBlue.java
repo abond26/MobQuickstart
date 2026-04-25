@@ -105,6 +105,7 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             telemetry.addData("Pose", "X: %.1f, Y: %.1f", robot.chassisLocal.getPose().getX(), robot.chassisLocal.getPose().getY());
             telemetry.addData("Velo", "XVelo: %.1f, YVelo: %.1f", robot.chassisLocal.getVeloX(), robot.chassisLocal.getVeloY());
             telemetry.addData("Angle", robot.chassisLocal.calculateTurretAngle(activeTarget));
+            telemetry.addData("What it hink da color is", robot.intake.getDetectedColor(telemetry));
             telemetry.update();
         }
     }

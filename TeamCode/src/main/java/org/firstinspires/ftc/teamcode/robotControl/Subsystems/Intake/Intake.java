@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake;
 
 import androidx.annotation.NonNull;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+@Configurable
 
 public class Intake implements IntakeConstants{
     private DcMotor intakeL, intakeR;
@@ -20,8 +22,10 @@ public class Intake implements IntakeConstants{
     
     private ElapsedTime colorTimer = new ElapsedTime();
     private DetectedColor currentlyDetectedColor = DetectedColor.UNKNOWN;
+    public static double DISTANCE_THRESHOLD_INCHES = 1.8;
 
-    public double requiredDetectionTimeSeconds = 0.6;
+
+    public double requiredDetectionTimeSeconds = 0.3;
     public double autonTime = 0.15;
 
     public enum DetectedColor {
@@ -43,10 +47,10 @@ public class Intake implements IntakeConstants{
 
         intakeShifterR = hardwareMap.get(Servo.class, "intakeShifterR");
         intakeShifterR.setDirection(Servo.Direction.FORWARD);
-        intakeShifterR.setPosition(0.56);
+        intakeShifterR.setPosition(0.53);
         intakeShifterL = hardwareMap.get(Servo.class, "intakeShifterL");
         intakeShifterL.setDirection(Servo.Direction.REVERSE);
-        intakeShifterL.setPosition(0.56);
+        intakeShifterL.setPosition(0.53);
 
 
         distanceSensor = hardwareMap.get(RevColorSensorV3.class, "color_sensor");
@@ -104,8 +108,10 @@ public class Intake implements IntakeConstants{
         }
 
         if (currentlyDetectedColor == DetectedColor.BALL && colorTimer.seconds() >= requiredDetectionTimeSeconds) {
+            down();
             return DetectedColor.BALL;
         }
+        shift();
 
         return DetectedColor.UNKNOWN;
     }

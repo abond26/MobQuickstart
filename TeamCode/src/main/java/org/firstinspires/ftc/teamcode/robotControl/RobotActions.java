@@ -58,6 +58,11 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
             gate.block();
         }
     }
+    public void AutonLaunch(double speed) {
+        gate.open();
+        intake.simpleIntake(-speed);
+
+    }
 
     // Manual hood Control
     public void hoodControl(boolean xPressed, boolean bPressed) {
@@ -133,9 +138,14 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         double targetRPM;
 
         if (robotY < 30) {
-            targetRPM = 2700;
+            targetRPM = -0.276052 * Math.pow(dist, 2) + 85.86611 * dist - 3957.10145;
+
+
+            turret.setHoodPos(0);
         } else {
-            targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1520;
+            turret.setHoodPos(0.38984674329501917);
+
+            targetRPM = 0.012264577 * Math.pow(dist, 2) + 5.4005132 * dist + 1540;
         }
 
         if (turret instanceof TestTurret) {
@@ -167,9 +177,9 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         double robotY = chassisLocal.getPose().getY();
 
         if (robotY < 30) {
-            shootingTargetOverride = new Pose(12, 144, 144);
+            shootingTargetOverride = new Pose(10, 144, 144);
         } else if (robotY >= 30 && robotY < 109.851150202977) {
-            shootingTargetOverride = new Pose(1, 144, 0);
+            shootingTargetOverride = new Pose(3, 144, 0);
         } else {
             shootingTargetOverride = new Pose(8, 140, 0);
         }
@@ -186,21 +196,16 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         }
     }
     // Inside RobotActions.java
+
+
+
     public void aimTurret(Pose target) {
-        aimTurret(target, 1.0);
-    }
+        Pose compensatedTarget = chassisLocal.sillyTargetPose(target);
 
-    /**
-     * @param leadVelocityScale passed to {@link ChassisLocal#getLeadTargetPose(Pose, double)} so auton
-     *                          can match teleop-style lead when path follower reports low velocity.
-     */
-    public void aimTurret(Pose target, double leadVelocityScale) {
-        Pose compensatedTarget = chassisLocal.getLeadTargetPose(target, leadVelocityScale);
-
-        double angle = chassisLocal.calculateTurretAngle(compensatedTarget);
+        double angle = chassisLocal.calculateTurretAngle(target);
         turret.setRotatorToAngle(angle);
 
-        autoVelocityEquation(compensatedTarget);
+        autoVelocityEquation(target);
     }
 
 
@@ -209,4 +214,25 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
     // double distance = vision.getTargetDistance();
     // shooter.setVelocityFromDistance(distance);
     // }
+
+    /**
+     * Attempts to correct the Pedro Pathing pose using a MegaTag2 AprilTag fix
+     * from the Limelight. Call this once per loop in both TeleOp and Auton.
+     *
+     * <p>Pattern:
+     * <pre>
+     *   // In your loop():
+     *   robotActions.tryRelocalize();
+     *   robot.chassisLocal.update();
+     * </pre>
+     */
+//    public void tryRelocalize() {
+//        double headingDeg = Math.toDegrees(chassisLocal.getPose().getHeading());
+//        vision.updateOrientation(headingDeg);
+//
+//        Pose visionPose = vision.getTransformedPose(headingDeg);
+//        if (visionPose != null) {
+//            chassisLocal.setPose(visionPose);
+//        }
+//    }
 }

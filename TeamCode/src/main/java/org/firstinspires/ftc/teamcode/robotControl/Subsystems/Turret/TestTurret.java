@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -22,6 +23,8 @@ public class TestTurret extends Turret {
     private Servo rotator, hood;
 
     private double targetRPM = 0;
+    private VoltageSensor batteryVoltage;
+
     private double integralSum = 0;
     private double lastError = 0; //
     private ElapsedTime timer = new ElapsedTime();
@@ -40,6 +43,8 @@ public class TestTurret extends Turret {
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(SCALE_RANGE_LOWER,SCALE_RANGE_UPPER);
         hood.setPosition(0.38984674329501917);
+        batteryVoltage = hardwareMap.voltageSensor.iterator().next();   
+
 
         timer.reset();
     }
@@ -57,12 +62,22 @@ public class TestTurret extends Turret {
         lastError = error;
 
         PIDFCoefficients coeffs = (distance <= SWITCH_PID_DIST) ? FLYWHEEL_PID_CLOSE : FLYWHEEL_PID_FAR;
+        
+        // Base power calculation
         double power = (coeffs.f * targetRPM) + (coeffs.p * error) + (coeffs.i * integralSum) + (coeffs.d * derivative);
+
+        // Voltage Compensation: Scale power to match a 12V baseline
+        double voltageScale = 13 / batteryVoltage.getVoltage();
+
+        // Recovery Mode: Boost power slightly if we drop below target (e.g., after a shot)
+        double recoveryMultiplier = (targetRPM > 0 && error > 100) ? 1.4 : 1.0;
+
+        power = power * voltageScale * recoveryMultiplier;
 
         power = Math.max(0, Math.min(1, power));
         if (targetRPM == 0) { power = 0; integralSum = 0; }
 
-       jollyCrusader.setPower(power);
+        jollyCrusader.setPower(power);
         gloomyCrusader.setPower(power);
     }
 //
@@ -122,4 +137,5 @@ public class TestTurret extends Turret {
                 break;
         }
     }
+
 }
