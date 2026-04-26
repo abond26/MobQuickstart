@@ -243,6 +243,7 @@ public class GyroCopyAuton extends OpMode implements BlueUniversalConstants {
     @Override
     public void init() {
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
+        testTurret = (TestTurret) robot.turret;
         follower = robot.chassisLocal.getFollower();
         actions = new RobotActions(
                 robot.chassisLocal,
