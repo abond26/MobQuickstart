@@ -23,8 +23,9 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 public class GyroCopyAuton extends OpMode implements BlueUniversalConstants {
 
     Robot robot;
-    RobotActions actions;
     TestTurret testTurret;
+
+    RobotActions actions;
     private Follower follower;
     private Timer pathTimer, opModeTimer;
     private boolean shooting = false;
@@ -243,7 +244,6 @@ public class GyroCopyAuton extends OpMode implements BlueUniversalConstants {
     @Override
     public void init() {
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
-        follower = robot.chassisLocal.getFollower();
         testTurret = new TestTurret(hardwareMap);
         actions = new RobotActions(
                 robot.chassisLocal,
@@ -279,6 +279,8 @@ public class GyroCopyAuton extends OpMode implements BlueUniversalConstants {
         telemetry.addData("X", "%.1f", robot.chassisLocal.getPose().getX());
         telemetry.addData("Y", "%.1f", robot.chassisLocal.getPose().getY());
         telemetry.addData("Heading", "%.1f°", Math.toDegrees(robot.chassisLocal.getPose().getHeading()));
+        telemetry.addData("RPM actual", testTurret.getRPM());
+        telemetry.addData("RPM target", testTurret.getTargetVelocity());
         telemetry.addData("Launcher Velo", robot.turret.getVelocity());
         telemetry.update();
     }
