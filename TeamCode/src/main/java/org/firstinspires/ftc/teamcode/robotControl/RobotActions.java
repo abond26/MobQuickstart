@@ -179,20 +179,20 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
         if (robotY < 30) {
             shootingTargetOverride = new Pose(10, 144, 144);
         } else if (robotY >= 30 && robotY < 109.851150202977) {
-            shootingTargetOverride = new Pose(3, 144, 0);
+            shootingTargetOverride = new Pose(3, 144, 144);
         } else {
-            shootingTargetOverride = new Pose(8, 140, 0);
+            shootingTargetOverride = new Pose(8, 140, 144);
         }
     }
     public void ChangeTargRed() {
         double robotY = chassisLocal.getPose().getY();
 
         if (robotY < 30) {
-            shootingTargetOverride = new Pose(72, 72, 0);
+            shootingTargetOverride = new Pose(134, 72, 36);
         } else if (robotY >= 30 && robotY < 60) {
-            shootingTargetOverride = new Pose(72, 100, 0);
+            shootingTargetOverride = new Pose(141, 100, 36);
         } else {
-            shootingTargetOverride = new Pose(72, 140, 0);
+            shootingTargetOverride = new Pose(136, 140, 36);
         }
     }
     // Inside RobotActions.java

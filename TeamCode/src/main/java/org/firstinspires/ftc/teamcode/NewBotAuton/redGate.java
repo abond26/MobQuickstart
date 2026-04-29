@@ -35,7 +35,7 @@ public class redGate extends OpMode implements BlueUniversalConstants {
     private static final double AUTON_FIXED_TURRET_ANGLE_DEG = -26.25;
     private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FIRST = -28;
     private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FINAL = 7;
-    private static final double AUTON_RPM_OFFSET = 10;
+    private static final double AUTON_RPM_OFFSET = -10;
     private static final double AUTON_RPM_OFFSET_FIRST_SHOT = 0;
 
     /** Open blocker (`robot.gate`) when this close to the shot pose (inches). */
