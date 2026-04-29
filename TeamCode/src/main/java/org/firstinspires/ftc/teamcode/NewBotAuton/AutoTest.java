@@ -33,6 +33,7 @@ import org.firstinspires.ftc.teamcode.LimeLight.BallLimelight;
 @Autonomous(name = "AutoTest", group = "auto", preselectTeleOp = "AmazingBotBlue")
 public class AutoTest extends OpMode {
     private static final int PIPELINENUM = 0;
+    private static final int BALL_DETECTOR_PIPELINE = 1;
     Pose target = new Pose(0, 144, Math.toRadians(144));
     Pose sillyTarget;
     private int rotatorStartPosition = 0;
@@ -138,7 +139,8 @@ public class AutoTest extends OpMode {
         GateCollectionAgain,
         GateCollectionAgainAgain,
         shootAgainAgainAgainAgain,
-        shoot3ToGate
+        shoot3ToGate,
+        LimelightSensorTracking
     }
 
     PathState pathState;
@@ -148,7 +150,7 @@ public class AutoTest extends OpMode {
     private final Pose collect1thing = new Pose(13.5, 34, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(42.4576341127923, 35.30371389270978);
     private final Pose shootPose2 = new Pose(47, 9, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose(9.5, 8, Math.toRadians(180));
+    private final Pose randomCollect = new Pose(9.5, 8, Math.toRadians(180));
     private final Pose option1 = new Pose(13, 61, Math.toRadians(135));
     private final Pose option2 = new Pose(7, 55, Math.toRadians(90));
 
@@ -181,17 +183,17 @@ public class AutoTest extends OpMode {
                 .setLinearHeadingInterpolation(collect1thing.getHeading(), shootPose2.getHeading())
                 .build();
         GateCollect1 = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose2, gateCollect1))
-                .setLinearHeadingInterpolation(shootPose2.getHeading(), gateCollect1.getHeading())
+                .addPath(new BezierLine(shootPose2, randomCollect))
+                .setLinearHeadingInterpolation(shootPose2.getHeading(), randomCollect.getHeading())
                 .build();
         Turn = follower.pathBuilder()
-                .addPath(new BezierLine(gateCollect1, option1))
-                .setLinearHeadingInterpolation(gateCollect1.getHeading(), option1.getHeading())
+                .addPath(new BezierLine(randomCollect, option1))
+                .setLinearHeadingInterpolation(randomCollect.getHeading(), option1.getHeading())
                 .build();
 
         shoot3 = follower.pathBuilder()
-                .addPath(new BezierLine(gateCollect1, shootBall3))
-                .setLinearHeadingInterpolation(gateCollect1.getHeading(), shootBall3.getHeading())
+                .addPath(new BezierLine(randomCollect, shootBall3))
+                .setLinearHeadingInterpolation(randomCollect.getHeading(), shootBall3.getHeading())
                 .build();
 
         collect3 = follower.pathBuilder()
@@ -236,7 +238,36 @@ public class AutoTest extends OpMode {
                     collectionStarted = true;
                     shotFeeding = false;
                 }
-                boolean farEnoughForBallDetour = !isNear(collect1thing, BALL_DETOUR_MIN_DIST_TO_GOAL_IN);
+                if ((arrived() || isNear(collect1thing, 3)) && collectionStarted) {
+                    setPathState((AutoTest.PathState.shoot));
+                }
+                break;
+            case shoot:
+                if (!shoot2Started) {
+                    follower.followPath(shoot2);
+                    shoot2Started = true;
+                }
+                if (shoot2Started && (arrived() || isNear(shootPose2, 5))) {
+                    robot.intake.powerON();
+                    if (!shotFeeding) {
+                        robot.gate.open();
+                        shootTimer.resetTimer();
+                        shotFeeding = true;
+                    }
+                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 1.5) {
+                        setPathState((PathState.LimelightSensorTracking));
+                    }
+                }
+                break;
+            case LimelightSensorTracking:
+                if (!gateCollectionStarted) {
+                    robot.intake.down();
+                    robot.gate.block();
+                    follower.followPath(GateCollect1);
+                    gateCollectionStarted = true;
+                    openTimer.resetTimer();
+                }
+                boolean farEnoughForBallDetour = !isNear(randomCollect, BALL_DETOUR_MIN_DIST_TO_GOAL_IN);
                 if (!ballDetourConsumed
                         && ballDetourStep == 0
                         && ballLimelight.isConnected()
@@ -272,8 +303,8 @@ public class AutoTest extends OpMode {
                 if (ballDetourStep == 2 && arrived()) {
                     Pose at2 = follower.getPose();
                     PathChain resumeToCollect = follower.pathBuilder()
-                            .addPath(new BezierLine(at2, collect1thing))
-                            .setLinearHeadingInterpolation(at2.getHeading(), collect1thing.getHeading())
+                            .addPath(new BezierLine(at2, randomCollect))
+                            .setLinearHeadingInterpolation(at2.getHeading(), randomCollect.getHeading())
                             .build();
                     follower.followPath(resumeToCollect);
                     ballDetourStep = 3;
@@ -283,42 +314,13 @@ public class AutoTest extends OpMode {
                     ballDetourStep = 0;
                     ballDetourConsumed = true;
                 }
-                if ((arrived() || isNear(collect1thing, 3)) && collectionStarted) {
-                    setPathState((AutoTest.PathState.shoot));
-                }
-                break;
-            case shoot:
-                if (!shoot2Started) {
-                    follower.followPath(shoot2);
-                    shoot2Started = true;
-                }
-                if (shoot2Started && (arrived() || isNear(shootPose2, 5))) {
-                    robot.intake.powerON();
-                    if (!shotFeeding) {
-                        robot.gate.open();
-                        shootTimer.resetTimer();
-                        shotFeeding = true;
-                    }
-                    if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 1.5) {
-                        setPathState((PathState.GateCollection));
-                    }
-                }
-                break;
-            case GateCollection:
-                if (!gateCollectionStarted) {
-                    robot.intake.down();
-                    robot.gate.block();
-                    follower.followPath(GateCollect1);
-                    gateCollectionStarted = true;
-                    openTimer.resetTimer();
-                }
                 Intake.DetectedColor color = robot.intake.AutonColor(telemetry);
                 boolean full = (color != Intake.DetectedColor.UNKNOWN);
                 boolean ready = full || openTimer.getElapsedTimeSeconds() > 1.0;
                 boolean forceGateLeave = opModeTimer.getElapsedTimeSeconds() >= 27.5;
 
                 if (gateCollectionStarted
-                        && (((arrived() || isNear(gateCollect1, 3)) && ready) || forceGateLeave)) {
+                        && (((arrived() || isNear(randomCollect, 3)) && ready) || forceGateLeave)) {
                     robot.intake.down();
                     setPathState((AutoTest.PathState.shootAgain));
                 }
@@ -399,6 +401,9 @@ public class AutoTest extends OpMode {
         buildPaths();
 
         ballLimelight = new BallLimelight(hardwareMap);
+        if (ballLimelight.isConnected() && ballLimelight.getCamera() != null) {
+            ballLimelight.getCamera().pipelineSwitch(BALL_DETECTOR_PIPELINE);
+        }
 
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
         intakeSubsystem = robot.intake;
@@ -416,6 +421,7 @@ public class AutoTest extends OpMode {
         sillyTarget = robot.chassisLocal.sillyTargetPose(target);
 
         telemetry.addLine("Good to go BLUE");
+        telemetry.addData("Ball LL pipeline", BALL_DETECTOR_PIPELINE);
         telemetry.update();
     }
 
@@ -427,6 +433,8 @@ public class AutoTest extends OpMode {
     @Override
     public void loop() {
         follower.update();
+        // ChassisLocal owns a separate Follower instance; sync pose so RobotActions distance matches pathing.
+        robot.chassisLocal.setPose(follower.getPose());
         statePathUpdate();
 
         Pose currentPose = follower.getPose();
@@ -459,7 +467,8 @@ public class AutoTest extends OpMode {
         while (turretAngle < -180) turretAngle += 360;
         robot.turret.setRotatorToAngle(-turretAngle);
 
-        robot.turret.setVelocity(VelocityLookupTable.getVelocity(distForShooter));
+        // Quadratic RPM vs distance (and RPM→ticks) from RobotActions; hood set here by zone overwrites equation hood.
+        actions.autoVelocityEquation(aimTarget);
         int zone = VelocityLookupTable.getZone(distForShooter);
         if (zone == 1) robot.turret.setHoodPos(BlueUniversalConstants.CLOSE_HOOD_POSITION);
         else if (zone == 2) robot.turret.setHoodPos(BlueUniversalConstants.MID_HOOD_POSITION);

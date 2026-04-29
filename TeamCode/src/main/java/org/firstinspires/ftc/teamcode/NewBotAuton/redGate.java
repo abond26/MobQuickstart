@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.NewBotAuton;
 
-import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
@@ -18,36 +18,44 @@ import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
-import com.pedropathing.math.Vector;
-import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.ShotTimeLookupTable;
+import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.TestTurret;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
 import org.firstinspires.ftc.teamcode.tests.ColorTesting;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "redGate", group = "auto", preselectTeleOp = "AmazingBotRed")
-public class redGate extends OpMode {
-    private static final int PIPELINENUM = 0;
-    Pose target = new Pose(144, 144, Math.toRadians(36));
+@Autonomous(name = "redGate", group = "auto", preselectTeleOp = "BLUEEEEE b")
+public class redGate extends OpMode implements BlueUniversalConstants {
+    /**
+     * Fixed field-relative turret angle (degrees) for this auton after run starts.
+     * Tune on the field (telemetry used to show dynamic angle; match that here).
+     */
+    private static final double AUTON_FIXED_TURRET_ANGLE_DEG = -26.25;
+    private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FIRST = -28;
+    private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FINAL = 7;
+    private static final double AUTON_RPM_OFFSET = 10;
+    private static final double AUTON_RPM_OFFSET_FIRST_SHOT = 0;
+
+    /** Open blocker (`robot.gate`) when this close to the shot pose (inches). */
+    private static final double GATE_OPEN_PROXIMITY_IN = 5;
+    private static final double FIRST_SHOT_PROXIMITY = 5;
+    private static final double LAST_SHOT_PROXIMITY = 20;
+
+
     Pose sillyTarget;
     TestTurret testTurret;
     private int rotatorStartPosition=0;
     double txDeg = 0.0;
     double tyDeg = 0.0;
-    private Follower follower;
     Robot robot;
-
+    private RobotActions actions;
     private Vision vision = null;
     private ColorTesting colorTesting = null;
     private Intake intakeSubsystem = null;
-    private Turret turretSubsystem = null;
     private TransferGate gateSubsystem = null;
-    private static final double BALL_DETECT_TIMEOUT_SEC = 3.0;
+    private static final double BALL_DETECT_TIMEOUT_SEC = 3;
 
     private boolean shoot1Started = false;
     private boolean shoot2Started = false;
@@ -74,7 +82,6 @@ public class redGate extends OpMode {
     private int tagHeight = 75;
     private static final double NORMAL_DRIVE_POWER = 1;
     private static final double INTAKE_DRIVE_POWER = 1;
-    RobotActions actions;
 
     private static final double DISTANCE_THRESHOLD = 180.0;
     private static final double CLOSE_HOOD_POSITION = .2541;
@@ -135,22 +142,22 @@ public class redGate extends OpMode {
 
     PathState pathState;
 
-    private final Pose startPose = new Pose(112.21723544631305, 136.97551020408164, Math.toRadians(-90));
-    private final Pose shootPose1 = new Pose(85, 77, Math.toRadians(40));
-    private final Pose collect1thing = new Pose(126, 58, Math.toRadians(0));
+    private final Pose startPose = new Pose(112.217235446, 136.97551020408164, Math.toRadians(-90));
+    private final Pose shootPose1 = new Pose(81, 77, Math.toRadians(25));
+    private final Pose collect1thing = new Pose(134, 62, Math.toRadians(0));
     private final Pose goToCollect1ControlPoint = new Pose(91.735, 60.091);
-    private final Pose shootPose2 = new Pose(85, 77, Math.toRadians(25));
-    private final Pose gateCollect1 = new Pose(132.5, 61, Math.toRadians(38));
+    private final Pose shootPose2 = new Pose(81, 77, Math.toRadians(25));
+    private final Pose gateCollect1 = new Pose(131.5, 64.5, Math.toRadians(32));
     private final Pose option1 = new Pose(131, 61, Math.toRadians(45));
     private final Pose option2 = new Pose(137, 55, Math.toRadians(90));
 
-    private final Pose shootBall3 = new Pose(85, 77, Math.toRadians(25));
+    private final Pose shootBall3 = new Pose(81, 77, Math.toRadians(25));
     private final Pose inBetween2 = new Pose(100, 62, Math.toRadians(202.5));
     private final Pose gateCollect2 = new Pose(128.5, 62, Math.toRadians(205));
     private final Pose shootBall4 = new Pose(84, 75, Math.toRadians(230));
     private final Pose gateCollect3 = new Pose(128.5, 62, Math.toRadians(205));
     private final Pose shootBall5 = new Pose(95, 87, Math.toRadians(230));
-    private final Pose collect3end = new Pose(120, 85, Math.toRadians(0));
+    private final Pose collect3end = new Pose(124, 88, Math.toRadians(0));
     private final Pose collect3ControlPoint = new Pose(102.98, 84.857);
     private final Pose shootBall6 = new Pose(89, 120, Math.toRadians(33));
     private final Pose park = new Pose(103, 84, Math.toRadians(226));
@@ -158,6 +165,7 @@ public class redGate extends OpMode {
     private PathChain shoot1, Turn, goToCollect1, shoot3ToGate, collect1, shoot2, GateCollect3, shoot6, InBetween1, InBetween2, GateCollect1, GateCollect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
 
     public void buildPaths() {
+        Follower follower = robot.chassisLocal.getFollower();
         shoot1 = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shootPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
@@ -199,6 +207,7 @@ public class redGate extends OpMode {
     }
 
     public void statePathUpdate() {
+        Follower follower = robot.chassisLocal.getFollower();
         switch (pathState) {
             case start:
                 if (!shoot1Started) {
@@ -219,10 +228,10 @@ public class redGate extends OpMode {
                 robot.intake.shift();
                 // Open gate when close to first shot pose (do not clear shotFeeding every frame — that
                 // was resetting the feed timer every loop so collection never triggered).
-                if (isNear(shootPose1, 10)) {
+                if (isNear(shootPose1, FIRST_SHOT_PROXIMITY)) {
                     robot.gate.open();
                 }
-                if (shoot1Started && (arrived() || isNear(shootPose1, 5))) {
+                if (shoot1Started && (arrived() || isNear(shootPose1, FIRST_SHOT_PROXIMITY))) {
                     if (!shotFeeding) {
                         robot.gate.open();
                         shootTimer.resetTimer();
@@ -250,7 +259,7 @@ public class redGate extends OpMode {
                     follower.followPath(shoot2);
                     shoot2Started = true;
                 }
-                if (shoot2Started && (arrived() || isNear(shootPose2, 5))) {
+                if (shoot2Started && (arrived() || isNear(shootPose2, GATE_OPEN_PROXIMITY_IN))) {
                     robot.intake.powerON();
                     if (!shotFeeding) {
                         robot.gate.open();
@@ -258,25 +267,27 @@ public class redGate extends OpMode {
                         shotFeeding = true;
                     }
                     if (shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5) {
+                        robot.intake.gateCollet();
                         setPathState((PathState.GateCollection));
                     }
                 }
                 break;
             case GateCollection:
                 if (!gateCollectionStarted) {
-                    robot.intake.shift();
+                    robot.intake.gateCollet();
                     robot.gate.block();
                     follower.followPath(GateCollect1);
                     gateCollectionStarted = true;
                     openTimer.resetTimer();
                 }
-                Intake.DetectedColor color = robot.intake.AutonColor(telemetry);
+                Intake.DetectedColor color = robot.intake.getDetectedColorByDistance(telemetry);
+                robot.intake.gateCollet();
                 boolean full = (color != Intake.DetectedColor.UNKNOWN);
-                boolean ready = full || openTimer.getElapsedTimeSeconds() > 3.5;
-                boolean forceGateLeave = opModeTimer.getElapsedTimeSeconds() >= 24.5;
+                boolean ready = full || openTimer.getElapsedTimeSeconds() > 3.3;
+                boolean forceGateLeave = opModeTimer.getElapsedTimeSeconds() >= 25.5;
 
                 if (gateCollectionStarted
-                        && (((arrived() || isNear(gateCollect1, 3)) && ready) || forceGateLeave)) {
+                        && (((arrived() || isNear(gateCollect1, 5)) && ready) || forceGateLeave)) {
                     robot.intake.up();
                     robot.gate.block();
                     shotFeeding = false;
@@ -305,19 +316,18 @@ public class redGate extends OpMode {
                     follower.followPath(shoot3);
                     shoot3Started = true;
                 }
-                if (shoot3Started && (arrived() || isNear(shootBall3, 5))) {
+                if (shoot3Started && (arrived() || isNear(shootBall3, GATE_OPEN_PROXIMITY_IN))) {
                     robot.intake.powerON();
                     if (!shotFeeding) {
                         shootTimer.resetTimer();
                         shotFeeding = true;
                     }
-                    if (isNear(shootBall3, 2))
-                    {
+                    if (isNear(shootBall3, GATE_OPEN_PROXIMITY_IN)) {
                         robot.gate.open();
                     }
-                    boolean readyToLeave = shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.5;
+                    boolean readyToLeave = shotFeeding && shootTimer.getElapsedTimeSeconds() > 0.45;
                     if (readyToLeave) {
-                        if (opModeTimer.getElapsedTimeSeconds() < 24) {
+                        if (opModeTimer.getElapsedTimeSeconds() < 25) {
                             setPathState((redGate.PathState.GateCollection));
                         } else {
                             robot.intake.shift();
@@ -327,6 +337,7 @@ public class redGate extends OpMode {
                 }
                 break;
             case collectAgainAgainEnd:
+                robot.intake.shift();
                 robot.gate.block();
                 if (!collectionStarted) {
                     follower.followPath(collect3);
@@ -341,7 +352,7 @@ public class redGate extends OpMode {
                     follower.followPath(shoot6);
                     shoot5Started = true;
                 }
-                if (shoot5Started && (arrived() || isNear(shootBall6, 5))) {
+                if (shoot5Started && (arrived() || isNear(shootBall6, LAST_SHOT_PROXIMITY))) {
                     robot.intake.powerON();
                     if (!shotFeeding) {
                         robot.gate.open();
@@ -390,26 +401,24 @@ public class redGate extends OpMode {
         shootTimer = new Timer();
         openTimer = new Timer();
 
-        follower = ConstantsNewBot.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
-        buildPaths();
-        testTurret= new TestTurret(hardwareMap);
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
-        intakeSubsystem = robot.intake;
-        turretSubsystem = robot.turret;
-        gateSubsystem = robot.gate;
+        // Important: create TestTurret AFTER Robot so launcher motors end in TestTurret's
+        // RUN_WITHOUT_ENCODER + manual power-loop configuration (same order as AmazingBotBlue).
+        testTurret = new TestTurret(hardwareMap);
         actions = new RobotActions(
                 robot.chassisLocal,
                 robot.vision,
                 testTurret,
                 robot.gate,
-                robot.intake);
+                robot.intake
+        );
+        buildPaths();
         robot.intake.down();
         robot.gate.block();
 
-        sillyTarget = robot.chassisLocal.sillyTargetPose(target);
+        sillyTarget = autonTarget;
 
-        telemetry.addLine("Good to go RED");
+        telemetry.addLine("Good to go BLUE");
         telemetry.update();
     }
 
@@ -417,49 +426,48 @@ public class redGate extends OpMode {
         opModeTimer.resetTimer();
         setPathState(pathState);
     }
-//
+
+    private double getFixedTurretAngleDeg() {
+        if (pathState == PathState.actuallyshoot1) {
+            return AUTON_FIXED_TURRET_ANGLE_DEG_FIRST;
+        }
+        if (pathState == PathState.shootAgainAgainAgainAgain) {
+            return AUTON_FIXED_TURRET_ANGLE_DEG_FINAL;
+        }
+        return AUTON_FIXED_TURRET_ANGLE_DEG;
+    }
+
+    private double getAutonRpmOffset() {
+        if (pathState == PathState.actuallyshoot1) {
+            return AUTON_RPM_OFFSET_FIRST_SHOT;
+        }
+        if (pathState == PathState.shootAgainAgainAgainAgain) {
+            return AUTON_RPM_OFFSET_FIRST_SHOT;
+        }
+        return AUTON_RPM_OFFSET;
+    }
+    //
     @Override
     public void loop() {
-        follower.update();
+        robot.chassisLocal.update();
         statePathUpdate();
 
-        Pose currentPose = follower.getPose();
+        Pose currentPose = robot.chassisLocal.getPose();
         PoseStorage.savePose(currentPose);
 
-        double dx = target.getX() - currentPose.getX();
-        double dy = target.getY() - currentPose.getY();
-        double dist = Math.sqrt(dx * dx + dy * dy);
+        double dist = robot.chassisLocal.getDistance(autonTarget);
+        sillyTarget = autonTarget;
 
-        Vector velocity = follower.getVelocity();
-        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
-        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
-        double shotTime = ShotTimeLookupTable.getTime(dist);
-        Pose aimTarget;
-        if (dist < 120) {
-            aimTarget = new Pose(
-                    target.getX() - vx * shotTime,
-                    target.getY() - vy * shotTime
-            );
-        } else {
-            aimTarget = target;
-        }
-
-        double aimDx = aimTarget.getX() - currentPose.getX();
-        double aimDy = aimTarget.getY() - currentPose.getY();
-        //Match AmazingBotRed + RobotActions.adjustShootingParams: velocity/hood use distance to
-        // lead point (sillyTarget), not distance to raw goal.
-        double distForShooter = Math.hypot(aimDx, aimDy);
-        double angleToGoal = Math.toDegrees(Math.atan2(aimDy, aimDx));
-        double turretAngle = angleToGoal - Math.toDegrees(currentPose.getHeading());
-        while (turretAngle > 180) turretAngle -= 360;
-        while (turretAngle < -180) turretAngle += 360;
-        robot.chassisLocal.update();
-        sillyTarget = robot.chassisLocal.sillyTargetPose(target);
-        double currentDist = robot.chassisLocal.getDistance(target);
-        testTurret.update(currentDist);
-        actions.aimRotatorLocal(target, telemetry);
-
-        actions.autoVelocityEquation(target);
+        double fixedTurretAngleDeg = getFixedTurretAngleDeg();
+        testTurret.setRotatorToAngle(fixedTurretAngleDeg);
+        actions.autoVelocityEquation(autonTarget);
+        testTurret.setTargetRPM(testTurret.getTargetVelocity() + getAutonRpmOffset());
+        double distForShooter = dist;
+        int zone = VelocityLookupTable.getZone(distForShooter);
+        if (zone == 1) testTurret.setHoodPos(BlueUniversalConstants.CLOSE_HOOD_POSITION);
+        else if (zone == 2) testTurret.setHoodPos(BlueUniversalConstants.MID_HOOD_POSITION);
+        else testTurret.setHoodPos(BlueUniversalConstants.FAR_HOOD_POSITION);
+        testTurret.update(distForShooter);
 
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", currentPose.getX());
@@ -467,13 +475,15 @@ public class redGate extends OpMode {
         telemetry.addData("Heading", Math.toDegrees(currentPose.getHeading()));
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("Dist to goal", dist);
-        telemetry.addData("Dist for shooter (lead)", distForShooter);
-        telemetry.addData("Turret Angle", -turretAngle);
-        telemetry.addData("Launcher velocity", robot.turret.getTargetVelocity());
+        telemetry.addData("Dist for shooter", distForShooter);
+        telemetry.addData("Turret Angle (fixed)", fixedTurretAngleDeg);
+        telemetry.addData("RPM actual", testTurret.getRPM());
+        telemetry.addData("RPM target", testTurret.getTargetVelocity());
+        telemetry.update();
     }
 
     private boolean shootinAuton() {
-        Pose pos = follower.getPose();
+        Pose pos = robot.chassisLocal.getPose();
         double y = pos.getY();
         double x = pos.getX();
         double leftUpBound = -x + 144;
@@ -488,13 +498,13 @@ public class redGate extends OpMode {
     }
 
     private boolean isNear(Pose target, double thresholdInches) {
-        Pose p = follower.getPose();
+        Pose p = robot.chassisLocal.getPose();
         double dx = p.getX() - target.getX();
         double dy = p.getY() - target.getY();
         return Math.sqrt(dx * dx + dy * dy) < thresholdInches;
     }
 
     private boolean arrived() {
-        return !follower.isBusy();
+        return robot.chassisLocal.getFollower().atParametricEnd();
     }
 }

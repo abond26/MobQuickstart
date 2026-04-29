@@ -18,10 +18,7 @@ import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
-import com.pedropathing.math.Vector;
 import org.firstinspires.ftc.teamcode.robotControl.BlueUniversalConstants;
-import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.ShotTimeLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.VelocityLookupTable;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Transfer.TransferGate;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Turret.Turret;
@@ -32,12 +29,15 @@ import org.firstinspires.ftc.teamcode.util.PoseStorage;
 @Autonomous(name = "blueFar", group = "auto", preselectTeleOp = "AmazingBotBlue")
 public class blueFar extends OpMode {
     private static final int PIPELINENUM = 0;
-    Pose target = new Pose(0, 144, Math.toRadians(144));
+    private static final double FIRST_SHOT_PROXIMITY_IN = 5.0;
+    private static final double FIRST_SHOT_SETTLE_SEC = 1.3;
+    private static final double FIRST_SHOT_FEED_SEC = 0.5;
+    private static final double AUTON_VELOCITY_OFFSET_TPS = 110;
+    Pose target = new Pose(4, 144, Math.toRadians(144));
     Pose sillyTarget;
     private int rotatorStartPosition = 0;
     double txDeg = 0.0;
     double tyDeg = 0.0;
-    private Follower follower;
     Robot robot;
 
     private Vision vision = null;
@@ -136,18 +136,18 @@ public class blueFar extends OpMode {
     private final Pose shootPose1 = new Pose(54.7, 18, Math.toRadians(180));
     private final Pose collect1thing = new Pose(13.5, 34, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(42.4576341127923, 35.30371389270978);
-    private final Pose shootPose2 = new Pose(47, 9, Math.toRadians(180));
-    private final Pose gateCollect1 = new Pose(9.5, 8, Math.toRadians(180));
+    private final Pose shootPose2 = new Pose(47, 10, Math.toRadians(180));
+    private final Pose gateCollect1 = new Pose(9.5, 10, Math.toRadians(180));
     private final Pose option1 = new Pose(13, 61, Math.toRadians(135));
     private final Pose option2 = new Pose(7, 55, Math.toRadians(90));
 
-    private final Pose shootBall3 = new Pose(47, 9, Math.toRadians(180));
+    private final Pose shootBall3 = new Pose(47, 10, Math.toRadians(180));
     private final Pose inBetween2 = new Pose(44, 62, Math.toRadians(337.5));
     private final Pose gateCollect2 = new Pose(15.5, 62, Math.toRadians(335));
     private final Pose shootBall4 = new Pose(60, 75, Math.toRadians(310));
     private final Pose gateCollect3 = new Pose(15.5, 62, Math.toRadians(335));
     private final Pose shootBall5 = new Pose(49, 87, Math.toRadians(310));
-    private final Pose collect3end = new Pose(37, 8.8, Math.toRadians(180));
+    private final Pose collect3end = new Pose(37, 15, Math.toRadians(180));
     private final Pose collect3ControlPoint = new Pose(41.02, 84.857);
     private final Pose shootBall6 = new Pose(55, 120, Math.toRadians(147));
     private final Pose park = new Pose(41, 84, Math.toRadians(314));
@@ -155,6 +155,7 @@ public class blueFar extends OpMode {
     private PathChain shoot1, Turn, goToCollect1, shoot3ToGate, collect1, shoot2, GateCollect3, shoot6, InBetween1, InBetween2, GateCollect1, GateCollect2, shoot3, awayfromGate, goToCollect3, collect3, shoot4, goToGate, openGate, goToCollect4, collect4, shoot5, parking;
 
     public void buildPaths() {
+        Follower follower = robot.chassisLocal.getFollower();
         shoot1 = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shootPose1))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose1.getHeading())
@@ -195,6 +196,12 @@ public class blueFar extends OpMode {
     }
 
     public void statePathUpdate() {
+        Follower follower = robot.chassisLocal.getFollower();
+        if (opModeTimer.getElapsedTimeSeconds() > 28.0
+                && pathState != PathState.collectAgainAgainEnd
+                && pathState != PathState.done) {
+            setPathState(PathState.collectAgainAgainEnd);
+        }
         switch (pathState) {
             case start:
                 if (!shoot1Started) {
@@ -205,7 +212,6 @@ public class blueFar extends OpMode {
                     shoot1Started = true;
                 }
                 if (shoot1Started) {
-                    robot.gate.open();
                     pathState = PathState.actuallyshoot1;
                     pathTimer.resetTimer();
                 }
@@ -213,7 +219,14 @@ public class blueFar extends OpMode {
                 break;
             case actuallyshoot1:
                 robot.intake.shift();
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 0.25) {
+                boolean atFirstShotPose = arrived() || isNear(shootPose1, FIRST_SHOT_PROXIMITY_IN);
+                if (atFirstShotPose && !shotFeeding
+                        && pathTimer.getElapsedTimeSeconds() > FIRST_SHOT_SETTLE_SEC) {
+                    robot.gate.open();
+                    shootTimer.resetTimer();
+                    shotFeeding = true;
+                }
+                if (shotFeeding && shootTimer.getElapsedTimeSeconds() > FIRST_SHOT_FEED_SEC) {
                     setPathState(PathState.collection);
                 }
                 break;
@@ -246,8 +259,9 @@ public class blueFar extends OpMode {
                 }
                 break;
             case GateCollection:
+                robot.intake.shift();
                 if (!gateCollectionStarted) {
-                    robot.intake.down();
+                    robot.intake.shift();
                     robot.gate.block();
                     follower.followPath(GateCollect1);
                     gateCollectionStarted = true;
@@ -260,7 +274,7 @@ public class blueFar extends OpMode {
 
                 if (gateCollectionStarted
                         && (((arrived() || isNear(gateCollect1, 3)) && ready) || forceGateLeave)) {
-                    robot.intake.down();
+                    robot.intake.up();
                     setPathState((blueFar.PathState.shootAgain));
                 }
                 break;
@@ -278,7 +292,7 @@ public class blueFar extends OpMode {
                     }
                     boolean readyToLeave = shotFeeding && shootTimer.getElapsedTimeSeconds() > 1.5;
                     if (readyToLeave) {
-                        if (opModeTimer.getElapsedTimeSeconds() < 27) {
+                        if (opModeTimer.getElapsedTimeSeconds() < 28) {
                             setPathState((blueFar.PathState.GateCollection));
                         } else {
                             setPathState(PathState.collectAgainAgainEnd);
@@ -333,10 +347,6 @@ public class blueFar extends OpMode {
         shootTimer = new Timer();
         openTimer = new Timer();
 
-        follower = ConstantsNewBot.createFollower(hardwareMap);
-        follower.setStartingPose(startPose);
-        buildPaths();
-
         robot = new Robot(hardwareMap, startPose, PIPELINENUM);
         intakeSubsystem = robot.intake;
         turretSubsystem = robot.turret;
@@ -347,6 +357,7 @@ public class blueFar extends OpMode {
                 robot.turret,
                 robot.gate,
                 robot.intake);
+        buildPaths();
         robot.intake.down();
         robot.gate.block();
 
@@ -363,44 +374,22 @@ public class blueFar extends OpMode {
 
     @Override
     public void loop() {
-        follower.update();
+        robot.chassisLocal.update();
         statePathUpdate();
 
-        Pose currentPose = follower.getPose();
+        Pose currentPose = robot.chassisLocal.getPose();
         PoseStorage.savePose(currentPose);
 
-        double dx = target.getX() - currentPose.getX();
-        double dy = target.getY() - currentPose.getY();
-        double dist = Math.sqrt(dx * dx + dy * dy);
+        // Lock auton aiming target to fixed field point (4, 144) for all states.
+        actions.setTargetPose(target);
+        Pose activeTarget = target;
+        actions.aimTurret(activeTarget);
+        // Slightly reduce shooter speed for auton consistency.
+        robot.turret.setVelocity(Math.max(0, robot.turret.getTargetVelocity() - AUTON_VELOCITY_OFFSET_TPS));
 
-        Vector velocity = follower.getVelocity();
-        double vx = velocity.getMagnitude() * Math.cos(velocity.getTheta());
-        double vy = velocity.getMagnitude() * Math.sin(velocity.getTheta());
-        double shotTime = ShotTimeLookupTable.getTime(dist);
-        Pose aimTarget;
-        if (dist < 120) {
-            aimTarget = new Pose(
-                    target.getX() - vx * shotTime,
-                    target.getY() - vy * shotTime
-            );
-        } else {
-            aimTarget = target;
-        }
-
-        double aimDx = aimTarget.getX() - currentPose.getX();
-        double aimDy = aimTarget.getY() - currentPose.getY();
-        double distForShooter = Math.hypot(aimDx, aimDy);
-        double angleToGoal = Math.toDegrees(Math.atan2(aimDy, aimDx));
-        double turretAngle = angleToGoal - Math.toDegrees(currentPose.getHeading());
-        while (turretAngle > 180) turretAngle -= 360;
-        while (turretAngle < -180) turretAngle += 360;
-        robot.turret.setRotatorToAngle(-turretAngle);
-
-        robot.turret.setVelocity(VelocityLookupTable.getVelocity(distForShooter));
-        int zone = VelocityLookupTable.getZone(distForShooter);
-        if (zone == 1) robot.turret.setHoodPos(BlueUniversalConstants.CLOSE_HOOD_POSITION);
-        else if (zone == 2) robot.turret.setHoodPos(BlueUniversalConstants.MID_HOOD_POSITION);
-        else robot.turret.setHoodPos(BlueUniversalConstants.FAR_HOOD_POSITION);
+        double dist = robot.chassisLocal.getDistance(activeTarget);
+        double distForShooter = dist;
+        double turretAngle = robot.chassisLocal.calculateTurretAngle(activeTarget);
 
         telemetry.addData("paths state", pathState.toString());
         telemetry.addData("x", currentPose.getX());
@@ -408,13 +397,13 @@ public class blueFar extends OpMode {
         telemetry.addData("Heading", Math.toDegrees(currentPose.getHeading()));
         telemetry.addData("Path Time", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("Dist to goal", dist);
-        telemetry.addData("Dist for shooter (lead)", distForShooter);
-        telemetry.addData("Turret Angle", -turretAngle);
+        telemetry.addData("Dist for shooter", distForShooter);
+        telemetry.addData("Turret Angle", turretAngle);
         telemetry.addData("Launcher velocity", robot.turret.getTargetVelocity());
     }
 
     private boolean shootinAuton() {
-        Pose pos = follower.getPose();
+        Pose pos = robot.chassisLocal.getPose();
         double y = pos.getY();
         double x = pos.getX();
         double leftUpBound = -x + 144;
@@ -429,13 +418,14 @@ public class blueFar extends OpMode {
     }
 
     private boolean isNear(Pose target, double thresholdInches) {
-        Pose p = follower.getPose();
+        Pose p = robot.chassisLocal.getPose();
         double dx = p.getX() - target.getX();
         double dy = p.getY() - target.getY();
         return Math.sqrt(dx * dx + dy * dy) < thresholdInches;
     }
 
     private boolean arrived() {
-        return !follower.isBusy();
+        return robot.chassisLocal.getFollower().atParametricEnd();
     }
+
 }
