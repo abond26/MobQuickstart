@@ -33,15 +33,15 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
      * Tune on the field (telemetry used to show dynamic angle; match that here).
      */
     private static final double AUTON_FIXED_TURRET_ANGLE_DEG = 26.25;
-    private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FIRST = 28;
+    private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FIRST = 27;
     private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FINAL = -7;
-    private static final double AUTON_RPM_OFFSET = 10;
-    private static final double AUTON_RPM_OFFSET_FIRST_SHOT = 0;
+    private static final double AUTON_RPM_OFFSET = 20;
+    private static final double AUTON_RPM_OFFSET_FIRST_SHOT = 100;
 
     /** Open blocker (`robot.gate`) when this close to the shot pose (inches). */
     private static final double GATE_OPEN_PROXIMITY_IN = 5;
     private static final double FIRST_SHOT_PROXIMITY = 5;
-    private static final double LAST_SHOT_PROXIMITY = 20;
+    private static final double LAST_SHOT_PROXIMITY = 35;
 
 
     Pose sillyTarget;
@@ -147,7 +147,7 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
     private final Pose collect1thing = new Pose(10, 62, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(52.265, 60.091);
     private final Pose shootPose2 = new Pose(63, 77, Math.toRadians(155));
-    private final Pose gateCollect1 = new Pose(12.5, 64.5, Math.toRadians(148));
+    private final Pose gateCollect1 = new Pose(12.5, 62, Math.toRadians(148));
     private final Pose option1 = new Pose(131, 61, Math.toRadians(45));
     private final Pose option2 = new Pose(137, 55, Math.toRadians(90));
 
@@ -272,7 +272,8 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                     }
                 }
                 break;
-            case GateCollection: 
+            case GateCollection:
+                robot.intake.gateCollet();
                 if (!gateCollectionStarted) {
                     robot.intake.gateCollet();
                     robot.gate.block();
@@ -365,6 +366,7 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
                 }
                 break;
             case done:
+                robot.turret.setRotatorPos(0.5);
                 break;
         }
     }

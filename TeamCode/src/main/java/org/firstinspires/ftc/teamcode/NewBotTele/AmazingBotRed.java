@@ -23,6 +23,7 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
     RobotActions actions;
     TestTurret testTurret;
     boolean sillyControls = false;
+    boolean inPosition = false;
 
     Pose sillyTarget;
     public static double RpmChange = 20;
@@ -50,6 +51,7 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
 
         waitForStart();
         robot.chassisLocal.startTeleop();
+        robot.turret.setRotatorPos(0.5);
 
         while (opModeIsActive()) {
 
@@ -84,20 +86,36 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             if (gamepad1.b) {
                 robot.turret.shiftHood(hoodIncrement);
             }
+            if (gamepad1.dpad_up){
+                robot.chassisLocal.setPose(ManualRelocal);
+            }
 
             actions.launch(intakespeed, gamepad1.right_bumper);
             if (gamepad1.right_bumper) {
                 gamepad1.rumble(100);
             }
             double sumOfTrigs = gamepad1.left_trigger - gamepad1.right_trigger;
+            if (sumOfTrigs > 0.2){
+                robot.intake.shift();
+            }else{
+                Intake.DetectedColor detectedColor = robot.intake.getDetectedColorByDistance(telemetry);
+                telemetry.addData("Ball Detected", detectedColor);
+            }
             if (!gamepad1.right_bumper) {
                 actions.intake(sumOfTrigs);
             }
-            if (sillyControls) {
+
+            inPosition = robot.chassisLocal.isShootingPosition();
+            if (sillyControls && inPosition) {
                 actions.ChangeTargRed();
                 Pose dynamicTarget = actions.getShootingTarget();
                 actions.aimTurret(dynamicTarget);
             }
+
+            else {
+                testTurret.setRotatorPos(0.5);
+            }
+
             Intake.DetectedColor detectedColor = robot.intake.getDetectedColorByDistance(telemetry);
 
 //            PoseStorage.savePose(robot.chassisLocal.getPose());
@@ -106,6 +124,8 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             telemetry.addData("RPM", "%.1f / Target: %.1f", testTurret.getRPM(), testTurret.getTargetVelocity());
             telemetry.addData("Hood", "%.3f", robot.turret.getHoodPos());
             telemetry.addData("Ball Detected", detectedColor);
+            telemetry.addData("Pose", "X: %.1f, Y: %.1f", robot.chassisLocal.getPose().getX(), robot.chassisLocal.getPose().getY());
+            telemetry.addData("Velo", "XVelo: %.1f, YVelo: %.1f", robot.chassisLocal.getVeloX(), robot.chassisLocal.getVeloY());
 
             telemetry.addData("Distance", "%.2f", currentDist);
             telemetry.update();

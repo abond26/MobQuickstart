@@ -15,8 +15,9 @@ public interface BlueUniversalConstants {
     Pose target = new Pose(4, 144, Math.toRadians(144));
     Pose autonTarget = new Pose(0,144, Math.toRadians(144));
     Pose aprilTagPose = new Pose(16, 132, Math.toRadians(145));
+    Pose ManualRelocal = new Pose(132.2, 7, Math.toRadians(180));
 
-    Double dpadUpHeading = 0.0;
+
 
     double CLOSE_HOOD_POSITION = 1; // Hood position for close shots
     double MID_HOOD_POSITION = 0.7;
