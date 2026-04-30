@@ -144,7 +144,7 @@ public class blueGate extends OpMode implements BlueUniversalConstants {
 
     private final Pose startPose = new Pose(31.7827645537, 136.97551020408164, Math.toRadians(270));
     private final Pose shootPose1 = new Pose(63, 77, Math.toRadians(155));
-    private final Pose collect1thing = new Pose(10, 62, Math.toRadians(180));
+    private final Pose collect1thing = new Pose(14, 62, Math.toRadians(180));
     private final Pose goToCollect1ControlPoint = new Pose(52.265, 60.091);
     private final Pose shootPose2 = new Pose(63, 77, Math.toRadians(155));
     private final Pose gateCollect1 = new Pose(12.5, 62, Math.toRadians(148));
