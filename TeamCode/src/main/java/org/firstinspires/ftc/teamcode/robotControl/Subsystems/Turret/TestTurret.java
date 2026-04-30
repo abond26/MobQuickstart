@@ -63,16 +63,17 @@ public class TestTurret extends Turret {
 
         PIDFCoefficients coeffs = (distance <= SWITCH_PID_DIST) ? FLYWHEEL_PID_CLOSE : FLYWHEEL_PID_FAR;
         
-        // Base power calculation
-        double power = (coeffs.f * targetRPM) + (coeffs.p * error) + (coeffs.i * integralSum) + (coeffs.d * derivative);
 
-        // Voltage Compensation: Scale power to match a 12V baseline
-        double voltageScale = 13 / batteryVoltage.getVoltage();
+        double voltageScale = 12.8 / batteryVoltage.getVoltage();
+        double fCompensated = coeffs.f * voltageScale;
+        
 
-        // Recovery Mode: Boost power slightly if we drop below target (e.g., after a shot)
-        double recoveryMultiplier = (targetRPM > 0 && error > 100) ? 1.4 : 1.0;
+        double pCompensated = coeffs.p;
+        if (targetRPM > 0 && error > 100) {
+            pCompensated = coeffs.p * 1.5;
+        }
 
-        power = power * voltageScale * recoveryMultiplier;
+        double power = (fCompensated * targetRPM) + (pCompensated * error) + (coeffs.i * integralSum) + (coeffs.d * derivative);
 
         power = Math.max(0, Math.min(1, power));
         if (targetRPM == 0) { power = 0; integralSum = 0; }

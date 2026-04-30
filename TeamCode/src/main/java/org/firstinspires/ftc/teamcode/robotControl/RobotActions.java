@@ -202,7 +202,7 @@ public class RobotActions implements BlueUniversalConstants, TurretConstants {
     public void aimTurret(Pose target) {
         Pose compensatedTarget = chassisLocal.sillyTargetPose(target);
 
-        double angle = chassisLocal.calculateTurretAngle(target);
+        double angle = chassisLocal.calculateTurretAngle(compensatedTarget);
         turret.setRotatorToAngle(angle);
 
         autoVelocityEquation(target);

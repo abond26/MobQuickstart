@@ -59,6 +59,18 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
 
             robot.chassisLocal.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
+            // Feed MT2 the current heading every loop
+            double currentHeadingDeg = Math.toDegrees(robot.chassisLocal.getPose().getHeading());
+            robot.vision.updateOrientation(currentHeadingDeg);
+
+            // Relocalize using MT2 on TOUCHPAD
+            if (gamepad1.touchpad) {
+                Pose mt2Pose = robot.vision.getMegaTag2Pose();
+                if (mt2Pose != null && robot.chassisLocal.getDistance(mt2Pose) < 15.0) {
+                    robot.chassisLocal.setPose(mt2Pose);
+                    gamepad1.rumble(250);
+                }
+            }
 
             if (gamepad1.aWasPressed()) testTurret.shiftVelocity(RpmChange);
             if (gamepad1.yWasPressed()) testTurret.shiftVelocity(-RpmChange);

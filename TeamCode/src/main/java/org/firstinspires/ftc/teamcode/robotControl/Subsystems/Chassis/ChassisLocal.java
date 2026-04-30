@@ -52,8 +52,25 @@ public class ChassisLocal implements DriveConstants{
         return follower;
     }
 
+    private double lastHeading = 0;
+    private long lastTime = 0;
+    private double headingVelocityRad = 0;
+
     public void update() {
         follower.update();
+        long currentTime = System.nanoTime();
+        double currentHeading = follower.getPose().getHeading();
+        if (lastTime != 0) {
+            double dt = (currentTime - lastTime) / 1e9;
+            if (dt > 0 && dt < 0.5) { // Prevent massive spikes
+                double dH = currentHeading - lastHeading;
+                while (dH > Math.PI) dH -= 2 * Math.PI;
+                while (dH < -Math.PI) dH += 2 * Math.PI;
+                headingVelocityRad = dH / dt;
+            }
+        }
+        lastHeading = currentHeading;
+        lastTime = currentTime;
     }
 
     public Pose getPose() {
@@ -144,7 +161,10 @@ public class ChassisLocal implements DriveConstants{
         double dx = target.getX() - robotPose.getX();
         double dy = target.getY() - robotPose.getY();
         double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
-        double turretAngle = angleToGoal - Math.toDegrees(robotPose.getHeading());
+        
+        double predictedHeading = Math.toDegrees(robotPose.getHeading()) + (Math.toDegrees(headingVelocityRad) * 0.15);
+        
+        double turretAngle = angleToGoal - predictedHeading;
         while (turretAngle > 180) turretAngle -= 360;
         while (turretAngle < -180) turretAngle += 360;
         return -turretAngle;

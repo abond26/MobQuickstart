@@ -96,6 +96,31 @@ public class Vision implements VisionConstants{
         return new Pose(x, y, heading);
     }
 
+    public void updateOrientation(double headingDegrees) {
+        if (limelight != null) {
+            limelight.updateRobotOrientation(headingDegrees);
+        }
+    }
+
+    @Nullable
+    public Pose getMegaTag2Pose() {
+        if (limelight == null) return null;
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) return null;
+
+        Pose3D botposeMT2 = result.getBotpose_MT2();
+        if (botposeMT2 == null) return null;
+
+        Position pos = botposeMT2.getPosition().toUnit(DistanceUnit.INCH);
+        YawPitchRollAngles orient = botposeMT2.getOrientation();
+        
+        double pedroX = pos.y + 72.0;
+        double pedroY = -pos.x + 72.0; 
+        double heading = orient.getYaw(AngleUnit.RADIANS);
+        
+        return new Pose(pedroX, pedroY, heading); 
+    }
+
     public Pose3D getRobotPosition(){
         List<FiducialResult> fiducialResult = limelight.getLatestResult().getFiducialResults();
         if (!fiducialResult.isEmpty() && fiducialResult.get(0).getTargetArea() >= 0.01) {

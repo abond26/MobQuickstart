@@ -62,6 +62,17 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
 
             robot.chassisLocal.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
+            double headingDeg = Math.toDegrees(robot.chassisLocal.getPose().getHeading());
+            robot.vision.updateOrientation(headingDeg);
+
+            if (gamepad1.touchpad) {
+                Pose mt2Pose = robot.vision.getMegaTag2Pose();
+                if (mt2Pose != null && robot.chassisLocal.getDistance(mt2Pose) < 15.0) {
+                    robot.chassisLocal.setPose(mt2Pose);
+                    gamepad1.rumble(250);
+                }
+            }
+
             double currentDist = robot.chassisLocal.getDistance(target);
             testTurret.update(currentDist);
 
