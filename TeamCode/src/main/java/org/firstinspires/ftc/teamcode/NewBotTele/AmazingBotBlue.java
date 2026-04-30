@@ -26,6 +26,7 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
     RobotActions actions;
     TestTurret testTurret;
     boolean sillyControls = false;
+    boolean inPosition = false;
     static TelemetryManager telemetryM;
 
 
@@ -52,11 +53,11 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
 
         waitForStart();
         robot.chassisLocal.startTeleop();
+        robot.turret.setRotatorPos(0.5);
 
         while (opModeIsActive()) {
 
             robot.chassisLocal.update();
-
             robot.chassisLocal.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
             // Feed MT2 the current heading every loop
@@ -91,22 +92,35 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             if (gamepad1.b) {
                 robot.turret.shiftHood(hoodIncrement);
             }
+            if (gamepad1.dpad_up){
+                robot.chassisLocal.setPose(ManualRelocal);
+            }
 
             actions.launch(intakespeed, gamepad1.right_bumper);
             if (gamepad1.right_bumper) {
                 gamepad1.rumble(100);
             }
             double sumOfTrigs = gamepad1.left_trigger - gamepad1.right_trigger;
+            if (sumOfTrigs > 0.2){
+                robot.intake.shift();
+            }else{
+                Intake.DetectedColor detectedColor = robot.intake.getDetectedColorByDistance(telemetry);
+                telemetry.addData("Ball Detected", detectedColor);
+            }
             if (!gamepad1.right_bumper) {
                 actions.intake(sumOfTrigs);
             }
 
             Pose activeTarget = target;
-            if (sillyControls) {
+            inPosition = robot.chassisLocal.isShootingPosition();
+            if (sillyControls && inPosition) {
                 actions.ChangeTargBlue();
                 activeTarget = actions.getShootingTarget();
                 
                 actions.aimTurret(activeTarget);
+            }
+            else {
+                testTurret.setRotatorPos(0.5);
             }
 
             testTurret.update(robot.chassisLocal.getDistance(activeTarget));
@@ -118,6 +132,7 @@ public class AmazingBotBlue extends LinearOpMode implements BlueUniversalConstan
             telemetry.addData("Velo", "XVelo: %.1f, YVelo: %.1f", robot.chassisLocal.getVeloX(), robot.chassisLocal.getVeloY());
             telemetry.addData("Angle", robot.chassisLocal.calculateTurretAngle(activeTarget));
             telemetry.addData("What it hink da color is", robot.intake.getDetectedColor(telemetry));
+
             telemetry.update();
         }
     }

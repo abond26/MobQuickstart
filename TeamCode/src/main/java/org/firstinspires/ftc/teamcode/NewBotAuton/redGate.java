@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.robotControl.RedUniversalConstants;
 import org.firstinspires.ftc.teamcode.robotControl.RobotActions;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Intake.Intake;
@@ -26,22 +27,23 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.Vision.Vision;
 import org.firstinspires.ftc.teamcode.tests.ColorTesting;
 import org.firstinspires.ftc.teamcode.util.PoseStorage;
 
-@Autonomous(name = "redGate", group = "auto", preselectTeleOp = "BLUEEEEE b")
-public class redGate extends OpMode implements BlueUniversalConstants {
+@Autonomous(name = "redGate", group = "auto", preselectTeleOp = "Red Tele")
+public class redGate extends OpMode implements RedUniversalConstants {
     /**
      * Fixed field-relative turret angle (degrees) for this auton after run starts.
      * Tune on the field (telemetry used to show dynamic angle; match that here).
      */
-    private static final double AUTON_FIXED_TURRET_ANGLE_DEG = -26.25;
-    private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FIRST = -28;
+    private static final double AUTON_FIXED_TURRET_ANGLE_DEG = -20;
+    private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FIRST = -22;
     private static final double AUTON_FIXED_TURRET_ANGLE_DEG_FINAL = 7;
-    private static final double AUTON_RPM_OFFSET = -10;
-    private static final double AUTON_RPM_OFFSET_FIRST_SHOT = 0;
+    private static final double AUTON_RPM_OFFSET = 20;
+    private static final double AUTON_RPM_OFFSET_FIRST_SHOT = 100;
 
+    private static final double AUTON_RPM_OFFSET_LAST_SHOT = 0;
     /** Open blocker (`robot.gate`) when this close to the shot pose (inches). */
-    private static final double GATE_OPEN_PROXIMITY_IN = 5;
+    private static final double GATE_OPEN_PROXIMITY_IN = 3;
     private static final double FIRST_SHOT_PROXIMITY = 5;
-    private static final double LAST_SHOT_PROXIMITY = 20;
+    private static final double LAST_SHOT_PROXIMITY = 35;
 
 
     Pose sillyTarget;
@@ -147,7 +149,7 @@ public class redGate extends OpMode implements BlueUniversalConstants {
     private final Pose collect1thing = new Pose(134, 62, Math.toRadians(0));
     private final Pose goToCollect1ControlPoint = new Pose(91.735, 60.091);
     private final Pose shootPose2 = new Pose(81, 77, Math.toRadians(25));
-    private final Pose gateCollect1 = new Pose(131.5, 64.5, Math.toRadians(32));
+    private final Pose gateCollect1 = new Pose(131.5, 62, Math.toRadians(32));
     private final Pose option1 = new Pose(131, 61, Math.toRadians(45));
     private final Pose option2 = new Pose(137, 55, Math.toRadians(90));
 
@@ -157,7 +159,7 @@ public class redGate extends OpMode implements BlueUniversalConstants {
     private final Pose shootBall4 = new Pose(84, 75, Math.toRadians(230));
     private final Pose gateCollect3 = new Pose(128.5, 62, Math.toRadians(205));
     private final Pose shootBall5 = new Pose(95, 87, Math.toRadians(230));
-    private final Pose collect3end = new Pose(124, 88, Math.toRadians(0));
+    private final Pose collect3end = new Pose(126, 88, Math.toRadians(0));
     private final Pose collect3ControlPoint = new Pose(102.98, 84.857);
     private final Pose shootBall6 = new Pose(89, 120, Math.toRadians(33));
     private final Pose park = new Pose(103, 84, Math.toRadians(226));
@@ -365,6 +367,7 @@ public class redGate extends OpMode implements BlueUniversalConstants {
                 }
                 break;
             case done:
+                robot.turret.setRotatorPos(0.5);
                 break;
         }
     }
@@ -418,7 +421,7 @@ public class redGate extends OpMode implements BlueUniversalConstants {
 
         sillyTarget = autonTarget;
 
-        telemetry.addLine("Good to go BLUE");
+        telemetry.addLine("Good to go RED");
         telemetry.update();
     }
 
@@ -442,7 +445,7 @@ public class redGate extends OpMode implements BlueUniversalConstants {
             return AUTON_RPM_OFFSET_FIRST_SHOT;
         }
         if (pathState == PathState.shootAgainAgainAgainAgain) {
-            return AUTON_RPM_OFFSET_FIRST_SHOT;
+            return AUTON_RPM_OFFSET;
         }
         return AUTON_RPM_OFFSET;
     }
@@ -464,9 +467,9 @@ public class redGate extends OpMode implements BlueUniversalConstants {
         testTurret.setTargetRPM(testTurret.getTargetVelocity() + getAutonRpmOffset());
         double distForShooter = dist;
         int zone = VelocityLookupTable.getZone(distForShooter);
-        if (zone == 1) testTurret.setHoodPos(BlueUniversalConstants.CLOSE_HOOD_POSITION);
-        else if (zone == 2) testTurret.setHoodPos(BlueUniversalConstants.MID_HOOD_POSITION);
-        else testTurret.setHoodPos(BlueUniversalConstants.FAR_HOOD_POSITION);
+        if (zone == 1) testTurret.setHoodPos(RedUniversalConstants.CLOSE_HOOD_POSITION);
+        else if (zone == 2) testTurret.setHoodPos(RedUniversalConstants.MID_HOOD_POSITION);
+        else testTurret.setHoodPos(RedUniversalConstants.FAR_HOOD_POSITION);
         testTurret.update(distForShooter);
 
         telemetry.addData("paths state", pathState.toString());
