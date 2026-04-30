@@ -120,7 +120,8 @@ public class AmazingBotRed extends LinearOpMode implements RedUniversalConstants
             if (sillyControls && inPosition) {
                 actions.ChangeTargRed();
                 Pose dynamicTarget = actions.getShootingTarget();
-                actions.aimTurret(dynamicTarget);
+//                actions.aimTurret(dynamicTarget);
+                actions.aimRotatorLocal(dynamicTarget,telemetry);
             }
 
             else {

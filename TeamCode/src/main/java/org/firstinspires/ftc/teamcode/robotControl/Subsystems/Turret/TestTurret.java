@@ -43,7 +43,7 @@ public class TestTurret extends Turret {
         hood = hardwareMap.get(Servo.class, "hood");
         hood.scaleRange(SCALE_RANGE_LOWER,SCALE_RANGE_UPPER);
         hood.setPosition(0.38984674329501917);
-        batteryVoltage = hardwareMap.voltageSensor.iterator().next();   
+        batteryVoltage = hardwareMap.voltageSensor.iterator().next();
 
 
         timer.reset();
@@ -62,11 +62,11 @@ public class TestTurret extends Turret {
         lastError = error;
 
         PIDFCoefficients coeffs = (distance <= SWITCH_PID_DIST) ? FLYWHEEL_PID_CLOSE : FLYWHEEL_PID_FAR;
-        
+
 
         double voltageScale = 12.8 / batteryVoltage.getVoltage();
         double fCompensated = coeffs.f * voltageScale;
-        
+
 
         double pCompensated = coeffs.p;
         if (targetRPM > 0 && error > 100) {

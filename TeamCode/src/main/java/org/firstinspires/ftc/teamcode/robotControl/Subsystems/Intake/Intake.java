@@ -47,10 +47,10 @@ public class Intake implements IntakeConstants{
 
         intakeShifterR = hardwareMap.get(Servo.class, "intakeShifterR");
         intakeShifterR.setDirection(Servo.Direction.FORWARD);
-        intakeShifterR.setPosition(0.53);
+        intakeShifterR.setPosition(0.582);
         intakeShifterL = hardwareMap.get(Servo.class, "intakeShifterL");
         intakeShifterL.setDirection(Servo.Direction.REVERSE);
-        intakeShifterL.setPosition(0.53);
+        intakeShifterL.setPosition(0.582);
 
 
         distanceSensor = hardwareMap.get(RevColorSensorV3.class, "color_sensor");
@@ -86,8 +86,8 @@ public class Intake implements IntakeConstants{
         intakeShifterR.setPosition(0.7);
     }
     public void shift(){
-        intakeShifterL.setPosition(0.563);
-        intakeShifterR.setPosition(0.563);
+        intakeShifterL.setPosition(0.582);
+        intakeShifterR.setPosition(0.582);
     }
     public void gateCollet()
     {

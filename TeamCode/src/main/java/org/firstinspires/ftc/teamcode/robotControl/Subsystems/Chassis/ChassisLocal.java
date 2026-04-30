@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.robotControl.Subsystems.Chassis;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.robotControl.Subsystems.LookUpTables.ShotT
 
 import org.firstinspires.ftc.teamcode.pedroPathing.ConstantsNewBot;
 //import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+@Configurable
 public class ChassisLocal implements DriveConstants{
 
     private Follower follower;
@@ -54,7 +56,11 @@ public class ChassisLocal implements DriveConstants{
 
     private double lastHeading = 0;
     private long lastTime = 0;
-    private double headingVelocityRad = 0;
+    private static double headingVelocityRad = 0;
+    
+    // Filtering and Prediction Constants
+    public static double HEADING_VELO_GAIN = 0.8; // 0.0 to 1.0 (Higher = more smoothing)
+    public static double AIM_LOOKAHEAD = 0.12;   // Seconds of prediction
 
     public void update() {
         follower.update();
@@ -66,7 +72,10 @@ public class ChassisLocal implements DriveConstants{
                 double dH = currentHeading - lastHeading;
                 while (dH > Math.PI) dH -= 2 * Math.PI;
                 while (dH < -Math.PI) dH += 2 * Math.PI;
-                headingVelocityRad = dH / dt;
+                
+                double rawVelo = dH / dt;
+                // Low-Pass Filter to eliminate jitter during rotation
+                headingVelocityRad = (HEADING_VELO_GAIN * headingVelocityRad) + ((1.0 - HEADING_VELO_GAIN) * rawVelo);
             }
         }
         lastHeading = currentHeading;
@@ -162,7 +171,7 @@ public class ChassisLocal implements DriveConstants{
         double dy = target.getY() - robotPose.getY();
         double angleToGoal = Math.toDegrees(Math.atan2(dy, dx));
         
-        double predictedHeading = Math.toDegrees(robotPose.getHeading()) + (Math.toDegrees(headingVelocityRad) * 0.15);
+        double predictedHeading = Math.toDegrees(robotPose.getHeading()) + (Math.toDegrees(headingVelocityRad) * AIM_LOOKAHEAD);
         
         double turretAngle = angleToGoal - predictedHeading;
         while (turretAngle > 180) turretAngle -= 360;
